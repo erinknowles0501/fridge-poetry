@@ -1,5 +1,10 @@
+/******
+ * FIREBASE
+ * */
+
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -15,36 +20,58 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-console.log("app", app);
+const db = getFirestore(app);
 
-/////
+/**
+ * Get words (+etc) from firebase connection
+ * */
 
-console.log("here");
+const words = [];
+const querySnapshot = await getDocs(collection(db, "defaultWords"));
+querySnapshot.forEach((doc) => {
+    words.push(doc.data());
+});
+console.log("words", words);
 
-const words = [
-    "hello",
-    "goodbye",
-    "yes",
-    "no",
-    "know",
-    "be",
-    "see",
-    "his",
-    "her",
-    "ing",
-];
+/**
+ * Set up app
+ * */
 
 const appEl = document.querySelector("#app");
+appEl.addEventListener(
+    "dragover",
+    (event) => {
+        event.preventDefault();
+        // console.log("event", event);
+    },
+    false
+);
 
 function makeWordEls() {
     words.forEach((word) => {
         const el = document.createElement("div");
         el.className = "word";
-        el.textContent = word;
-        el.setAttribute("data-word", word); /// TODO escape special chars
+        el.textContent = word.wordtext; // TODO Checks to assume this is safely escaped
+        // TODO Add data-id so can get which word to update when element is moved
         el.setAttribute("draggable", true);
+        setElementPosition(el, word.position.top, word.position.left);
+
+        addListeners(el);
+        word.element = el;
         appEl.appendChild(el);
     });
+}
+
+function addListeners(element) {
+    element.addEventListener("mouseover", () => {});
+    element.addEventListener("dragstart", () => {
+        currentDragged = element;
+    });
+}
+
+function setElementPosition(element, positionTop, positionLeft) {
+    element.style.top = positionTop + "px";
+    element.style.left = positionLeft + "px";
 }
 
 // TODO
@@ -56,38 +83,12 @@ function makeWordEls() {
 
 makeWordEls();
 
-const wordEls = document.querySelectorAll(".word");
-const wordObjs = {};
-
 let currentDragged = null;
-
-wordEls.forEach((wordEl) => {
-    wordEl.addEventListener("dragstart", () => {
-        currentDragged = wordEl;
-    });
-    const word = wordEl.getAttribute("data-word");
-    const wordBoundingRect = wordEl.getBoundingClientRect();
-
-    wordObjs[word] = {
-        word: word,
-        wordText: wordEl.textContent,
-        wordEl: wordEl,
-        boundingRect: wordBoundingRect,
-    };
-});
-
-console.log("wordObjs", wordObjs);
-
-appEl.addEventListener(
-    "dragover",
-    (event) => {
-        event.preventDefault();
-    },
-    false
-);
 
 appEl.addEventListener("drop", (event) => {
     event.preventDefault();
-    currentDragged.style.top = event.pageY + "px";
-    currentDragged.style.left = event.pageX + "px";
+    setElementPosition(currentDragged, event.pageY, event.pageX);
+
+    // currentDragged.position.top = event.pageY;
+    // currentDragged.position.left = event.pageX; // TODO Send to firebase
 });

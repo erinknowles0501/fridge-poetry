@@ -5,10 +5,10 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "rollup --config",
+        "build": "rollup --config --watch",
         "serve": "live-server --port=7020 --no-browser",
         "tunnel": "lt --port=7020 --subdomain=fridgepoetry",
-        "dev": "npm-run-all build -p serve tunnel"
+        "dev": "npm-run-all -p build serve tunnel"
     },
     "type": "module",
     "author": "",
