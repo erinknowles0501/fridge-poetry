@@ -1,25 +1,11 @@
-/******
- * FIREBASE
- * */
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    updateDoc,
+} from "firebase/firestore";
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyA9mJ8pnpsPYephd3H9FJU4-mRLsn4y2do",
-    authDomain: "fridge-poetry-ek.firebaseapp.com",
-    projectId: "fridge-poetry-ek",
-    storageBucket: "fridge-poetry-ek.appspot.com",
-    messagingSenderId: "1093091176992",
-    appId: "1:1093091176992:web:a8524051a03ed50cbe0245",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+import app from "./firebase/index.js";
 const db = getFirestore(app);
 
 /**
@@ -29,7 +15,7 @@ const db = getFirestore(app);
 const words = [];
 const querySnapshot = await getDocs(collection(db, "defaultWords"));
 querySnapshot.forEach((doc) => {
-    words.push(doc.data());
+    words.push({ ...doc.data(), id: doc.id });
 });
 console.log("words", words);
 
@@ -52,7 +38,7 @@ function makeWordEls() {
         const el = document.createElement("div");
         el.className = "word";
         el.textContent = word.wordtext; // TODO Checks to assume this is safely escaped
-        // TODO Add data-id so can get which word to update when element is moved
+        el.dataset.id = word.id;
         el.setAttribute("draggable", true);
         setElementPosition(el, word.position.top, word.position.left);
 
@@ -88,7 +74,19 @@ let currentDragged = null;
 appEl.addEventListener("drop", (event) => {
     event.preventDefault();
     setElementPosition(currentDragged, event.pageY, event.pageX);
-
-    // currentDragged.position.top = event.pageY;
-    // currentDragged.position.left = event.pageX; // TODO Send to firebase
+    updateWordPosition(
+        currentDragged.getAttribute("data-id"),
+        event.pageY,
+        event.pageX
+    );
 });
+
+async function updateWordPosition(id, top, left) {
+    console.log("id", id);
+
+    const result = await updateDoc(id, {
+        "position.top": top,
+        "position.left": left,
+    });
+    console.log("result", result);
+}
