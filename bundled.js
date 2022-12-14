@@ -2288,9 +2288,9 @@ var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof win
 var k$1,goog=goog||{},l=commonjsGlobal||self;function aa$1(){}function ba$1(a){var b=typeof a;b="object"!=b?b:a?Array.isArray(a)?"array":b:"null";return "array"==b||"object"==b&&"number"==typeof a.length}function p(a){var b=typeof a;return "object"==b&&null!=a||"function"==b}function da(a){return Object.prototype.hasOwnProperty.call(a,ea)&&a[ea]||(a[ea]=++fa)}var ea="closure_uid_"+(1E9*Math.random()>>>0),fa=0;function ha(a,b,c){return a.call.apply(a.bind,arguments)}
 function ia(a,b,c){if(!a)throw Error();if(2<arguments.length){var d=Array.prototype.slice.call(arguments,2);return function(){var e=Array.prototype.slice.call(arguments);Array.prototype.unshift.apply(e,d);return a.apply(b,e)}}return function(){return a.apply(b,arguments)}}function q(a,b,c){Function.prototype.bind&&-1!=Function.prototype.bind.toString().indexOf("native code")?q=ha:q=ia;return q.apply(null,arguments)}
 function ja(a,b){var c=Array.prototype.slice.call(arguments,1);return function(){var d=c.slice();d.push.apply(d,arguments);return a.apply(this,d)}}function t(a,b){function c(){}c.prototype=b.prototype;a.Z=b.prototype;a.prototype=new c;a.prototype.constructor=a;a.Vb=function(d,e,f){for(var h=Array(arguments.length-2),n=2;n<arguments.length;n++)h[n-2]=arguments[n];return b.prototype[e].apply(d,h)};}function v(){this.s=this.s;this.o=this.o;}var ka=0;v.prototype.s=!1;v.prototype.na=function(){if(!this.s&&(this.s=!0,this.M(),0!=ka)){da(this);}};v.prototype.M=function(){if(this.o)for(;this.o.length;)this.o.shift()();};const ma$1=Array.prototype.indexOf?function(a,b){return Array.prototype.indexOf.call(a,b,void 0)}:function(a,b){if("string"===typeof a)return "string"!==typeof b||1!=b.length?-1:a.indexOf(b,0);for(let c=0;c<a.length;c++)if(c in a&&a[c]===b)return c;return -1},na$1=Array.prototype.forEach?function(a,b,c){Array.prototype.forEach.call(a,b,c);}:function(a,b,c){const d=a.length,e="string"===typeof a?a.split(""):a;for(let f=0;f<d;f++)f in e&&b.call(c,e[f],f,a);};
-function oa(a){a:{var b=pa$1;const c=a.length,d="string"===typeof a?a.split(""):a;for(let e=0;e<c;e++)if(e in d&&b.call(void 0,d[e],e,a)){b=e;break a}b=-1;}return 0>b?null:"string"===typeof a?a.charAt(b):a[b]}function qa(a){return Array.prototype.concat.apply([],arguments)}function ra(a){const b=a.length;if(0<b){const c=Array(b);for(let d=0;d<b;d++)c[d]=a[d];return c}return []}function sa$1(a){return /^[\s\xa0]*$/.test(a)}var ta=String.prototype.trim?function(a){return a.trim()}:function(a){return /^[\s\xa0]*([\s\S]*?)[\s\xa0]*$/.exec(a)[1]};function w(a,b){return -1!=a.indexOf(b)}function ua(a,b){return a<b?-1:a>b?1:0}var x$1;a:{var va$1=l.navigator;if(va$1){var wa$1=va$1.userAgent;if(wa$1){x$1=wa$1;break a}}x$1="";}function xa(a,b,c){for(const d in a)b.call(c,a[d],d,a);}function ya$1(a){const b={};for(const c in a)b[c]=a[c];return b}var za="constructor hasOwnProperty isPrototypeOf propertyIsEnumerable toLocaleString toString valueOf".split(" ");function Aa$1(a,b){let c,d;for(let e=1;e<arguments.length;e++){d=arguments[e];for(c in d)a[c]=d[c];for(let f=0;f<za.length;f++)c=za[f],Object.prototype.hasOwnProperty.call(d,c)&&(a[c]=d[c]);}}function Ca(a){Ca[" "](a);return a}Ca[" "]=aa$1;function Fa$1(a){var b=Ga;return Object.prototype.hasOwnProperty.call(b,9)?b[9]:b[9]=a(9)}var Ha=w(x$1,"Opera"),y=w(x$1,"Trident")||w(x$1,"MSIE"),Ia$1=w(x$1,"Edge"),Ja=Ia$1||y,Ka=w(x$1,"Gecko")&&!(w(x$1.toLowerCase(),"webkit")&&!w(x$1,"Edge"))&&!(w(x$1,"Trident")||w(x$1,"MSIE"))&&!w(x$1,"Edge"),La$1=w(x$1.toLowerCase(),"webkit")&&!w(x$1,"Edge");function Ma(){var a=l.document;return a?a.documentMode:void 0}var Na$1;
+function oa(a){a:{var b=pa$1;const c=a.length,d="string"===typeof a?a.split(""):a;for(let e=0;e<c;e++)if(e in d&&b.call(void 0,d[e],e,a)){b=e;break a}b=-1;}return 0>b?null:"string"===typeof a?a.charAt(b):a[b]}function qa(a){return Array.prototype.concat.apply([],arguments)}function ra(a){const b=a.length;if(0<b){const c=Array(b);for(let d=0;d<b;d++)c[d]=a[d];return c}return []}function sa$1(a){return /^[\s\xa0]*$/.test(a)}var ta=String.prototype.trim?function(a){return a.trim()}:function(a){return /^[\s\xa0]*([\s\S]*?)[\s\xa0]*$/.exec(a)[1]};function w(a,b){return -1!=a.indexOf(b)}function ua$1(a,b){return a<b?-1:a>b?1:0}var x$1;a:{var va$1=l.navigator;if(va$1){var wa$1=va$1.userAgent;if(wa$1){x$1=wa$1;break a}}x$1="";}function xa(a,b,c){for(const d in a)b.call(c,a[d],d,a);}function ya$1(a){const b={};for(const c in a)b[c]=a[c];return b}var za="constructor hasOwnProperty isPrototypeOf propertyIsEnumerable toLocaleString toString valueOf".split(" ");function Aa$1(a,b){let c,d;for(let e=1;e<arguments.length;e++){d=arguments[e];for(c in d)a[c]=d[c];for(let f=0;f<za.length;f++)c=za[f],Object.prototype.hasOwnProperty.call(d,c)&&(a[c]=d[c]);}}function Ca(a){Ca[" "](a);return a}Ca[" "]=aa$1;function Fa$1(a){var b=Ga;return Object.prototype.hasOwnProperty.call(b,9)?b[9]:b[9]=a(9)}var Ha=w(x$1,"Opera"),y=w(x$1,"Trident")||w(x$1,"MSIE"),Ia$1=w(x$1,"Edge"),Ja=Ia$1||y,Ka=w(x$1,"Gecko")&&!(w(x$1.toLowerCase(),"webkit")&&!w(x$1,"Edge"))&&!(w(x$1,"Trident")||w(x$1,"MSIE"))&&!w(x$1,"Edge"),La$1=w(x$1.toLowerCase(),"webkit")&&!w(x$1,"Edge");function Ma(){var a=l.document;return a?a.documentMode:void 0}var Na$1;
 a:{var Oa="",Pa$1=function(){var a=x$1;if(Ka)return /rv:([^\);]+)(\)|;)/.exec(a);if(Ia$1)return /Edge\/([\d\.]+)/.exec(a);if(y)return /\b(?:MSIE|rv)[: ]([^\);]+)(\)|;)/.exec(a);if(La$1)return /WebKit\/(\S+)/.exec(a);if(Ha)return /(?:Version)[ \/]?(\S+)/.exec(a)}();Pa$1&&(Oa=Pa$1?Pa$1[1]:"");if(y){var Qa=Ma();if(null!=Qa&&Qa>parseFloat(Oa)){Na$1=String(Qa);break a}}Na$1=Oa;}var Ga={};
-function Ra(){return Fa$1(function(){let a=0;const b=ta(String(Na$1)).split("."),c=ta("9").split("."),d=Math.max(b.length,c.length);for(let h=0;0==a&&h<d;h++){var e=b[h]||"",f=c[h]||"";do{e=/(\d*)(\D*)(.*)/.exec(e)||["","","",""];f=/(\d*)(\D*)(.*)/.exec(f)||["","","",""];if(0==e[0].length&&0==f[0].length)break;a=ua(0==e[1].length?0:parseInt(e[1],10),0==f[1].length?0:parseInt(f[1],10))||ua(0==e[2].length,0==f[2].length)||ua(e[2],f[2]);e=e[3];f=f[3];}while(0==a)}return 0<=a})}var Sa;
+function Ra(){return Fa$1(function(){let a=0;const b=ta(String(Na$1)).split("."),c=ta("9").split("."),d=Math.max(b.length,c.length);for(let h=0;0==a&&h<d;h++){var e=b[h]||"",f=c[h]||"";do{e=/(\d*)(\D*)(.*)/.exec(e)||["","","",""];f=/(\d*)(\D*)(.*)/.exec(f)||["","","",""];if(0==e[0].length&&0==f[0].length)break;a=ua$1(0==e[1].length?0:parseInt(e[1],10),0==f[1].length?0:parseInt(f[1],10))||ua$1(0==e[2].length,0==f[2].length)||ua$1(e[2],f[2]);e=e[3];f=f[3];}while(0==a)}return 0<=a})}var Sa;
 if(l.document&&y){var Ta=Ma();Sa=Ta?Ta:parseInt(Na$1,10)||void 0;}else Sa=void 0;var Ua$1=Sa;var Va$1=function(){if(!l.addEventListener||!Object.defineProperty)return !1;var a=!1,b=Object.defineProperty({},"passive",{get:function(){a=!0;}});try{l.addEventListener("test",aa$1,b),l.removeEventListener("test",aa$1,b);}catch(c){}return a}();function z$1(a,b){this.type=a;this.g=this.target=b;this.defaultPrevented=!1;}z$1.prototype.h=function(){this.defaultPrevented=!0;};function A(a,b){z$1.call(this,a?a.type:"");this.relatedTarget=this.g=this.target=null;this.button=this.screenY=this.screenX=this.clientY=this.clientX=0;this.key="";this.metaKey=this.shiftKey=this.altKey=this.ctrlKey=!1;this.state=null;this.pointerId=0;this.pointerType="";this.i=null;if(a){var c=this.type=a.type,d=a.changedTouches&&a.changedTouches.length?a.changedTouches[0]:null;this.target=a.target||a.srcElement;this.g=b;if(b=a.relatedTarget){if(Ka){a:{try{Ca(b.nodeName);var e=!0;break a}catch(f){}e=
 !1;}e||(b=null);}}else "mouseover"==c?b=a.fromElement:"mouseout"==c&&(b=a.toElement);this.relatedTarget=b;d?(this.clientX=void 0!==d.clientX?d.clientX:d.pageX,this.clientY=void 0!==d.clientY?d.clientY:d.pageY,this.screenX=d.screenX||0,this.screenY=d.screenY||0):(this.clientX=void 0!==a.clientX?a.clientX:a.pageX,this.clientY=void 0!==a.clientY?a.clientY:a.pageY,this.screenX=a.screenX||0,this.screenY=a.screenY||0);this.button=a.button;this.key=a.key||"";this.ctrlKey=a.ctrlKey;this.altKey=a.altKey;this.shiftKey=
 a.shiftKey;this.metaKey=a.metaKey;this.pointerId=a.pointerId||0;this.pointerType="string"===typeof a.pointerType?a.pointerType:Wa[a.pointerType]||"";this.state=a.state;this.i=a;a.defaultPrevented&&A.Z.h.call(this);}}t(A,z$1);var Wa={2:"touch",3:"pen",4:"mouse"};A.prototype.h=function(){A.Z.h.call(this);var a=this.i;a.preventDefault?a.preventDefault():a.returnValue=!1;};var B$1="closure_listenable_"+(1E6*Math.random()|0);var Xa=0;function Ya(a,b,c,d,e){this.listener=a;this.proxy=null;this.src=b;this.type=c;this.capture=!!d;this.ia=e;this.key=++Xa;this.ca=this.fa=!1;}function Za$1(a){a.ca=!0;a.listener=null;a.proxy=null;a.src=null;a.ia=null;}function $a(a){this.src=a;this.g={};this.h=0;}$a.prototype.add=function(a,b,c,d,e){var f=a.toString();a=this.g[f];a||(a=this.g[f]=[],this.h++);var h=ab(a,b,d,e);-1<h?(b=a[h],c||(b.fa=!1)):(b=new Ya(b,this.src,f,!!d,e),b.fa=c,a.push(b));return b};function bb(a,b){var c=b.type;if(c in a.g){var d=a.g[c],e=ma$1(d,b),f;(f=0<=e)&&Array.prototype.splice.call(d,e,1);f&&(Za$1(b),0==a.g[c].length&&(delete a.g[c],a.h--));}}
@@ -12620,6 +12620,34 @@ async function sa(t) {
     n;
 }
 
+function ua(t, e, n = {}) {
+    const s = new j;
+    return t.asyncQueue.enqueueAndForget((async () => function(t, e, n, s, i) {
+        const r = new Gc({
+            next: r => {
+                // Remove query first before passing event to user to avoid
+                // user actions affecting the now stale query.
+                e.enqueueAndForget((() => ju(t, o)));
+                const u = r.docs.has(n);
+                !u && r.fromCache ? 
+                // TODO(dimond): If we're online and the document doesn't
+                // exist then we resolve with a doc.exists set to false. If
+                // we're offline however, we reject the Promise in this
+                // case. Two options: 1) Cache the negative response from
+                // the server so we can deliver that even when you're
+                // offline 2) Actually reject the Promise in the online case
+                // if the document doesn't exist.
+                i.reject(new Q(G.UNAVAILABLE, "Failed to get document because the client is offline.")) : u && r.fromCache && s && "server" === s.source ? i.reject(new Q(G.UNAVAILABLE, 'Failed to get document from server. (However, this document does exist in the local cache. Run again without setting source to "server" to retrieve the cached document.)')) : i.resolve(r);
+            },
+            error: t => i.reject(t)
+        }), o = new Ju(rn(n.path), r, {
+            includeMetadataChanges: !0,
+            Du: !0
+        });
+        return Qu(t, o);
+    }(await sa(t), t.asyncQueue, e, n, s))), s.promise;
+}
+
 function aa(t, e, n = {}) {
     const s = new j;
     return t.asyncQueue.enqueueAndForget((async () => function(t, e, n, s, i) {
@@ -12669,6 +12697,13 @@ function wa(t, e, n) {
  * @internal
  */ function ma(t, e, n, s) {
     if (!0 === e && !0 === s) throw new Q(G.INVALID_ARGUMENT, `${t} and ${n} cannot be used together.`);
+}
+
+/**
+ * Validates that `path` refers to a document (indicated by the fact it contains
+ * an even numbers of segments).
+ */ function ga(t) {
+    if (!dt.isDocumentKey(t)) throw new Q(G.INVALID_ARGUMENT, `Invalid document reference. Document references must have an even number of segments, but ${t} has ${t.length}.`);
 }
 
 /**
@@ -13000,6 +13035,22 @@ function Va(t, e, ...n) {
         const s = t._path.child(ht.fromString(e, ...n));
         return ya(s), new va(t.firestore, 
         /* converter= */ null, s);
+    }
+}
+
+function Da(t, e, ...n) {
+    if (t = getModularInstance(t), 
+    // We allow omission of 'pathString' but explicitly prohibit passing in both
+    // 'undefined' and 'null'.
+    1 === arguments.length && (e = st.I()), wa("doc", "path", e), t instanceof Aa) {
+        const s = ht.fromString(e, ...n);
+        return ga(s), new ba(t, 
+        /* converter= */ null, new dt(s));
+    }
+    {
+        if (!(t instanceof ba || t instanceof va)) throw new Q(G.INVALID_ARGUMENT, "Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore");
+        const s = t._path.child(ht.fromString(e, ...n));
+        return ga(s), new ba(t.firestore, t instanceof va ? t.converter : null, new dt(s));
     }
 }
 
@@ -14350,6 +14401,65 @@ class ol {
     }
 }
 
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// TODO(mrschmidt) Consider using `BaseTransaction` as the base class in the
+// legacy SDK.
+/**
+ * A reference to a transaction.
+ *
+ * The `Transaction` object passed to a transaction's `updateFunction` provides
+ * the methods to read and write data within the transaction context. See
+ * {@link runTransaction}.
+ */
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Reads the document referred to by this `DocumentReference`.
+ *
+ * Note: `getDoc()` attempts to provide up-to-date data when possible by waiting
+ * for data from the server, but it may return cached data or fail if you are
+ * offline and the server cannot be reached. To specify this behavior, invoke
+ * {@link getDocFromCache} or {@link getDocFromServer}.
+ *
+ * @param reference - The reference of the document to fetch.
+ * @returns A Promise resolved with a `DocumentSnapshot` containing the
+ * current document contents.
+ */
+function ll(t) {
+    t = Ia(t, ba);
+    const e = Ia(t.firestore, Fa);
+    return ua(La(e), t._key).then((n => bl(e, t, n)));
+}
+
 class fl extends ol {
     constructor(t) {
         super(), this.firestore = t;
@@ -14397,6 +14507,14 @@ function pl(t, e, n, ...s) {
         const n = new j;
         return t.asyncQueue.enqueueAndForget((async () => hc(await na(t), e, n))), n.promise;
     }(La(t), e);
+}
+
+/**
+ * Converts a {@link ViewSnapshot} that contains the single document specified by `ref`
+ * to a {@link DocumentSnapshot}.
+ */ function bl(t, e, n) {
+    const s = n.docs.get(e._key), i = new fl(t);
+    return new kh(t, i, e._key, s, new Nh(n.hasPendingWrites, n.fromCache), e.converter);
 }
 
 /**
@@ -14452,16 +14570,91 @@ const app = initializeApp(firebaseConfig);
 
 const db = Ba(app);
 
-/**
- * Get words (+etc) from firebase connection
- * */
+class WordService {
+    // constructor() {
+    //     this.db = getFirestore(app);
+    // }
 
-const words = [];
-const querySnapshot = await wl(Va(db, "defaultWords"));
-querySnapshot.forEach((doc) => {
-    words.push({ ...doc.data(), id: doc.id });
-});
-console.log("words", words);
+    // TODO Error handling service to route through..
+
+    async getWordsByFridge(/*fridgeID*/) {
+        const words = [];
+
+        // TODO: This snapshot listneer should be called and handled elsewhere.
+        // const unsub = onSnapshot(collection(db, "defaultWords"), (snapshot) => {
+        //     console.log("querySnapshot", snapshot);
+        //     const docs = snapshot.docs;
+        //     console.log("docs", docs);
+
+        //     // console.log("Current data: ", doc.data());
+        //     snapshot.docChanges().forEach((change) => {
+        //         //console.log("change", change.doc.data());
+        //         const word = await change.doc.data();
+        //         word.id = change.doc.id;
+
+        //         words.push(word);
+        //         showme(words)
+
+        //         //console.log("doc", doc.data());
+        //         // console.log("docs", docs);
+        //         // //console.log("docs.data()", docs.data());
+        //         // docs.forEach(doc => {
+
+        //         // const word = await doc.data();
+        //         // word.id = doc.id;
+        //         // words.push(word);
+        //     });
+        // });
+
+        const snapshot = await wl(Va(db, "defaultWords"));
+        snapshot.forEach((doc) => {
+            words.push({ ...doc.data(), id: doc.id });
+        });
+        return words;
+    }
+
+    getDocumentReference(id) {
+        return Da(db, "defaultWords", id);
+    }
+
+    async updateWord(wordID, top, left) {
+        const docRef = this.getDocumentReference(wordID);
+
+        await pl(docRef, {
+            "position.top": top,
+            "position.left": left,
+        });
+
+        //console.log("result", result);
+
+        // return result;
+    }
+}
+
+const wordService = new WordService();
+
+class FridgeService {
+    async getFridgeByID(fridgeID) {
+        const docRef = Da(db, "fridges", fridgeID);
+        const docSnap = await ll(docRef);
+        return { ...docSnap.data(), id: docSnap.id };
+    }
+
+    async createFridge() {
+        //
+    }
+}
+
+const fridgeService = new FridgeService();
+
+// TODO Routing
+window.location.hash = "test";
+const fridgeID = window.location.hash.slice(1);
+const fridge = await fridgeService.getFridgeByID(fridgeID);
+console.log(fridge);
+// TODO Populate fridge info from fridge data
+
+const words = await wordService.getWordsByFridge(fridge.id);
 
 /**
  * Set up app
@@ -14528,9 +14721,6 @@ appEl.addEventListener("drop", (event) => {
 async function updateWordPosition(id, top, left) {
     console.log("id", id);
 
-    const result = await pl(id, {
-        "position.top": top,
-        "position.left": left,
-    });
-    console.log("result", result);
+    await wordService.updateWord(id, top, left);
+    //console.log("result", result);
 }

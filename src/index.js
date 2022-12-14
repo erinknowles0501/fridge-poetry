@@ -1,23 +1,13 @@
-import {
-    getFirestore,
-    collection,
-    getDocs,
-    updateDoc,
-} from "firebase/firestore";
+import { wordService, fridgeService } from "./services/api.js";
 
-import app from "./firebase/index.js";
-const db = getFirestore(app);
+// TODO Routing
+window.location.hash = "test";
+const fridgeID = window.location.hash.slice(1);
+const fridge = await fridgeService.getFridgeByID(fridgeID);
+console.log(fridge);
+// TODO Populate fridge info from fridge data
 
-/**
- * Get words (+etc) from firebase connection
- * */
-
-const words = [];
-const querySnapshot = await getDocs(collection(db, "defaultWords"));
-querySnapshot.forEach((doc) => {
-    words.push({ ...doc.data(), id: doc.id });
-});
-console.log("words", words);
+const words = await wordService.getWordsByFridge(fridge.id);
 
 /**
  * Set up app
@@ -84,9 +74,6 @@ appEl.addEventListener("drop", (event) => {
 async function updateWordPosition(id, top, left) {
     console.log("id", id);
 
-    const result = await updateDoc(id, {
-        "position.top": top,
-        "position.left": left,
-    });
-    console.log("result", result);
+    await wordService.updateWord(id, top, left);
+    //console.log("result", result);
 }
