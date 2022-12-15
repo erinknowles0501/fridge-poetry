@@ -13554,6 +13554,15 @@ class Za {
  * limitations under the License.
  */ const ih = /^__.*__$/;
 
+/** The result of parsing document data (e.g. for a setData call). */ class rh {
+    constructor(t, e, n) {
+        this.data = t, this.fieldMask = e, this.fieldTransforms = n;
+    }
+    toMutation(t, e) {
+        return null !== this.fieldMask ? new Wn(t, this.data, this.fieldMask, e, this.fieldTransforms) : new jn(t, this.data, e, this.fieldTransforms);
+    }
+}
+
 /** The result of parsing "update" data (i.e. for an updateData call). */ class oh {
     constructor(t, 
     // The fieldMask does not include document transforms.
@@ -13680,6 +13689,23 @@ function uh(t) {
 function hh(t) {
     const e = t._freezeSettings(), n = nu(t._databaseId);
     return new ah(t._databaseId, !!e.ignoreUndefinedProperties, n);
+}
+
+/** Parse document data from a set() call. */ function lh(t, e, n, s, i, r = {}) {
+    const o = t.aa(r.merge || r.mergeFields ? 2 /* MergeSet */ : 0 /* Set */ , e, n, i);
+    Rh("Data must be an object, but it was:", o, s);
+    const u = Eh(s, o);
+    let c, a;
+    if (r.merge) c = new zt(o.fieldMask), a = o.fieldTransforms; else if (r.mergeFields) {
+        const t = [];
+        for (const s of r.mergeFields) {
+            const i = bh(e, s, n);
+            if (!o.contains(i)) throw new Q(G.INVALID_ARGUMENT, `Field '${i}' is specified in your field mask but missing from your input data.`);
+            Sh(t, i) || t.push(i);
+        }
+        c = new zt(t), a = o.fieldTransforms.filter((t => c.covers(t.field)));
+    } else c = null, a = o.fieldTransforms;
+    return new rh(new De(u), c, a);
 }
 
 class fh extends nh {
@@ -14417,6 +14443,39 @@ class ol {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * Converts custom model object of type T into `DocumentData` by applying the
+ * converter if it exists.
+ *
+ * This function is used when converting user objects to `DocumentData`
+ * because we want to provide the user with a more specific error message if
+ * their `set()` or fails due to invalid data originating from a `toFirestore()`
+ * call.
+ */ function ul(t, e, n) {
+    let s;
+    // Cast to `any` in order to satisfy the union type constraint on
+    // toFirestore().
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return s = t ? n && (n.merge || n.mergeFields) ? t.toFirestore(e, n) : t.toFirestore(e) : e, 
+    s;
+}
+
+/**
+ * @license
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 // TODO(mrschmidt) Consider using `BaseTransaction` as the base class in the
 // legacy SDK.
 /**
@@ -14488,6 +14547,12 @@ class fl extends ol {
     return Bh(t._query), aa(n, t._query).then((n => new Mh(e, s, t, n)));
 }
 
+function yl(t, e, n) {
+    t = Ia(t, ba);
+    const s = Ia(t.firestore, Fa), i = ul(t.converter, e, n);
+    return Rl(s, [ lh(hh(s), "setDoc", t._key, i, null !== t.converter, n).toMutation(t._key, $n.none()) ]);
+}
+
 function pl(t, e, n, ...s) {
     t = Ia(t, ba);
     const i = Ia(t.firestore, Fa), r = hh(i);
@@ -14497,6 +14562,20 @@ function pl(t, e, n, ...s) {
     // performing validation.
     e = getModularInstance(e)) || e instanceof Za ? ph(r, "updateDoc", t._key, e, n, s) : yh(r, "updateDoc", t._key, e);
     return Rl(i, [ o.toMutation(t._key, $n.exists(!0)) ]);
+}
+
+/**
+ * Add a new document to specified `CollectionReference` with the given data,
+ * assigning it a document ID automatically.
+ *
+ * @param reference - A reference to the collection to add this document to.
+ * @param data - An Object containing the data for the new document.
+ * @returns A `Promise` resolved with a `DocumentReference` pointing to the
+ * newly created document after it has been written to the backend (Note that it
+ * won't resolve while you're offline).
+ */ function Tl(t, e) {
+    const n = Ia(t.firestore, Fa), s = Da(t), i = ul(t.converter, e);
+    return Rl(n, [ lh(hh(t.firestore), "addDoc", s._key, i, null !== t.converter, {}).toMutation(s._key, $n.exists(!1)) ]).then((() => s));
 }
 
 /**
@@ -14568,16 +14647,81 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+var defaultWords = [
+	"I",
+	"you",
+	"she",
+	"he",
+	"his",
+	"her",
+	"they",
+	"their",
+	"there",
+	"that",
+	"this",
+	"who",
+	"what",
+	"where",
+	"when",
+	"why",
+	"how",
+	"is",
+	"not",
+	"ish",
+	"ly",
+	"s",
+	"s",
+	"ing",
+	"ing",
+	"ed",
+	"ed",
+	"dis",
+	"de",
+	"re",
+	"dog",
+	"cat",
+	"cup",
+	"grass",
+	"fire",
+	"water",
+	"ocean",
+	"river",
+	"tree",
+	"candy",
+	"bed",
+	"magnet",
+	"life",
+	"death",
+	"room",
+	"space",
+	"star",
+	"sun",
+	"light",
+	"heavy",
+	"brain",
+	"heart",
+	"gut",
+	"go",
+	"take",
+	"leave",
+	"stay",
+	"have",
+	"see",
+	"want",
+	"need",
+	"think",
+	"feel",
+	"dance",
+	"sit",
+	"sleep"
+];
+
 const db = Ba(app);
 
 class WordService {
-    // constructor() {
-    //     this.db = getFirestore(app);
-    // }
-
     // TODO Error handling service to route through..
 
-    async getWordsByFridge(/*fridgeID*/) {
+    async getWordsByFridge(fridgeID) {
         const words = [];
 
         // TODO: This snapshot listneer should be called and handled elsewhere.
@@ -14605,29 +14749,29 @@ class WordService {
         //         // words.push(word);
         //     });
         // });
-
-        const snapshot = await wl(Va(db, "defaultWords"));
-        snapshot.forEach((doc) => {
-            words.push({ ...doc.data(), id: doc.id });
-        });
-        return words;
+        try {
+            const snapshot = await wl(
+                Va(db, `fridges/${fridgeID}/words`)
+            );
+            snapshot.forEach((doc) => {
+                words.push({ ...doc.data(), id: doc.id });
+            });
+            return words;
+        } catch (e) {
+            console.error(e);
+        }
     }
 
-    getDocumentReference(id) {
-        return Da(db, "defaultWords", id);
+    getDocumentReference(id, fridgeID) {
+        return Da(db, `fridges/${fridgeID}/words`, id);
     }
 
-    async updateWord(wordID, top, left) {
-        const docRef = this.getDocumentReference(wordID);
-
+    async updateWord(wordID, top, left, fridgeID) {
+        const docRef = this.getDocumentReference(wordID, fridgeID);
         await pl(docRef, {
             "position.top": top,
             "position.left": left,
         });
-
-        //console.log("result", result);
-
-        // return result;
     }
 }
 
@@ -14640,41 +14784,62 @@ class FridgeService {
         return { ...docSnap.data(), id: docSnap.id };
     }
 
-    async createFridge() {
-        //
+    async createFridge(name) {
+        const newFridgeRef = Da(Va(db, "fridges"));
+        await yl(newFridgeRef, { name: name });
+        await this.createWordsOnFridge(newFridgeRef.id);
+        return newFridgeRef.id;
+    }
+
+    async createWordsOnFridge(fridgeID) {
+        defaultWords.forEach(async (word) => {
+            await Tl(Va(db, `fridges/${fridgeID}/words`), {
+                wordText: word,
+                position: { top: 0, left: 0 },
+            });
+        });
     }
 }
 
 const fridgeService = new FridgeService();
 
 // TODO Routing
-window.location.hash = "test";
-const fridgeID = window.location.hash.slice(1);
-const fridge = await fridgeService.getFridgeByID(fridgeID);
-console.log(fridge);
+
 // TODO Populate fridge info from fridge data
-
-const words = await wordService.getWordsByFridge(fridge.id);
-
-/**
- * Set up app
- * */
+const fridge = {
+    fridgeID: null,
+    name: null,
+    words: [],
+};
 
 const appEl = document.querySelector("#app");
 appEl.addEventListener(
     "dragover",
     (event) => {
         event.preventDefault();
-        // console.log("event", event);
     },
     false
 );
 
+async function loadFridge() {
+    fridge.fridgeID = window.location.hash.slice(1);
+    fridge.name = await fridgeService.getFridgeByID(fridge.fridgeID);
+    fridge.words = await wordService.getWordsByFridge(fridge.fridgeID);
+
+    makeWordEls();
+}
+
+await loadFridge();
+
+/**
+ * Set up app
+ * */
+
 function makeWordEls() {
-    words.forEach((word) => {
+    fridge.words.forEach((word) => {
         const el = document.createElement("div");
         el.className = "word";
-        el.textContent = word.wordtext; // TODO Checks to assume this is safely escaped
+        el.textContent = word.wordText; // TODO Checks to assume this is safely escaped
         el.dataset.id = word.id;
         el.setAttribute("draggable", true);
         setElementPosition(el, word.position.top, word.position.left);
@@ -14704,8 +14869,6 @@ function setElementPosition(element, positionTop, positionLeft) {
 //     console.log("activeRect", activeRect);
 // }
 
-makeWordEls();
-
 let currentDragged = null;
 
 appEl.addEventListener("drop", (event) => {
@@ -14719,8 +14882,28 @@ appEl.addEventListener("drop", (event) => {
 });
 
 async function updateWordPosition(id, top, left) {
-    console.log("id", id);
-
-    await wordService.updateWord(id, top, left);
-    //console.log("result", result);
+    await wordService.updateWord(id, top, left, fridge.fridgeID);
 }
+
+/** New fridge... */
+const newFridgeModalToggleEl = document.querySelector(
+    "#new-fridge-modal-toggle"
+);
+
+const newFridgeModalEl = document.querySelector(".new-fridge-modal");
+newFridgeModalToggleEl.addEventListener("click", () => {
+    newFridgeModalEl.classList.toggle("new-fridge-modal-hidden");
+});
+
+const createNewFridge = document.querySelector("#create-new-fridge");
+console.log("createNewFridge", createNewFridge);
+
+createNewFridge.addEventListener("click", async () => {
+    const newFridgeID = await fridgeService.createFridge(
+        document.querySelector("#new-fridge-name").value
+    );
+
+    window.location.hash = newFridgeID;
+    console.log("here after new fridge hash");
+    await loadFridge();
+});

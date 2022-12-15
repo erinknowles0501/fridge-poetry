@@ -1,33 +1,42 @@
 import { wordService, fridgeService } from "./services/api.js";
 
 // TODO Routing
-window.location.hash = "test";
-const fridgeID = window.location.hash.slice(1);
-const fridge = await fridgeService.getFridgeByID(fridgeID);
-console.log(fridge);
+
 // TODO Populate fridge info from fridge data
-
-const words = await wordService.getWordsByFridge(fridge.id);
-
-/**
- * Set up app
- * */
+const fridge = {
+    fridgeID: null,
+    name: null,
+    words: [],
+};
 
 const appEl = document.querySelector("#app");
 appEl.addEventListener(
     "dragover",
     (event) => {
         event.preventDefault();
-        // console.log("event", event);
     },
     false
 );
 
+async function loadFridge() {
+    fridge.fridgeID = window.location.hash.slice(1);
+    fridge.name = await fridgeService.getFridgeByID(fridge.fridgeID);
+    fridge.words = await wordService.getWordsByFridge(fridge.fridgeID);
+
+    makeWordEls();
+}
+
+await loadFridge();
+
+/**
+ * Set up app
+ * */
+
 function makeWordEls() {
-    words.forEach((word) => {
+    fridge.words.forEach((word) => {
         const el = document.createElement("div");
         el.className = "word";
-        el.textContent = word.wordtext; // TODO Checks to assume this is safely escaped
+        el.textContent = word.wordText; // TODO Checks to assume this is safely escaped
         el.dataset.id = word.id;
         el.setAttribute("draggable", true);
         setElementPosition(el, word.position.top, word.position.left);
@@ -57,8 +66,6 @@ function setElementPosition(element, positionTop, positionLeft) {
 //     console.log("activeRect", activeRect);
 // }
 
-makeWordEls();
-
 let currentDragged = null;
 
 appEl.addEventListener("drop", (event) => {
@@ -72,8 +79,28 @@ appEl.addEventListener("drop", (event) => {
 });
 
 async function updateWordPosition(id, top, left) {
-    console.log("id", id);
-
-    await wordService.updateWord(id, top, left);
-    //console.log("result", result);
+    await wordService.updateWord(id, top, left, fridge.fridgeID);
 }
+
+/** New fridge... */
+const newFridgeModalToggleEl = document.querySelector(
+    "#new-fridge-modal-toggle"
+);
+
+const newFridgeModalEl = document.querySelector(".new-fridge-modal");
+newFridgeModalToggleEl.addEventListener("click", () => {
+    newFridgeModalEl.classList.toggle("new-fridge-modal-hidden");
+});
+
+const createNewFridge = document.querySelector("#create-new-fridge");
+console.log("createNewFridge", createNewFridge);
+
+createNewFridge.addEventListener("click", async () => {
+    const newFridgeID = await fridgeService.createFridge(
+        document.querySelector("#new-fridge-name").value
+    );
+
+    window.location.hash = newFridgeID;
+    console.log("here after new fridge hash");
+    await loadFridge();
+});

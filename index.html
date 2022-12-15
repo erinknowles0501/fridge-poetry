@@ -36,15 +36,51 @@
             .word:hover {
                 cursor: grab;
             }
+
+            #new-fridge-modal-toggle {
+                background: yellow;
+                padding: 1rem;
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                z-index: 5;
+                cursor: default;
+            }
+
+            #new-fridge-modal-toggle:hover {
+                background: white;
+                outline: 5px solid yellow;
+            }
+
+            .new-fridge-modal {
+                background: yellow;
+                padding: 2rem;
+                position: absolute;
+                top: 5rem;
+                bottom: 5rem;
+                left: 50%;
+                right: 5rem;
+                z-index: 6;
+            }
+
+            .new-fridge-modal-hidden {
+                display: none;
+            }
+
+            .new-fridge-modal p {
+                font-weight: bold;
+            }
         </style>
     </head>
     <body>
         <div id="app" dropzone="move"></div>
+        <div id="new-fridge-modal-toggle">New Fridge...</div>
+        <div class="new-fridge-modal new-fridge-modal-hidden">
+            <p>New fridge name:</p>
+            <input type="text" id="new-fridge-name"></input>
+            <hr>
+            <button type="button" id="create-new-fridge">Create</button>
+        </div>
         <script src="bundled.js" type="module"></script>
-        <!-- 
-
-
-//box-shadow: -1.5px 1.5px 1px gray;
-        -->
     </body>
 </html>
