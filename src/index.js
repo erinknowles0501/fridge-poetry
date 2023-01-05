@@ -19,6 +19,7 @@ appEl.addEventListener(
 );
 
 async function loadFridge() {
+    // TODO: Case where there is no hash, or hash is invalid, or id doesn't come back with a fridge
     fridge.fridgeID = window.location.hash.slice(1);
     fridge.name = await fridgeService.getFridgeByID(fridge.fridgeID);
     fridge.words = await wordService.getWordsByFridge(fridge.fridgeID);

@@ -9,10 +9,44 @@ import {
     setDoc,
     addDoc,
 } from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import app from "../firebase/index.js";
 const db = getFirestore(app);
+const fbAuth = getAuth();
 
 import { default as defaultWords } from "../defaultWords.json";
+
+class AuthService {
+    auth = null;
+    user = null;
+
+    constructor(auth) {
+        this.auth = auth;
+
+        signInWithEmailAndPassword(
+            auth,
+            "erinknowles@protonmail.com",
+            "testtest111"
+        ).then((userCred) => {
+            this.user = userCred.user;
+            console.log("userCred", this.user);
+        });
+        // signInWithEmailAndPassword(auth, email, password).then(
+        //     (userCredential) => {
+        //         // Signed in
+        //         this.user = userCredential.user;
+        //         // ...
+        //     }
+        // );
+
+        // TODO Same error handlign service work
+        // .catch((error) => {
+        //     const errorCode = error.code;
+        //     const errorMessage = error.message;
+        // });
+    }
+}
+export const authService = new AuthService(fbAuth);
 
 class WordService {
     // TODO Error handling service to route through..
@@ -74,6 +108,10 @@ class WordService {
 export const wordService = new WordService();
 
 class FridgeService {
+    constructor(auth) {
+        this.auth = auth;
+    }
+
     async getFridgeByID(fridgeID) {
         const docRef = doc(db, "fridges", fridgeID);
         const docSnap = await getDoc(docRef);
@@ -81,8 +119,13 @@ class FridgeService {
     }
 
     async createFridge(name) {
+        // TODO: Create user permissions based on current user
+        // TODO: Capture and send user invites
         const newFridgeRef = doc(collection(db, "fridges"));
-        await setDoc(newFridgeRef, { name: name });
+        await setDoc(newFridgeRef, {
+            name: name,
+            creatorUID: this.auth.user.uid,
+        });
         await this.createWordsOnFridge(newFridgeRef.id);
         return newFridgeRef.id;
     }
@@ -97,8 +140,22 @@ class FridgeService {
     }
 }
 
-export const fridgeService = new FridgeService();
+export const fridgeService = new FridgeService(authService);
 
 class UserService {
+    // TODO: Inject current user auth
+    // new user
+    // get whether user can access fridge (current, ?)
+    // get fridges by user (current)
+    // get user by id
+    // update user
     //
+}
+
+class InvitationService {
+    // create user invite
+    // mark invite accepted / revoked
+    // get user invite
+    // get invites by fridge
+    // re-send invite?
 }
