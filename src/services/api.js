@@ -97,6 +97,7 @@ class WordService {
     }
 
     async updateWord(wordID, top, left, fridgeID) {
+        // TODO Constraints on top and left
         const docRef = this.getDocumentReference(wordID, fridgeID);
         await updateDoc(docRef, {
             "position.top": top,

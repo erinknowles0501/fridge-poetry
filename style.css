@@ -1,0 +1,67 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-size: 16px;
+}
+
+#app {
+    position: relative;
+    transform-origin: top left;
+}
+
+.word {
+    font-family: monospace;
+    outline: 1px solid rgba(0, 0, 0, 0.3);
+    padding: 0.2rem 0.5rem;
+    color: black;
+    background: white;
+    font-size: 0.5rem;
+    display: inline-block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+.word:hover {
+    cursor: grab;
+}
+
+#new-fridge-modal-toggle {
+    background: yellow;
+    padding: 1rem;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 5;
+    cursor: default;
+}
+
+#new-fridge-modal-toggle:hover {
+    background: white;
+    outline: 5px solid yellow;
+}
+
+.new-fridge-modal {
+    background: yellow;
+    padding: 2rem;
+    position: absolute;
+    top: 5rem;
+    bottom: 5rem;
+    left: 50%;
+    right: 5rem;
+    z-index: 6;
+}
+
+.new-fridge-modal-hidden {
+    display: none;
+}
+
+.new-fridge-modal p {
+    font-weight: bold;
+}

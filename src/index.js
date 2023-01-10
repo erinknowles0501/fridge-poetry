@@ -1,4 +1,5 @@
 import { wordService, fridgeService } from "./services/api.js";
+import scaleApp from "./scale.js";
 
 // TODO Routing
 
@@ -17,6 +18,11 @@ appEl.addEventListener(
     },
     false
 );
+
+const scale = scaleApp();
+onresize = () => {
+    scale = scaleApp();
+};
 
 async function loadFridge() {
     // TODO: Case where there is no hash, or hash is invalid, or id doesn't come back with a fridge
@@ -56,8 +62,8 @@ function addListeners(element) {
 }
 
 function setElementPosition(element, positionTop, positionLeft) {
-    element.style.top = positionTop + "px";
-    element.style.left = positionLeft + "px";
+    element.style.top = positionTop / scale.y + "px";
+    element.style.left = positionLeft / scale.x + "px";
 }
 
 // TODO
@@ -102,6 +108,5 @@ createNewFridge.addEventListener("click", async () => {
     );
 
     window.location.hash = newFridgeID;
-    console.log("here after new fridge hash");
     await loadFridge();
 });
