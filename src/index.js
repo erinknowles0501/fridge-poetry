@@ -19,9 +19,9 @@ appEl.addEventListener(
     false
 );
 
-const scale = scaleApp();
+const scale = { ...scaleApp() };
 onresize = () => {
-    scale = scaleApp();
+    ({ x: scale.x, y: scale.y } = scaleApp());
 };
 
 async function loadFridge() {
@@ -46,7 +46,11 @@ function makeWordEls() {
         el.textContent = word.wordText; // TODO Checks to assume this is safely escaped
         el.dataset.id = word.id;
         el.setAttribute("draggable", true);
-        setElementPosition(el, word.position.top, word.position.left);
+        setElementPosition(
+            el,
+            word.position.top / scale.y,
+            word.position.left / scale.x
+        );
 
         addListeners(el);
         word.element = el;
@@ -55,15 +59,28 @@ function makeWordEls() {
 }
 
 function addListeners(element) {
-    element.addEventListener("mouseover", () => {});
-    element.addEventListener("dragstart", () => {
+    element.addEventListener("dragstart", (event) => {
+        //      console.log("dragstart event", event);
+        currentOffset.x = event.offsetX;
+        currentOffset.y = event.offsetY;
+        console.log("currentOffset", currentOffset);
+        console.log("scale", scale);
+
         currentDragged = element;
     });
 }
 
-function setElementPosition(element, positionTop, positionLeft) {
-    element.style.top = positionTop / scale.y + "px";
-    element.style.left = positionLeft / scale.x + "px";
+function setElementPosition(
+    element,
+    positionTop,
+    positionLeft,
+    offsetTop = 0,
+    offsetLeft = 0
+) {
+    // TODO: Case where landscape
+
+    element.style.top = positionTop - offsetTop + "px";
+    element.style.left = positionLeft - offsetLeft + "px";
 }
 
 // TODO
@@ -74,10 +91,21 @@ function setElementPosition(element, positionTop, positionLeft) {
 // }
 
 let currentDragged = null;
+let currentOffset = { x: 0, y: 0 };
 
 appEl.addEventListener("drop", (event) => {
     event.preventDefault();
-    setElementPosition(currentDragged, event.pageY, event.pageX);
+    //console.log("event", event);
+
+    //console.log("currentOffset.y / scale.y", currentOffset.y / scale.y);
+
+    setElementPosition(
+        currentDragged,
+        event.pageY / scale.y,
+        event.pageX / scale.x,
+        currentOffset.y,
+        currentOffset.x
+    );
     updateWordPosition(
         currentDragged.getAttribute("data-id"),
         event.pageY,

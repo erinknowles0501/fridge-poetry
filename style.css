@@ -11,6 +11,7 @@ body {
 }
 
 #app {
+    background: #ddd;
     position: relative;
     transform-origin: top left;
 }

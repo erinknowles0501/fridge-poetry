@@ -9,7 +9,7 @@ export default function scaleApp() {
     const availableWidth = document.documentElement.clientWidth;
     const availableHeight = document.documentElement.clientHeight;
 
-    const scale = { x: 0, y: 0 };
+    const scale = { x: 1, y: 1 };
 
     if (availableHeight <= availableWidth) {
         // is landscape
