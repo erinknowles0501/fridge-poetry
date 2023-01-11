@@ -1,28 +1,29 @@
-export default function scaleApp(appEl) {
-    const contentWidth = 500;
-    const contentHeight = 300;
-    appEl.style.width = contentWidth + "px";
-    appEl.style.height = contentHeight + "px";
+export const APP_WIDTH = 500;
+export const APP_HEIGHT = 300;
 
-    const availableWidth = document.documentElement.clientWidth;
-    const availableHeight = document.documentElement.clientHeight;
+export function scaleApp(appEl) {
+    appEl.style.width = APP_WIDTH + "px";
+    appEl.style.height = APP_HEIGHT + "px";
+
+    const clientWidth = document.documentElement.clientWidth;
+    const clientHeight = document.documentElement.clientHeight;
 
     const scale = { x: 1, y: 1 };
 
-    if (availableHeight <= availableWidth) {
+    if (clientHeight <= clientWidth) {
         // is landscape
-        scale.x = availableWidth / contentWidth;
-        scale.y = availableHeight / contentHeight;
+        scale.x = clientWidth / APP_WIDTH;
+        scale.y = clientHeight / APP_HEIGHT;
 
         appEl.style.rotate = "0deg";
         appEl.style.translate = "0px";
     } else {
         // is portrait
-        scale.x = availableHeight / contentWidth;
-        scale.y = availableWidth / contentHeight;
+        scale.x = clientHeight / APP_WIDTH;
+        scale.y = clientWidth / APP_HEIGHT;
 
         appEl.style.rotate = "90deg";
-        appEl.style.translate = availableWidth + "px";
+        appEl.style.translate = clientWidth + "px";
     }
 
     appEl.style.scale = scale.x + " " + scale.y;

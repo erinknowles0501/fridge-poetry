@@ -100,8 +100,8 @@ class WordService {
         // TODO Constraints on top and left
         const docRef = this.getDocumentReference(wordID, fridgeID);
         await updateDoc(docRef, {
-            "position.top": top,
-            "position.left": left,
+            "position.y": top,
+            "position.x": left,
         });
     }
 }
@@ -135,7 +135,7 @@ class FridgeService {
         defaultWords.forEach(async (word) => {
             await addDoc(collection(db, `fridges/${fridgeID}/words`), {
                 wordText: word,
-                position: { top: 0, left: 0 },
+                position: { y: 0, x: 0 },
             });
         });
     }

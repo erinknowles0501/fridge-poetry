@@ -1,9 +1,11 @@
-import scaleApp from "./scale.js";
+import { scaleApp } from "./scale.js";
 import { loadFridge } from "./appSetup.js";
 import store from "./store.js";
 import createNewFridgeUI from "./newFridge.js";
 
 // TODO Routing incl. loadFridge() on route change
+// TODO Clicking word updates its z-index
+// TODO Mobile interactions...
 
 await loadFridge(window.location.hash.slice(1));
 

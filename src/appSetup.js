@@ -26,7 +26,7 @@ function makeWordEls() {
         el.textContent = word.wordText; // TODO Checks to assume this is safely escaped
         el.dataset.id = word.id;
         el.setAttribute("draggable", true);
-        setElementPosition(el, word.position.top, word.position.left);
+        setElementPosition(el, word.position.y, word.position.x);
 
         addListeners(el);
         word.element = el;

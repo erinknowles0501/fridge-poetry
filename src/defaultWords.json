@@ -1,11 +1,18 @@
 [
     "I",
+    "I",
+    "you",
     "you",
     "she",
+    "she",
     "he",
+    "he",
+    "they",
+    "they",
+    "my",
+    "mine",
     "his",
     "her",
-    "they",
     "their",
 
     "there",
@@ -19,6 +26,13 @@
     "how",
     "is",
     "not",
+    "in",
+    "out",
+    "are",
+    "to",
+    "for",
+    "be",
+    "of",
 
     "ish",
     "ly",
@@ -28,6 +42,8 @@
     "ing",
     "ed",
     "ed",
+    "r",
+    "ic",
 
     "dis",
     "de",
@@ -56,6 +72,8 @@
     "brain",
     "heart",
     "gut",
+    "body",
+    "friend",
 
     "go",
     "take",
@@ -69,5 +87,9 @@
     "feel",
     "dance",
     "sit",
-    "sleep"
+    "sleep",
+    "sing",
+    "sin",
+    "think",
+    "get"
 ]
