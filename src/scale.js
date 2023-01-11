@@ -1,6 +1,4 @@
-export default function scaleApp() {
-    const appEl = document.querySelector("#app");
-
+export default function scaleApp(appEl) {
     const contentWidth = 500;
     const contentHeight = 300;
     appEl.style.width = contentWidth + "px";
