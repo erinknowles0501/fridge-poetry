@@ -14,6 +14,9 @@
     "his",
     "her",
     "their",
+    "it",
+    "we",
+    "us",
 
     "there",
     "that",
@@ -29,10 +32,14 @@
     "in",
     "out",
     "are",
+    "were",
     "to",
     "for",
     "be",
     "of",
+    "a",
+    "a",
+    "a",
 
     "ish",
     "ly",
@@ -44,6 +51,7 @@
     "ed",
     "r",
     "ic",
+    "n",
 
     "dis",
     "de",
@@ -67,13 +75,15 @@
     "space",
     "star",
     "sun",
-    "light",
-    "heavy",
     "brain",
     "heart",
     "gut",
     "body",
     "friend",
+    "up",
+    "down",
+    "right",
+    "wrong",
 
     "go",
     "take",
@@ -90,6 +100,13 @@
     "sleep",
     "sing",
     "sin",
-    "think",
-    "get"
+    "hope",
+    "get",
+
+    "small",
+    "large",
+    "heavy",
+    "light",
+    "open",
+    "shut"
 ]

@@ -16,3 +16,6 @@ onresize = () => {
 };
 
 createNewFridgeUI();
+
+import userDropdown from "./ui/userDropdown.js";
+userDropdown.render();

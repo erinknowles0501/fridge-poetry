@@ -34,6 +34,9 @@ body {
     cursor: grab;
 }
 
+/* New fridge */
+/* TODO get rid of this. */
+
 #new-fridge-modal-toggle {
     background: yellow;
     padding: 1rem;
@@ -66,4 +69,98 @@ body {
 
 .new-fridge-modal p {
     font-weight: bold;
+}
+
+/* User dropdown */
+
+#user-dropdown-wrap {
+    position: absolute;
+    top: 1rem;
+    right: 5rem;
+    background: white;
+    z-index: 10;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+}
+
+#user-dropdown-wrap .user-dropdown-toggle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    font-size: 2rem;
+    font-family: sans-serif;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-transform: uppercase;
+}
+
+#user-dropdown-wrap:hover {
+    outline: 3px solid white;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 5rem;
+    right: 0rem;
+    z-index: 10;
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    font-family: "sans-serif";
+    display: none;
+    width: 300px;
+}
+
+.user-details-wrap {
+    padding-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.user-details-wrap .color {
+    background: gray;
+    height: 3rem;
+    width: 3rem;
+    border-radius: 50%;
+}
+
+.user-details-wrap .display-name {
+    color: #555;
+    font-size: 1.3rem;
+    text-decoration: none;
+}
+
+.user-details-wrap .display-name:hover {
+    color: black;
+    text-decoration: underline;
+}
+
+.user-dropdown a {
+    font-weight: bold;
+    text-decoration: none;
+    padding: 0.3rem;
+    color: gray;
+}
+
+.user-dropdown a:hover {
+    color: black;
+}
+
+.user-dropdown button {
+    font-weight: bold;
+    color: red;
+    outline: 2px solid red;
+    border-radius: 0.3rem;
+    padding: 0.3rem 0.4rem;
+    display: block;
+    border: 0;
+    margin-top: 1rem;
+}
+
+.user-dropdown button:hover {
+    background: red;
+    color: white;
 }

@@ -6,6 +6,7 @@ class Store {
         words: [],
     };
     currentDrag = { el: null, offset: { x: 0, y: 0 } };
+    user = { color: "red", displayName: "Erin" };
 
     clearStore() {
         // TODO double check this...
