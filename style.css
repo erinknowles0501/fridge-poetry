@@ -120,7 +120,7 @@ body {
     align-items: center;
 }
 
-.user-details-wrap .color {
+.user-details-wrap .display-color {
     background: gray;
     height: 3rem;
     width: 3rem;

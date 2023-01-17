@@ -1,5 +1,6 @@
 import store from "../store.js";
 //import { userService } from "../services/api.js";
+import { SELECTOR_CHARS } from "./consts.js";
 
 class UserDropdownToggle {
     constructor(className) {
@@ -29,7 +30,25 @@ class UserDropdownToggle {
 }
 
 class UserDropdown {
-    constructor() {
+    selectors = {
+        displayColor: {
+            name: "display-color",
+            char: SELECTOR_CHARS.class,
+            events: [
+                {
+                    type: "click",
+                    handler: function () {
+                        store.user.color = "green";
+                        this.mount.render();
+                    },
+                },
+            ],
+        },
+        displayName: { name: "display-name", char: SELECTOR_CHARS.class },
+    };
+
+    constructor(mount) {
+        this.mount = mount;
         this.#createRootEl();
         this.render();
     }
@@ -37,6 +56,25 @@ class UserDropdown {
     #createRootEl() {
         this.rootEl = document.createElement("div");
         this.rootEl.className = "user-dropdown";
+
+        // this.rootEl.addEventListener("click", async () => {
+        //     // console.log();
+        // });
+    }
+
+    #addListeners(selectors) {
+        for (const key in selectors) {
+            const selector = selectors[key];
+
+            selector.el = this.rootEl.querySelector(
+                selector.char + selector.name
+            );
+
+            selector.events?.forEach((event) => {
+                event.handler = event.handler.bind(this);
+                selector.el.addEventListener(event.type, event.handler);
+            });
+        }
     }
 
     shouldDisplay = false;
@@ -48,9 +86,9 @@ class UserDropdown {
     render() {
         const html = `
             <div class="user-details-wrap">
-                <div class="color" style="background: ${store.user.color}"></div>
+                <div class="${this.selectors.displayColor.name}" style="background: ${store.user.color}"></div>
                 <p>
-                    <a class="display-name" href="#">
+                    <a class="${this.selectors.displayName.name}" href="#">
                         ${store.user.displayName}
                     </a>
                 </p>
@@ -63,6 +101,9 @@ class UserDropdown {
 
         this.rootEl.style.display = this.shouldDisplay ? "block" : "none";
         this.rootEl.innerHTML = html;
+
+        // Has to come after adding the html to the root el or there won't be anything to select
+        this.#addListeners(this.selectors);
     }
 }
 
@@ -70,7 +111,7 @@ class UserDropdownUI {
     constructor() {
         this.rootEl = document.querySelector("#user-dropdown-wrap");
         this.toggle = new UserDropdownToggle("user-dropdown-toggle");
-        this.dropdown = new UserDropdown(this.rootEl);
+        this.dropdown = new UserDropdown(this);
 
         this.toggle.rootEl.addEventListener("click", () => {
             this.toggle.setDisplayName("value");
@@ -79,6 +120,10 @@ class UserDropdownUI {
     }
 
     render() {
+        console.log("here");
+        this.dropdown.render();
+        this.toggle.render();
+
         this.rootEl.appendChild(this.dropdown.rootEl);
         this.rootEl.appendChild(this.toggle.rootEl);
     }
