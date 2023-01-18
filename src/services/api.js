@@ -8,8 +8,14 @@ import {
     getDoc,
     setDoc,
     addDoc,
+    query,
+    where,
 } from "firebase/firestore";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+} from "firebase/auth";
 import app from "../firebase/index.js";
 const db = getFirestore(app);
 const fbAuth = getAuth();
@@ -23,27 +29,31 @@ class AuthService {
     constructor(auth) {
         this.auth = auth;
 
-        signInWithEmailAndPassword(
-            auth,
-            "erinknowles@protonmail.com",
-            "testtest111"
-        ).then((userCred) => {
-            this.user = userCred.user;
-            console.log("userCred", this.user);
-        });
-        // signInWithEmailAndPassword(auth, email, password).then(
-        //     (userCredential) => {
-        //         // Signed in
-        //         this.user = userCredential.user;
-        //         // ...
-        //     }
-        // );
-
         // TODO Same error handlign service work
         // .catch((error) => {
         //     const errorCode = error.code;
         //     const errorMessage = error.message;
         // });
+    }
+
+    async signIn() {
+        await signInWithEmailAndPassword(
+            this.auth,
+            "erinknowles@protonmail.com",
+            "testtest111"
+        );
+        return this.auth.currentUser;
+    }
+
+    handleAuthStateChanged(handler) {
+        onAuthStateChanged(this.auth, (user) => {
+            if (user) {
+                this.user = user;
+                handler(user);
+            } else {
+                // TODO
+            }
+        });
     }
 }
 export const authService = new AuthService(fbAuth);
@@ -144,14 +154,47 @@ class FridgeService {
 export const fridgeService = new FridgeService(authService);
 
 class UserService {
-    // TODO: Inject current user auth
-    // new user
     // get whether user can access fridge (current, ?)
-    // get fridges by user (current)
-    // get user by id
-    // update user
-    //
+
+    constructor(auth) {
+        this.auth = auth;
+    }
+
+    createUser() {
+        return id;
+    }
+
+    async getUserByID(id) {
+        id = "erintest";
+
+        const docRef = doc(db, "users", id);
+        const docSnap = await getDoc(docRef);
+        return { ...docSnap.data(), id: docSnap.id };
+    }
+
+    handleCurrentUserDataChange(updateWith, modulesToRerender) {
+        const unsub = onSnapshot(doc(db, "users", "erintest"), (doc) => {
+            updateWith(doc.data());
+            modulesToRerender.forEach((module) => {
+                module.render();
+            });
+        });
+    }
+
+    async updateUser(id, data) {
+        id = "erintest";
+        data = {
+            displayName: "E" + Math.random().toString().slice(2, 6),
+        };
+
+        const docRef = doc(db, "users", id);
+        await updateDoc(docRef, data);
+    }
+
+    getFridgesByUser(id) {}
 }
+
+export const userService = new UserService(authService);
 
 class InvitationService {
     // create user invite

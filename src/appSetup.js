@@ -1,20 +1,8 @@
-import { wordService, fridgeService } from "./services/api.js";
+import { wordService } from "./services/api.js";
 import { setElementPosition } from "./domHelpers.js";
 import store from "./store.js";
 
-export async function loadFridge(id) {
-    store.clearStore();
-
-    store.appEl = document.querySelector("#app");
-    // TODO: Case where there is no hash, or hash is invalid, or id doesn't come back with a fridge
-    store.fridge.fridgeID = id;
-    store.fridge.name = await fridgeService.getFridgeByID(
-        store.fridge.fridgeID
-    );
-    store.fridge.words = await wordService.getWordsByFridge(
-        store.fridge.fridgeID
-    );
-
+export function makeFridge() {
     makeWordEls();
     addAppDragListeners();
 }

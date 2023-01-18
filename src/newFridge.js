@@ -1,5 +1,5 @@
 import { fridgeService, wordService } from "./services/api.js";
-import { loadFridge } from "./appSetup.js";
+import { makeFridge } from "./appSetup.js";
 import { setElementPosition } from "./domHelpers.js";
 import store from "./store.js";
 import { APP_HEIGHT, APP_WIDTH } from "./scale.js";
@@ -22,7 +22,7 @@ export default function createNewFridgeUI() {
         );
 
         window.location.hash = newFridgeID;
-        await loadFridge(newFridgeID);
+        makeFridge();
         scatterWords(store.fridge.words);
     });
 

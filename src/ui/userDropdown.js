@@ -1,5 +1,5 @@
 import store from "../store.js";
-//import { userService } from "../services/api.js";
+import { userService } from "../services/api.js";
 import { SELECTOR_CHARS } from "./consts.js";
 
 class UserDropdownToggle {
@@ -44,7 +44,19 @@ class UserDropdown {
                 },
             ],
         },
-        displayName: { name: "display-name", char: SELECTOR_CHARS.class },
+        displayName: {
+            name: "display-name",
+            char: SELECTOR_CHARS.class,
+            events: [
+                {
+                    type: "click",
+                    handler: async function () {
+                        await userService.updateUser("erintest" /* , data */);
+                        this.mount.render();
+                    },
+                },
+            ],
+        },
     };
 
     constructor(mount) {
@@ -88,7 +100,7 @@ class UserDropdown {
             <div class="user-details-wrap">
                 <div class="${this.selectors.displayColor.name}" style="background: ${store.user.color}"></div>
                 <p>
-                    <a class="${this.selectors.displayName.name}" href="#">
+                    <a class="${this.selectors.displayName.name}">
                         ${store.user.displayName}
                     </a>
                 </p>
@@ -114,13 +126,11 @@ class UserDropdownUI {
         this.dropdown = new UserDropdown(this);
 
         this.toggle.rootEl.addEventListener("click", () => {
-            this.toggle.setDisplayName("value");
             this.dropdown.setShouldDisplay(!this.dropdown.shouldDisplay);
         });
     }
 
     render() {
-        console.log("here");
         this.dropdown.render();
         this.toggle.render();
 
@@ -129,4 +139,4 @@ class UserDropdownUI {
     }
 }
 
-export default new UserDropdownUI();
+export default UserDropdownUI;
