@@ -24,7 +24,7 @@ import { default as defaultWords } from "../defaultWords.json";
 
 class AuthService {
     auth = null;
-    user = null;
+    //user = null;
 
     constructor(auth) {
         this.auth = auth;
@@ -42,19 +42,24 @@ class AuthService {
             "erinknowles@protonmail.com",
             "testtest111"
         );
+        console.log(
+            "this.auth.currentUser after signin",
+            this.auth.currentUser
+        );
+
         return this.auth.currentUser;
     }
 
-    handleAuthStateChanged(handler) {
-        onAuthStateChanged(this.auth, (user) => {
-            if (user) {
-                this.user = user;
-                handler(user);
-            } else {
-                // TODO
-            }
-        });
-    }
+    // handleAuthStateChanged(handler) {
+    //     onAuthStateChanged(this.auth, (user) => {
+    //         if (user) {
+    //             this.user = user;
+    //             handler(user);
+    //         } else {
+    //             // TODO
+    //         }
+    //     });
+    // }
 }
 export const authService = new AuthService(fbAuth);
 
@@ -135,7 +140,7 @@ class FridgeService {
         const newFridgeRef = doc(collection(db, "fridges"));
         await setDoc(newFridgeRef, {
             name: name,
-            creatorUID: this.auth.user.uid,
+            creatorUID: this.auth.currentUser.uid,
         });
         await this.createWordsOnFridge(newFridgeRef.id);
         return newFridgeRef.id;
@@ -151,7 +156,7 @@ class FridgeService {
     }
 }
 
-export const fridgeService = new FridgeService(authService);
+export const fridgeService = new FridgeService(authService.auth);
 
 class UserService {
     // get whether user can access fridge (current, ?)
@@ -165,27 +170,27 @@ class UserService {
     }
 
     async getUserByID(id) {
-        id = "erintest";
-
         const docRef = doc(db, "users", id);
         const docSnap = await getDoc(docRef);
         return { ...docSnap.data(), id: docSnap.id };
     }
 
     handleCurrentUserDataChange(updateWith, modulesToRerender) {
-        const unsub = onSnapshot(doc(db, "users", "erintest"), (doc) => {
-            updateWith(doc.data());
-            modulesToRerender.forEach((module) => {
-                module.render();
-            });
-        });
+        const unsub = onSnapshot(
+            doc(db, "users", this.auth.currentUser.uid),
+            (doc) => {
+                const data = doc.data();
+                data.id = doc.id;
+                updateWith(data);
+                modulesToRerender.forEach((module) => {
+                    module.render();
+                });
+            }
+        );
     }
 
     async updateUser(id, data) {
-        id = "erintest";
-        data = {
-            displayName: "E" + Math.random().toString().slice(2, 6),
-        };
+        console.log("id", id);
 
         const docRef = doc(db, "users", id);
         await updateDoc(docRef, data);
@@ -194,7 +199,7 @@ class UserService {
     getFridgesByUser(id) {}
 }
 
-export const userService = new UserService(authService);
+export const userService = new UserService(authService.auth);
 
 class InvitationService {
     // create user invite

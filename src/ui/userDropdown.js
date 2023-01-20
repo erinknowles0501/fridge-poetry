@@ -1,6 +1,6 @@
 import store from "../store.js";
 import { userService } from "../services/api.js";
-import { SELECTOR_CHARS } from "./consts.js";
+import { DISPLAY_COLORS, SELECTOR_CHARS } from "./consts.js";
 
 class UserDropdownToggle {
     constructor(className) {
@@ -18,13 +18,8 @@ class UserDropdownToggle {
         this.render();
     }
 
-    updateColor() {
-        store.user.color = "purple";
-        this.render();
-    }
-
     render() {
-        this.rootEl.style.background = store.user.color;
+        this.rootEl.style.background = store.user.displayColor;
         this.rootEl.innerHTML = store.user.displayName.slice(0, 1);
     }
 }
@@ -38,11 +33,15 @@ class UserDropdown {
                 {
                     type: "click",
                     handler: function () {
-                        store.user.color = "green";
+                        this.shouldDisplayDisplayColorField = true;
                         this.mount.render();
                     },
                 },
             ],
+        },
+        displayColorSelector: {
+            name: "display-color-selector",
+            char: SELECTOR_CHARS.class,
         },
         displayName: {
             name: "display-name",
@@ -51,8 +50,29 @@ class UserDropdown {
                 {
                     type: "click",
                     handler: async function () {
-                        await userService.updateUser("erintest" /* , data */);
+                        this.shouldDisplayDisplayNameField = true;
                         this.mount.render();
+                    },
+                },
+            ],
+        },
+        displayNameField: {
+            name: "display-name-field",
+            char: SELECTOR_CHARS.id,
+            events: [
+                {
+                    type: "keydown",
+                    handler: async function (event) {
+                        // TODO Validation, better sanitation
+                        if (event.key === "Enter") {
+                            const value = event.target.value;
+
+                            await userService.updateUser(store.user.id, {
+                                displayName: value.replace(/(<([^>]+)>)/gi, ""),
+                            });
+                            this.shouldDisplayDisplayNameField = false;
+                            this.mount.render();
+                        }
                     },
                 },
             ],
@@ -68,10 +88,6 @@ class UserDropdown {
     #createRootEl() {
         this.rootEl = document.createElement("div");
         this.rootEl.className = "user-dropdown";
-
-        // this.rootEl.addEventListener("click", async () => {
-        //     // console.log();
-        // });
     }
 
     #addListeners(selectors) {
@@ -89,22 +105,77 @@ class UserDropdown {
         }
     }
 
+    buildColorSelectorEls() {
+        DISPLAY_COLORS.forEach((color) => {
+            const displayColorSelectorEl = this.rootEl.querySelector(
+                "." + this.selectors.displayColorSelector.name
+            );
+            const colorEl = document.createElement("div");
+            colorEl.addEventListener("click", async () => {
+                await userService.updateUser(store.user.id, {
+                    displayColor: color,
+                });
+                this.shouldDisplayDisplayColorField = false;
+                this.render();
+            });
+            colorEl.style.background = color;
+
+            displayColorSelectorEl.appendChild(colorEl);
+        });
+    }
+
     shouldDisplay = false;
     setShouldDisplay(newValue) {
         this.shouldDisplay = newValue;
         this.render();
     }
 
+    shouldDisplayDisplayColorField = false;
+    shouldDisplayDisplayNameField = false;
+
     render() {
-        const html = `
+        const html = /*html*/ `
             <div class="user-details-wrap">
-                <div class="${this.selectors.displayColor.name}" style="background: ${store.user.color}"></div>
+
+                <div 
+                    class="${this.selectors.displayColor.name}" 
+                    style="background: ${store.user.displayColor}">
+                    <div
+                        class="${this.selectors.displayColorSelector.name}"
+                        style="display: ${
+                            this.shouldDisplayDisplayColorField
+                                ? "grid"
+                                : "none"
+                        }"
+                    >
+                    </div>
+                </div>
+
                 <p>
-                    <a class="${this.selectors.displayName.name}">
+                    <a 
+                        class="${this.selectors.displayName.name}" 
+                        style="display: ${
+                            this.shouldDisplayDisplayNameField
+                                ? "none"
+                                : "block"
+                        }"
+                    >
                         ${store.user.displayName}
                     </a>
+
+                    <input
+                        id="${this.selectors.displayNameField.name}" 
+                        type="text" 
+                        placeholder="${store.user.displayName}" 
+                        style="display: ${
+                            this.shouldDisplayDisplayNameField
+                                ? "block"
+                                : "none"
+                        }">
                 </p>
+
             </div>
+
             <a href="#">My fridges</a>
             <a href="#">My words</a>
             
@@ -116,6 +187,7 @@ class UserDropdown {
 
         // Has to come after adding the html to the root el or there won't be anything to select
         this.#addListeners(this.selectors);
+        this.buildColorSelectorEls();
     }
 }
 
