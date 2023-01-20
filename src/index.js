@@ -4,6 +4,7 @@ import store from "./store.js";
 import createNewFridgeUI from "./newFridge.js";
 import * as services from "./services/api.js";
 import UserDropdown from "./ui/userDropdown.js";
+import startVue from "./ui/index.js";
 
 // TODO Routing incl. loadFridge() on route change
 // TODO Clicking word updates its z-index
@@ -25,3 +26,5 @@ store.registerUI({ userDropdown: userDropdown });
 userDropdown.render();
 
 store.watchCurrentUserState();
+
+startVue();
