@@ -2,7 +2,7 @@ class Store {
     appEl = null;
     fridge = {
         fridgeID: null,
-        name: null,
+        info: null,
         words: [],
     };
     currentDrag = { el: null, offset: { x: 0, y: 0 } };
@@ -17,7 +17,7 @@ class Store {
         this.appEl = document.querySelector("#app");
 
         this.fridge.fridgeID = window.location.hash.slice(1);
-        this.fridge.name = await this.services.fridgeService.getFridgeByID(
+        this.fridge.info = await this.services.fridgeService.getFridgeByID(
             this.fridge.fridgeID
         );
         this.fridge.words = await this.services.wordService.getWordsByFridge(

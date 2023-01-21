@@ -134,7 +134,7 @@ class UserDropdown {
     shouldDisplayDisplayNameField = false;
 
     render() {
-        const html = /*html*/ `
+        const html = `
             <div class="user-details-wrap">
 
                 <div 
