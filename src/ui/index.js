@@ -1,20 +1,83 @@
-import { createApp } from "vue/dist/vue.esm-browser.js";
-import User from "./user/User.js";
-import Fridge from "./fridge/Fridge.js";
+import { createApp, reactive } from "vue/dist/vue.esm-browser.js";
+import MenuRoot from "./MenuRoot.js";
+import MenuSlide from "./MenuSlide.js";
+import UserSettings from "./User/UserSettings.js";
+import store from "../store.js";
 
 export default function startUI() {
-    createApp({
-        components: { Fridge, User },
+    const app = createApp({
+        components: { MenuRoot, MenuSlide, UserSettings },
         data() {
             return {
                 isOpen: false,
+                menuItems: {
+                    fridge: [
+                        {
+                            title: "Manage Users",
+                            // permissions
+                        },
+                        {
+                            title: "Invitations",
+                        },
+
+                        {
+                            title: "Manage Words",
+                        },
+                        {
+                            title: "Fridge Settings",
+                        },
+                    ],
+                    user: [
+                        {
+                            title: "User Settings",
+                            component: "UserSettings",
+
+                            // parent
+                            // children
+                        },
+                        {
+                            title: "My Words",
+                            // props
+                        },
+                        {
+                            title: "My Fridges",
+                        },
+                        {
+                            title: "New Fridge",
+                        },
+                        {
+                            title: "Leave this Fridge",
+                            // handler
+                        },
+                    ],
+                },
+                activeLink: null,
             };
         },
         template: `
         <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false">
-            <fridge :isOpen="isOpen"/>
-            <user :isOpen="isOpen" />
+            
+                <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="menuItems" :activeLink="activeLink"></component>
+            
         </div>
         `,
-    }).mount("#app-ui-wrap");
+        methods: {
+            navigateMenu(event) {
+                if (event === "root") {
+                    this.activeLink = null;
+                    return;
+                }
+                this.activeLink = event;
+            },
+        },
+        provide() {
+            return {
+                navigate: this.navigateMenu,
+            };
+        },
+    });
+
+    app.config.globalProperties.store = reactive(store);
+
+    app.mount("#app-ui-wrap");
 }

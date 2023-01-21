@@ -1,17 +1,11 @@
-import store from "../../store.js";
-
 export default {
     name: "fridge",
-    props: ["isOpen"],
-    data() {
-        return {
-            localStore: store,
-        };
-    },
+    props: ["isOpen", "menuItems"],
     template: `
     <div class="fridge">
-        <div v-if="localStore.fridge.info">
-            <h2 class="fridge-name">{{ localStore.fridge.info.name }}{{isOpen}}</h2>
+        <h2 class="fridge-name">{{ this.store.fridge.info.name }}</h2>
+        <div v-if="isOpen" class="menu">
+            <a href="#">asfasf ashdf jka</a>
         </div>
     </div>
     `,
