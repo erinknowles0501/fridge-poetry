@@ -7,16 +7,18 @@ class Store {
     };
     currentDrag = { el: null, offset: { x: 0, y: 0 } };
     user = null;
-    UImodules = {};
     services = {};
+    router = null;
 
-    async initialize(services) {
+    async initialize(services, router) {
         this.clear();
 
         this.services = services;
+        this.router = router;
         this.appEl = document.querySelector("#app");
-
         this.fridge.fridgeID = window.location.hash.slice(1);
+        //console.log("current route...", this.fridge.fridgeID);
+
         this.fridge.info = await this.services.fridgeService.getFridgeByID(
             this.fridge.fridgeID
         );
@@ -40,12 +42,6 @@ class Store {
         this.services.userService.handleCurrentUserDataChange(
             (data) => (this.user = data)
         );
-    }
-
-    registerUI(modules) {
-        Object.entries(modules).forEach(([key, value]) => {
-            this.UImodules[key] = value;
-        });
     }
 }
 
