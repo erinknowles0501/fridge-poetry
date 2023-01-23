@@ -6,7 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "rollup --config --watch",
-        "serve": "live-server --port=7020 --no-browser",
+        "serve": "node ./src/server.js",
         "tunnel": "lt --port=7020 --subdomain=fridgepoetry",
         "dev": "npm-run-all -p build serve tunnel"
     },
@@ -16,7 +16,9 @@
     "dependencies": {
         "firebase": "^9.8.3",
         "npm-run-all": "^4.1.5",
+        "polka": "^0.5.2",
         "rollup": "^2.75.6",
+        "sirv": "^2.0.2",
         "vue": "^3.2.45"
     },
     "devDependencies": {

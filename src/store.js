@@ -10,14 +10,13 @@ class Store {
     services = {};
     router = null;
 
-    async initialize(services, router) {
+    async initialize(services) {
         this.clear();
 
         this.services = services;
-        this.router = router;
         this.appEl = document.querySelector("#app");
-        this.fridge.fridgeID = window.location.hash.slice(1);
-        //console.log("current route...", this.fridge.fridgeID);
+
+        this.fridge.fridgeID = window.location.pathname.slice(1);
 
         this.fridge.info = await this.services.fridgeService.getFridgeByID(
             this.fridge.fridgeID
