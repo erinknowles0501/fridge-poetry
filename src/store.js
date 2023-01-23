@@ -36,11 +36,9 @@ class Store {
     }
 
     watchCurrentUserState() {
-        const modulesToRerender = [this.UImodules.userDropdown];
         // Update user and UI on user changes
         this.services.userService.handleCurrentUserDataChange(
-            (data) => (this.user = data),
-            modulesToRerender
+            (data) => (this.user = data)
         );
     }
 

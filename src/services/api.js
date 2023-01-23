@@ -175,16 +175,13 @@ class UserService {
         return { ...docSnap.data(), id: docSnap.id };
     }
 
-    handleCurrentUserDataChange(updateWith, modulesToRerender) {
+    handleCurrentUserDataChange(updateWith) {
         const unsub = onSnapshot(
             doc(db, "users", this.auth.currentUser.uid),
             (doc) => {
                 const data = doc.data();
                 data.id = doc.id;
                 updateWith(data);
-                modulesToRerender.forEach((module) => {
-                    module.render();
-                });
             }
         );
     }

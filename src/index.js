@@ -3,7 +3,6 @@ import { makeFridge } from "./appSetup.js";
 import store from "./store.js";
 import createNewFridgeUI from "./newFridge.js";
 import * as services from "./services/api.js";
-import UserDropdown from "./ui/userDropdown.js";
 import startUI from "./ui/index.js";
 
 // TODO Routing incl. loadFridge() on route change
@@ -20,10 +19,6 @@ onresize = () => {
 };
 
 createNewFridgeUI();
-
-const userDropdown = new UserDropdown();
-store.registerUI({ userDropdown: userDropdown });
-userDropdown.render();
 
 store.watchCurrentUserState();
 

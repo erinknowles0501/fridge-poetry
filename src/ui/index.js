@@ -1,12 +1,12 @@
 import { createApp, reactive } from "vue/dist/vue.esm-browser.js";
 import MenuRoot from "./MenuRoot.js";
 import MenuSlide from "./MenuSlide.js";
-import UserSettings from "./User/UserSettings.js";
+
 import store from "../store.js";
 
 export default function startUI() {
     const app = createApp({
-        components: { MenuRoot, MenuSlide, UserSettings },
+        components: { MenuRoot, MenuSlide },
         data() {
             return {
                 isOpen: false,
@@ -30,7 +30,7 @@ export default function startUI() {
                     user: [
                         {
                             title: "User Settings",
-                            component: "UserSettings",
+                            componentName: "UserSettings",
 
                             // parent
                             // children
@@ -56,9 +56,7 @@ export default function startUI() {
         },
         template: `
         <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false">
-            
-                <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="menuItems" :activeLink="activeLink"></component>
-            
+            <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="menuItems" :activeLink="activeLink" />
         </div>
         `,
         methods: {
