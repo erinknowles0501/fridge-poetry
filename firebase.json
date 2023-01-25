@@ -4,9 +4,18 @@
         "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
         "rewrites": [
             {
+                "source": "**/front",
+                "destination": "/front.html"
+            },
+            {
+                "source": "**/",
+                "destination": "/front.html"
+            },
+            {
                 "source": "!/@(js|css)/**",
-                "destination": "/index.html"
+                "destination": "/fridge.html"
             }
-        ]
+        ],
+        "clearUrls": true
     }
 }
