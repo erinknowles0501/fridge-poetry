@@ -1,4 +1,4 @@
-@import "src/ui/style.css" layer(ui);
+@import "ui-style.css" layer(ui);
 
 * {
     box-sizing: border-box;

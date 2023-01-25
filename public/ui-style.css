@@ -1,0 +1,168 @@
+#app-ui-wrap {
+    //
+}
+
+#app-ui {
+    background: black;
+    position: absolute;
+    top: 0;
+    left: 2rem;
+    padding: 1rem;
+    color: white;
+    font-family: sans-serif;
+    z-index: 10;
+    width: 20%;
+    max-width: 40%;
+    opacity: 0.5;
+    transition: all 0.25s;
+}
+
+#app-ui:hover {
+    opacity: 1;
+    height: 100%;
+    max-height: 100%;
+}
+
+.fridge-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
+    word-break: break-word;
+}
+
+.ellipsis-overflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: keep-all;
+}
+
+.user-name {
+    font-size: 1rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.user-color {
+    line-height: 1em;
+    position: relative;
+    top: 0.1em;
+    height: 1em;
+    width: 1em;
+    border-radius: 50%;
+    background: white;
+    display: inline-block;
+    margin-right: 0.5em;
+}
+
+.menu {
+    font-size: 1rem;
+    padding: 0;
+    font-weight: normal;
+}
+
+.menu a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: all 0.25s;
+    font-size: 0.9rem;
+    border-left: 0;
+    display: block;
+    margin: 0.3rem 0;
+}
+
+.menu a:hover {
+    color: white;
+    border-left: 3px solid white;
+    padding-left: 0.5rem;
+}
+
+.menu-title-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.menu-title {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.menu-title span {
+    font-weight: bold;
+}
+
+.back {
+    display: block;
+    color: white;
+    cursor: pointer;
+    font-size: 2rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.25s;
+    padding-left: 5px;
+    padding-right: 0;
+    margin-right: 0.7rem;
+}
+
+.back:hover {
+    padding-left: 0;
+    padding-right: 5px;
+}
+
+/* FORM STUFF */
+
+button,
+input {
+    background: transparent;
+    border: 0;
+    outline: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+}
+
+button {
+    padding: 0.5rem 0.7rem;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+input {
+    padding: 0.5rem 0.7rem;
+    width: 100%;
+}
+
+.label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.25s;
+}
+
+.label:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.label:hover input {
+    color: white;
+}
+
+/** SPECIFIC **/
+
+.display-color-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 0.3rem;
+    row-gap: 0.3rem;
+}
+
+.display-color-option {
+    height: 0;
+    width: 100%;
+    border-radius: 50%;
+    background: white;
+    padding-bottom: 100%;
+}
+
+.display-color-option.active,
+.display-color-option:hover {
+    outline: 0.2rem solid white;
+}

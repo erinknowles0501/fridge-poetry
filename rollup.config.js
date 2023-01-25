@@ -4,7 +4,7 @@ import json from "@rollup/plugin-json";
 
 export default {
     input: "src/index.js",
-    output: { file: "bundled.js" },
+    output: { file: "public/bundled.js" },
     plugins: [nodeResolve(), commonjs(), json()],
     watch: true,
 };
