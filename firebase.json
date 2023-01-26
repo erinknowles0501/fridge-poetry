@@ -1,7 +1,7 @@
 {
     "hosting": {
         "public": "public",
-        "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+        "ignore": ["firebase.json", "**/.*"],
         "rewrites": [
             {
                 "source": "**/front",
@@ -12,7 +12,7 @@
                 "destination": "/front.html"
             },
             {
-                "source": "!/@(js|css)/**",
+                "source": "**/!(*.js|*.css)",
                 "destination": "/fridge.html"
             }
         ],
