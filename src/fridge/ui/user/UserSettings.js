@@ -1,4 +1,4 @@
-import { userService } from "../../services/api";
+import { userService } from "../../../services/api";
 
 export default {
     data() {

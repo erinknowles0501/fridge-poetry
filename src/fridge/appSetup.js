@@ -1,4 +1,4 @@
-import { wordService } from "./services/api.js";
+import { wordService } from "../services/api.js";
 import { setElementPosition } from "./domHelpers.js";
 import store from "./store.js";
 

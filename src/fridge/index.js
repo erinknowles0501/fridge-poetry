@@ -2,10 +2,9 @@ import { scaleApp } from "./scale.js";
 import { makeFridge } from "./appSetup.js";
 import store from "./store.js";
 import createNewFridgeUI from "./newFridge.js";
-import * as services from "./services/api.js";
+import * as services from "../services/api.js";
 import startUI from "./ui/index.js";
 
-// TODO Routing incl. loadFridge() on route change
 // TODO Clicking word updates its z-index
 // TODO Mobile interactions...
 

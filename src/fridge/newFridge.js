@@ -1,4 +1,4 @@
-import { fridgeService, wordService } from "./services/api.js";
+import { fridgeService, wordService } from "../services/api.js";
 import { makeFridge } from "./appSetup.js";
 import { setElementPosition } from "./domHelpers.js";
 import store from "./store.js";
