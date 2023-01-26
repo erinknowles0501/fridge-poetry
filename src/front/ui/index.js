@@ -1,8 +1,9 @@
-import { c as createApp, a as authService } from './vue.esm-browser-526c66a4.js';
+import { authService } from "../../services/api";
+import { createApp } from "vue/dist/vue.esm-browser.js";
 
 //import store from "../store.js";
 
-function startUI() {
+export default function startUI() {
     const app = createApp({
         //components: {},
         data() {
@@ -101,20 +102,16 @@ function startUI() {
                 }
             },
             async submitForm() {
-                this.isSigningUp
+                const success = this.isSigningUp
                     ? !this.disableSignup && (await this.signUp())
                     : !this.disableLogin && (await this.login());
+
+                if (success) {
+                    // Show fridges
+                }
             },
         },
     });
 
     app.mount("#app");
 }
-
-//import { makeFridge } from "./appSetup.js";
-
-//await store.initialize(services);
-
-//store.watchCurrentUserState();
-
-startUI();

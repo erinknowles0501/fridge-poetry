@@ -1,0 +1,142 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #ddd;
+    color: black;
+    font-family: sans-serif;
+}
+
+body {
+    padding-left: 20vw;
+    padding-top: 20vh;
+}
+
+.app-title {
+    margin: 0;
+}
+
+#app {
+    width: 30vw;
+}
+
+.form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.button-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+input,
+button {
+    background: transparent;
+    border: 1.5px solid black;
+    color: black;
+    font-size: 1rem;
+    padding: 0.4rem 0.6rem;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.7rem;
+}
+
+.label,
+label {
+    color: rgba(0, 0, 0, 0.7);
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+    margin-top: 2rem;
+    display: block;
+    font-size: 0.7rem;
+}
+
+.label p,
+label p {
+    display: block;
+    margin: 0.2rem 0;
+}
+
+button {
+    margin-top: 1.2rem;
+    align-self: flex-end;
+    transition: all 0.25s;
+    outline: 1px solid #ddd;
+}
+
+button:focus {
+    text-decoration: underline;
+}
+
+button:hover {
+    outline: 1px solid black;
+}
+
+button.sub {
+    border: 0;
+    outline: 0;
+    font-weight: normal;
+    margin-right: 1rem;
+}
+
+button.sub:hover {
+    text-decoration: underline;
+    outline: 0;
+}
+
+button:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.v-enter-active {
+    transition: opacity 0.4s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+    opacity: 0;
+}
+
+/* .slide-left-enter-active,
+.slide-left-leave-active {
+    transition: all 0.25s ease-out;
+}
+
+.slide-left-enter-from {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+.slide-left-leave-to {
+    opacity: 0;
+    transform: translateX(-30px);
+} */
+
+.error {
+    color: #cc0000;
+    font-size: 0.8rem;
+    padding: 0.7rem;
+    background: rgba(200, 0, 0, 0.04);
+    border-left: 3px solid rgba(200, 0, 0, 0.4);
+
+    margin-top: 2rem;
+}
+
+.error span {
+    font-weight: bold;
+    font-size: 0.7rem;
+    margin-right: 0.3rem;
+}
