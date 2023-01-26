@@ -15,6 +15,7 @@ import {
     getAuth,
     signInWithEmailAndPassword,
     onAuthStateChanged,
+    createUserWithEmailAndPassword,
 } from "firebase/auth";
 import app from "../firebase/index.js";
 const db = getFirestore(app);
@@ -36,14 +37,24 @@ class AuthService {
         // });
     }
 
-    async signIn() {
+    async signIn(email, password) {
         await signInWithEmailAndPassword(
             this.auth,
-            "erinknowles@protonmail.com",
-            "testtest111"
+            email || "erinknowles@protonmail.com",
+            password || "testtest111"
         );
         console.log(
             "this.auth.currentUser after signin",
+            this.auth.currentUser
+        );
+
+        return this.auth.currentUser;
+    }
+
+    async signUp(email, password) {
+        await createUserWithEmailAndPassword(this.auth, email, password);
+        console.log(
+            "this.auth.currentUser after signup",
             this.auth.currentUser
         );
 
