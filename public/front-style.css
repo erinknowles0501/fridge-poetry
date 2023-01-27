@@ -96,7 +96,8 @@ button.sub:hover {
     outline: 0;
 }
 
-button:disabled {
+button:disabled,
+input:disabled {
     opacity: 0.5;
     pointer-events: none;
 }

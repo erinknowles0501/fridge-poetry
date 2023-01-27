@@ -1,7 +1,7 @@
 class Store {
     appEl = null;
     fridge = {
-        fridgeID: null,
+        id: null,
         info: null,
         words: [],
     };
@@ -17,14 +17,14 @@ class Store {
             this.services = services;
             this.appEl = document.querySelector("#app");
 
-            this.fridge.fridgeID = window.location.pathname.slice(1);
+            this.fridge.id = window.location.pathname.slice(1);
 
             this.fridge.info = await this.services.fridgeService.getFridgeByID(
-                this.fridge.fridgeID
+                this.fridge.id
             );
             this.fridge.words =
                 await this.services.wordService.getWordsByFridge(
-                    this.fridge.fridgeID
+                    this.fridge.id
                 );
 
             await this.services.authService.signIn();
@@ -34,7 +34,7 @@ class Store {
             this.user.permissions =
                 await this.services.userService.getPermissionsByUserAndFridge(
                     this.user.id,
-                    this.fridge.fridgeID
+                    this.fridge.id
                 );
             console.log("this.user", this.user);
 

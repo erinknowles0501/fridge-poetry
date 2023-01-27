@@ -1,4 +1,4 @@
-import { w as wordService, u as userService, s as services, a as scaleApp } from './chunks/api.js';
+import { w as wordService, u as userService, f as fridgeService, P as PERMISSIONS_NAMES, s as services, a as scaleApp } from './chunks/api.js';
 import { createApp, reactive } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 function setElementPosition(element, positionY, positionX) {
@@ -9,7 +9,7 @@ function setElementPosition(element, positionY, positionX) {
 class Store {
     appEl = null;
     fridge = {
-        fridgeID: null,
+        id: null,
         info: null,
         words: [],
     };
@@ -25,14 +25,14 @@ class Store {
             this.services = services;
             this.appEl = document.querySelector("#app");
 
-            this.fridge.fridgeID = window.location.pathname.slice(1);
+            this.fridge.id = window.location.pathname.slice(1);
 
             this.fridge.info = await this.services.fridgeService.getFridgeByID(
-                this.fridge.fridgeID
+                this.fridge.id
             );
             this.fridge.words =
                 await this.services.wordService.getWordsByFridge(
-                    this.fridge.fridgeID
+                    this.fridge.id
                 );
 
             await this.services.authService.signIn();
@@ -42,7 +42,7 @@ class Store {
             this.user.permissions =
                 await this.services.userService.getPermissionsByUserAndFridge(
                     this.user.id,
-                    this.fridge.fridgeID
+                    this.fridge.id
                 );
             console.log("this.user", this.user);
 
@@ -120,7 +120,7 @@ function addAppDragListeners() {
             store.currentDrag.el.getAttribute("data-id"),
             adjustedY,
             adjustedX,
-            store.fridge.fridgeID
+            store.fridge.id
         );
     });
 }
@@ -232,14 +232,17 @@ var UserSettings = {
     },
     template: `
         <div>
-            <label class="label">Display name: 
+            <label class="label">
+                <p>Display name:</p>
                 <input 
                 ref="displayName" 
                 type="text" 
-                @click="localDisplayName = store.user.displayName;" 
+                @click="localDisplayName = store.user.displayName" 
                 :placeholder="store.user.displayName" 
                 v-model="localDisplayName" 
-                @keyup.enter="setDisplayName" />
+                @keyup.enter="setDisplayName" 
+                autofocus />
+                
             </label>
 
             <p class="label">Display color:</p>
@@ -257,67 +260,76 @@ var UserSettings = {
     `,
 };
 
+var FridgeSettings = {
+    data() {
+        return {
+            localFridgeInfo: JSON.parse(
+                JSON.stringify(store.fridge.info)
+            ),
+        };
+    },
+    template: `
+        <div>
+            <label class="label">
+                <p>Fridge name:</p>
+                <input 
+                type="text"
+                ref="fridgeName"
+                v-model="localFridgeInfo.name" 
+                @keyup.enter="$refs.fridgeName.blur()" 
+                @blur="updateFridge"
+                />
+            </label>
+
+            <label class="label">
+                <p>Maximum fridge users:</p>
+                <input 
+                type="number"
+                ref="maxUsers"
+                v-model="localFridgeInfo.maxUsers" 
+                @keyup.enter="$refs.maxUsers.blur()" 
+                @blur="updateFridge"
+                />
+            </label>
+
+            <label class="label">
+                <p>Maximum custom words per user:</p>
+                <input 
+                type="number"
+                ref="maxCustomWords"
+                v-model="localFridgeInfo.maxCustomWords" 
+                @keyup.enter="$refs.maxCustomWords.blur()" 
+                @blur="updateFridge"
+                />
+            </label>
+        </div>
+    `,
+    methods: {
+        async updateFridge() {
+            const data = {
+                ...this.localFridgeInfo,
+            };
+            await fridgeService.updateFridge(store.fridge.id, data);
+            store.fridge.info = data;
+            this.$forceUpdate();
+        },
+    },
+};
+
 var MenuSlide = {
     props: ["isOpen", "activeLink"],
     inject: ["navigate"],
-    components: { UserSettings },
+    components: { UserSettings, FridgeSettings },
     template: `
     <div>
         <div class="menu-title-wrap">
             <a href="#" @click.prevent="navigate('root')" class="back">&lt;</a>
             <h3 class="menu-title">{{ activeLink.title }}</h3>
         </div>
-        <component :is="activeLink.componentName" :activeLink="activeLink" />
+        <component v-if="isOpen" :is="activeLink.componentName" :activeLink="activeLink" />
     </div>
     `,
 };
-
-const PERMISSIONS_NAMES = {
-    EDIT_FRIDGE_NAME: "edit-fridge-name",
-    DELETE_FRIDGE: "delete-fridge",
-    EDIT_MAX_USERS: "edit-max-users",
-    CHANGE_FRIDGE_VISIBILITY: "change-fridge-visibility",
-    EDIT_MAX_CUSTOM_WORDS_PER_USER: "edit-max-custom-words-per-user",
-    SEND_INVITES: "send-invites",
-    REVOKE_INVITES: "revoke-invites",
-    FREEZE_USER: "freeze-user",
-    UNFREEZE_USER: "unfreeze-user",
-    CREATE_CUSTOM_WORDS: "create-custom-words",
-};
-
-/*
-basic (anonymous)
-    can view fridge (frozen)
-    can move words on any fridge they have access to (ie invited and unfrozen, or public)
-    can create new fridge
-
-editable by owner
-    can send invites
-    can create custom words
-    // can save poems
-    // can shuffle words
-    // can select multiple words
-    can freeze user  (is_frozen)
-    // can lock own words
-   
-fridge owner
-    can edit fridge name
-    can delete fridge
-    can edit max users
-    can change fridge visibility (private or public)
-    can edit max custom words per user
-    can revoke invites
-    // can edit max words
-    can unfreeze user
-    can remove user
-    // can archive words
-    // can un-archive words
-    // can create new words
-    can edit user's permissions:
-        see 'editable by owner'
-    can archive someone's custom words
-
-*/
 
 var menuItems = {
     fridge: [
@@ -338,6 +350,7 @@ var menuItems = {
         },
         {
             title: "Fridge Settings",
+            componentName: "FridgeSettings",
             permissions: {
                 showIfIn: [
                     PERMISSIONS_NAMES.CHANGE_FRIDGE_VISIBILITY,

@@ -57,7 +57,7 @@ function addAppDragListeners() {
             store.currentDrag.el.getAttribute("data-id"),
             adjustedY,
             adjustedX,
-            store.fridge.fridgeID
+            store.fridge.id
         );
     });
 }

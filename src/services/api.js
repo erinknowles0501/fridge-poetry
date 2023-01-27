@@ -24,6 +24,7 @@ const fbAuth = getAuth();
 import { APP_WIDTH, APP_HEIGHT } from "../fridge/scale.js";
 
 import { default as defaultWords } from "../defaultWords.json";
+import { PERMISSION_GROUPS } from "../constants.js";
 
 class AuthService {
     auth = null;
@@ -151,13 +152,17 @@ class FridgeService {
         await setDoc(newFridgeRef, {
             name: name,
             creatorUID: this.auth.currentUser.uid,
+            maxUsers: 20,
+            maxCustomWords: 5,
         });
         await this.createWordsOnFridge(newFridgeRef.id);
-
         await addDoc(collection(db, "permissions"), {
             fridgeID: newFridgeRef.id,
             userID: this.auth.currentUser.uid,
-            permissions: ["test1", "testttt"],
+            permissions: [
+                ...PERMISSION_GROUPS.FRIDGE_OWNER,
+                ...PERMISSION_GROUPS.OPTIONAL,
+            ],
         });
 
         return newFridgeRef.id;
@@ -179,6 +184,11 @@ class FridgeService {
                 position: { y, x },
             });
         });
+    }
+
+    async updateFridge(fridgeID, data) {
+        const fridgeRef = doc(db, "fridges", fridgeID);
+        await updateDoc(fridgeRef, data);
     }
 }
 

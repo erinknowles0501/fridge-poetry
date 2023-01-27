@@ -19,6 +19,7 @@ export default {
         },
         {
             title: "Fridge Settings",
+            componentName: "FridgeSettings",
             permissions: {
                 showIfIn: [
                     can.CHANGE_FRIDGE_VISIBILITY,

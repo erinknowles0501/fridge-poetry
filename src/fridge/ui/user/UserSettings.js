@@ -55,14 +55,17 @@ export default {
     },
     template: `
         <div>
-            <label class="label">Display name: 
+            <label class="label">
+                <p>Display name:</p>
                 <input 
                 ref="displayName" 
                 type="text" 
-                @click="localDisplayName = store.user.displayName;" 
+                @click="localDisplayName = store.user.displayName" 
                 :placeholder="store.user.displayName" 
                 v-model="localDisplayName" 
-                @keyup.enter="setDisplayName" />
+                @keyup.enter="setDisplayName" 
+                autofocus />
+                
             </label>
 
             <p class="label">Display color:</p>
