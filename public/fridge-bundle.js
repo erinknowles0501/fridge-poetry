@@ -1,4 +1,5 @@
-import { w as wordService, f as fridgeService, u as userService, c as createApp, r as reactive, s as services } from './vue.esm-browser-526c66a4.js';
+import { w as wordService, f as fridgeService, u as userService, s as services } from './api-d6e49f33.js';
+import { createApp, reactive } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 const APP_WIDTH = 500;
 const APP_HEIGHT = 300;

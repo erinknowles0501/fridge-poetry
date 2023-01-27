@@ -198,13 +198,30 @@ class UserService {
     }
 
     async updateUser(id, data) {
-        console.log("id", id);
-
         const docRef = doc(db, "users", id);
         await updateDoc(docRef, data);
     }
 
-    getFridgesByUser(id) {}
+    async getPermissionsByUser(id) {
+        const permissionQuery = query(
+            collection(db, "permissions"),
+            where("userID", "==", id)
+        );
+        const docs = await getDocs(permissionQuery);
+
+        return docs.docs.map((doc) => doc.data());
+    }
+
+    async getFridgesByUser(id) {
+        const permissions = await this.getPermissionsByUser(id);
+        const fridges = [];
+        permissions.forEach((permission) => {
+            if (!fridges.includes(permission.fridgeID)) {
+                fridges.push(permission.fridgeID);
+            }
+        });
+        return fridges;
+    }
 }
 
 export const userService = new UserService(authService.auth);

@@ -1,4 +1,4 @@
-import { createApp, reactive } from "vue/dist/vue.esm-browser.js";
+import { createApp, reactive } from "vue";
 import MenuRoot from "./MenuRoot.js";
 import MenuSlide from "./MenuSlide.js";
 

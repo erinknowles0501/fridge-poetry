@@ -140,3 +140,24 @@ button:disabled {
     font-size: 0.7rem;
     margin-right: 0.3rem;
 }
+
+.fridge-selection {
+    width: 100%;
+    margin-top: 3rem;
+}
+
+.welcome {
+    font-size: 1.3rem;
+    margin-bottom: 1.8rem;
+}
+
+a.fridge {
+    padding: 0.4rem 0;
+    margin: 0.3rem 0;
+    color: black;
+    display: block;
+}
+
+a.fridge:hover {
+    text-decoration: none;
+}

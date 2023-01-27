@@ -1,7 +1,6 @@
-import { a as authService, u as userService, f as fridgeService } from './api-d6e49f33.js';
-import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+import { authService } from "../../services/api";
 
-var LoginSignup = {
+export default {
     emits: ["loggedIn"],
     data() {
         return {
@@ -106,62 +105,3 @@ var LoginSignup = {
         },
     },
 };
-
-var FridgeSelection = {
-    data() {
-        return {
-            fridges: [],
-            user: {},
-        };
-    },
-    template: `
-        <div class="fridge-selection">
-            <div class="welcome">Welcome, <b>{{user.displayName}}</b></div>
-            <div>Select a fridge:</div>
-            <a v-for="fridge in fridges" :href="'/' + fridge.id" class="fridge">{{ fridge.name }}</a>
-            <div style="margin-top:1rem;">or, <a href="/new" class="fridge" style="display: inline">create a new fridge...</a></div>
-        </div>
-    `,
-    created() {
-        const currentUserUID = userService.auth.currentUser.uid;
-        console.log("currentUserUID", currentUserUID);
-
-        userService
-            .getUserByID(currentUserUID)
-            .then((user) => (this.user = user));
-
-        userService.getFridgesByUser(currentUserUID).then(async (fridgeIDs) => {
-            this.fridges = await Promise.all(
-                fridgeIDs.map(async (fridgeID) => {
-                    return await fridgeService.getFridgeByID(fridgeID);
-                })
-            );
-        });
-    },
-};
-
-function startUI() {
-    const app = createApp({
-        components: { LoginSignup, FridgeSelection },
-        data() {
-            return {
-                activeComponent: "LoginSignup",
-            };
-        },
-        template: `
-            <div>
-                <component :is="activeComponent" @loggedIn="activeComponent = 'FridgeSelection'" />
-            </div>
-        `,
-    });
-
-    app.mount("#app");
-}
-
-//import { makeFridge } from "./appSetup.js";
-
-//await store.initialize(services);
-
-//store.watchCurrentUserState();
-
-startUI();
