@@ -13,6 +13,7 @@ export default {
         paths: {
             vue: "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
         },
+        chunkFileNames: "chunks/[name].js",
     },
     plugins: [nodeResolve(), commonjs(), json()],
     external: ["vue"],
