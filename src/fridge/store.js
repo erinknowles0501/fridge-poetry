@@ -31,6 +31,13 @@ class Store {
             this.user = await this.services.userService.getUserByID(
                 this.services.authService.auth.currentUser.uid
             );
+            this.user.permissions =
+                await this.services.userService.getPermissionsByUserAndFridge(
+                    this.user.id,
+                    this.fridge.fridgeID
+                );
+            console.log("this.user", this.user);
+
             resolve();
         });
     }

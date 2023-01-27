@@ -2,6 +2,7 @@ import { createApp, reactive } from "vue";
 import MenuRoot from "./MenuRoot.js";
 import MenuSlide from "./MenuSlide.js";
 
+import menuItems from "./menuItems.js";
 import store from "../store.js";
 
 export default function startUI() {
@@ -10,53 +11,32 @@ export default function startUI() {
         data() {
             return {
                 isOpen: false,
-                menuItems: {
-                    fridge: [
-                        {
-                            title: "Manage Users",
-                            // permissions
-                        },
-                        {
-                            title: "Invitations",
-                        },
-
-                        {
-                            title: "Manage Words",
-                        },
-                        {
-                            title: "Fridge Settings",
-                        },
-                    ],
-                    user: [
-                        {
-                            title: "User Settings",
-                            componentName: "UserSettings",
-
-                            // parent
-                            // children
-                        },
-                        {
-                            title: "My Words",
-                            // props
-                        },
-                        {
-                            title: "My Fridges",
-                        },
-                        {
-                            title: "New Fridge",
-                        },
-                        {
-                            title: "Leave this Fridge",
-                            // handler
-                        },
-                    ],
-                },
                 activeLink: null,
             };
         },
+        computed: {
+            filteredMenuItems() {
+                function filterMenuItem(item) {
+                    if (!item.permissions) {
+                        return true;
+                    }
+                    return item.permissions.showIfIn?.some((showPermission) =>
+                        store.user.permissions.includes(showPermission)
+                    );
+                }
+
+                const filteredFridgeMenu = menuItems.fridge.filter((item) =>
+                    filterMenuItem(item)
+                );
+                const filteredUserMenu = menuItems.user.filter((item) =>
+                    filterMenuItem(item)
+                );
+                return { fridge: filteredFridgeMenu, user: filteredUserMenu };
+            },
+        },
         template: `
         <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false">
-            <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="menuItems" :activeLink="activeLink" />
+            <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="filteredMenuItems" :activeLink="activeLink" />
         </div>
         `,
         methods: {

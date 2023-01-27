@@ -22286,6 +22286,14 @@ class UserService {
         });
         return fridges;
     }
+
+    async getPermissionsByUserAndFridge(userID, fridgeID) {
+        const userPermissions = await this.getPermissionsByUser(userID);
+        const userFridgePermissions = userPermissions.find(
+            (entry) => entry.fridgeID == fridgeID
+        ).permissions;
+        return userFridgePermissions;
+    }
 }
 
 const userService = new UserService(authService.auth);

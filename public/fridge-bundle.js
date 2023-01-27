@@ -39,6 +39,13 @@ class Store {
             this.user = await this.services.userService.getUserByID(
                 this.services.authService.auth.currentUser.uid
             );
+            this.user.permissions =
+                await this.services.userService.getPermissionsByUserAndFridge(
+                    this.user.id,
+                    this.fridge.fridgeID
+                );
+            console.log("this.user", this.user);
+
             resolve();
         });
     }
@@ -265,59 +272,140 @@ var MenuSlide = {
     `,
 };
 
+const PERMISSIONS_NAMES = {
+    EDIT_FRIDGE_NAME: "edit-fridge-name",
+    DELETE_FRIDGE: "delete-fridge",
+    EDIT_MAX_USERS: "edit-max-users",
+    CHANGE_FRIDGE_VISIBILITY: "change-fridge-visibility",
+    EDIT_MAX_CUSTOM_WORDS_PER_USER: "edit-max-custom-words-per-user",
+    SEND_INVITES: "send-invites",
+    REVOKE_INVITES: "revoke-invites",
+    FREEZE_USER: "freeze-user",
+    UNFREEZE_USER: "unfreeze-user",
+    CREATE_CUSTOM_WORDS: "create-custom-words",
+};
+
+/*
+basic (anonymous)
+    can view fridge (frozen)
+    can move words on any fridge they have access to (ie invited and unfrozen, or public)
+    can create new fridge
+
+editable by owner
+    can send invites
+    can create custom words
+    // can save poems
+    // can shuffle words
+    // can select multiple words
+    can freeze user  (is_frozen)
+    // can lock own words
+   
+fridge owner
+    can edit fridge name
+    can delete fridge
+    can edit max users
+    can change fridge visibility (private or public)
+    can edit max custom words per user
+    can revoke invites
+    // can edit max words
+    can unfreeze user
+    can remove user
+    // can archive words
+    // can un-archive words
+    // can create new words
+    can edit user's permissions:
+        see 'editable by owner'
+    can archive someone's custom words
+
+*/
+
+var menuItems = {
+    fridge: [
+        {
+            title: "Manage Users",
+            permissions: {
+                showIfIn: [PERMISSIONS_NAMES.FREEZE_USER, PERMISSIONS_NAMES.UNFREEZE_USER],
+            },
+        },
+        {
+            title: "Invitations",
+            permissions: {
+                showIfIn: [PERMISSIONS_NAMES.SEND_INVITES, PERMISSIONS_NAMES.REVOKE_INVITES],
+            },
+        },
+        {
+            title: "Manage Words",
+        },
+        {
+            title: "Fridge Settings",
+            permissions: {
+                showIfIn: [
+                    PERMISSIONS_NAMES.CHANGE_FRIDGE_VISIBILITY,
+                    PERMISSIONS_NAMES.DELETE_FRIDGE,
+                    PERMISSIONS_NAMES.EDIT_FRIDGE_NAME,
+                    PERMISSIONS_NAMES.EDIT_MAX_USERS,
+                    PERMISSIONS_NAMES.EDIT_MAX_CUSTOM_WORDS_PER_USER,
+                ],
+            },
+        },
+    ],
+    user: [
+        {
+            title: "User Settings",
+            componentName: "UserSettings",
+
+            // parent
+            // children
+        },
+        {
+            title: "My Words",
+            // props
+        },
+        {
+            title: "My Fridges",
+        },
+        {
+            title: "New Fridge",
+        },
+        {
+            title: "Leave this Fridge",
+            // handler
+        },
+    ],
+};
+
 function startUI() {
     const app = createApp({
         components: { MenuRoot, MenuSlide },
         data() {
             return {
                 isOpen: false,
-                menuItems: {
-                    fridge: [
-                        {
-                            title: "Manage Users",
-                            // permissions
-                        },
-                        {
-                            title: "Invitations",
-                        },
-
-                        {
-                            title: "Manage Words",
-                        },
-                        {
-                            title: "Fridge Settings",
-                        },
-                    ],
-                    user: [
-                        {
-                            title: "User Settings",
-                            componentName: "UserSettings",
-
-                            // parent
-                            // children
-                        },
-                        {
-                            title: "My Words",
-                            // props
-                        },
-                        {
-                            title: "My Fridges",
-                        },
-                        {
-                            title: "New Fridge",
-                        },
-                        {
-                            title: "Leave this Fridge",
-                            // handler
-                        },
-                    ],
-                },
                 activeLink: null,
             };
         },
+        computed: {
+            filteredMenuItems() {
+                function filterMenuItem(item) {
+                    if (!item.permissions) {
+                        return true;
+                    }
+                    return item.permissions.showIfIn?.some((showPermission) =>
+                        store.user.permissions.includes(showPermission)
+                    );
+                }
+
+                const filteredFridgeMenu = menuItems.fridge.filter((item) =>
+                    filterMenuItem(item)
+                );
+                const filteredUserMenu = menuItems.user.filter((item) =>
+                    filterMenuItem(item)
+                );
+                return { fridge: filteredFridgeMenu, user: filteredUserMenu };
+            },
+        },
         template: `
         <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false">
-            <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="menuItems" :activeLink="activeLink" />
+            <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="filteredMenuItems" :activeLink="activeLink" />
         </div>
         `,
         methods: {
