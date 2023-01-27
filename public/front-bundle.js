@@ -1,4 +1,4 @@
-import { d as defaultWords, b as authService, u as userService, f as fridgeService } from './api-4929d2bd.js';
+import { d as defaultWords, b as authService, u as userService, f as fridgeService } from './chunks/api.js';
 import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 var LoginSignup = {
