@@ -10,6 +10,7 @@ import {
     addDoc,
     query,
     where,
+    deleteDoc,
 } from "firebase/firestore";
 import {
     getAuth,
@@ -189,6 +190,24 @@ class FridgeService {
     async updateFridge(fridgeID, data) {
         const fridgeRef = doc(db, "fridges", fridgeID);
         await updateDoc(fridgeRef, data);
+    }
+
+    async getPermissionsByFridge(fridgeID) {
+        const q = query(
+            collection(db, "permissions"),
+            where("fridgeID", "==", fridgeID)
+        );
+        const docs = await getDocs(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+
+    async deleteFridge(fridgeID) {
+        const permissionObjs = await this.getPermissionsByFridge(fridgeID);
+        const permissionIDs = permissionObjs.map((permission) => permission.id);
+        permissionIDs.forEach(async (id) => {
+            await deleteDoc(doc(db, "permissions", id));
+        });
+        await deleteDoc(doc(db, "fridges", fridgeID));
     }
 }
 

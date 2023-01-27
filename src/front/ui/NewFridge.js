@@ -15,6 +15,9 @@ export default {
             <button :disabled="!name || isWorking" @click="newFridge">Make new fridge</button>
         </div>
     `,
+    mounted() {
+        this.$refs.name.focus();
+    },
     methods: {
         async newFridge() {
             try {

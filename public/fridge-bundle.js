@@ -266,6 +266,9 @@ var FridgeSettings = {
             localFridgeInfo: JSON.parse(
                 JSON.stringify(store.fridge.info)
             ),
+            isDeleting: false,
+            deleteConfirmation: "",
+            disableDeletionField: false,
         };
     },
     template: `
@@ -302,6 +305,16 @@ var FridgeSettings = {
                 @blur="updateFridge"
                 />
             </label>
+
+            <div style="padding-top: 2rem">
+                <button v-if="!isDeleting" class="warning" @click="startDeleting">Delete fridge</button>
+                <div v-else style="display: flex">
+                    <label class="label">
+                        <p>Type 'delete' to confirm</p>
+                        <input type="text" class="warning" v-model="deleteConfirmation" @input="checkDelete" :disable="disableDeletionField" ref="deleteConfirmation">
+                    </label>
+                </div>
+            </div>
         </div>
     `,
     methods: {
@@ -312,6 +325,20 @@ var FridgeSettings = {
             await fridgeService.updateFridge(store.fridge.id, data);
             store.fridge.info = data;
             this.$forceUpdate();
+        },
+        startDeleting() {
+            this.isDeleting = true;
+            this.$nextTick(() => {
+                this.$refs.deleteConfirmation.focus();
+            });
+        },
+        async checkDelete() {
+            if (this.deleteConfirmation == "delete") {
+                this.$refs.deleteConfirmation.blur();
+                this.disableDeletionField = true;
+                await fridgeService.deleteFridge(store.fridge.id);
+                window.location = "/";
+            }
         },
     },
 };

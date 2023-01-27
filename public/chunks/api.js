@@ -15657,6 +15657,16 @@ function Kl(t, e, n, ...s) {
 }
 
 /**
+ * Deletes the document referred to by the specified `DocumentReference`.
+ *
+ * @param reference - A reference to the document to delete.
+ * @returns A Promise resolved once the document has been successfully
+ * deleted from the backend (note that it won't resolve while you're offline).
+ */ function Gl(t) {
+    return zl(fa(t.firestore, ih), [ new is(t._key, Qn.none()) ]);
+}
+
+/**
  * Add a new document to specified `CollectionReference` with the given data,
  * assigning it a document ID automatically.
  *
@@ -22302,6 +22312,24 @@ class FridgeService {
     async updateFridge(fridgeID, data) {
         const fridgeRef = Aa(db, "fridges", fridgeID);
         await Kl(fridgeRef, data);
+    }
+
+    async getPermissionsByFridge(fridgeID) {
+        const q = sl(
+            Ta(db, "permissions"),
+            rl("fridgeID", "==", fridgeID)
+        );
+        const docs = await Bl(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+
+    async deleteFridge(fridgeID) {
+        const permissionObjs = await this.getPermissionsByFridge(fridgeID);
+        const permissionIDs = permissionObjs.map((permission) => permission.id);
+        permissionIDs.forEach(async (id) => {
+            await Gl(Aa(db, "permissions", id));
+        });
+        await Gl(Aa(db, "fridges", fridgeID));
     }
 }
 
