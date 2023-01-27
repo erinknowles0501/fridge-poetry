@@ -25,16 +25,9 @@ import { default as defaultWords } from "../defaultWords.json";
 
 class AuthService {
     auth = null;
-    //user = null;
 
     constructor(auth) {
         this.auth = auth;
-
-        // TODO Same error handlign service work
-        // .catch((error) => {
-        //     const errorCode = error.code;
-        //     const errorMessage = error.message;
-        // });
     }
 
     async signIn(email, password) {
@@ -61,16 +54,16 @@ class AuthService {
         return this.auth.currentUser;
     }
 
-    // handleAuthStateChanged(handler) {
-    //     onAuthStateChanged(this.auth, (user) => {
-    //         if (user) {
-    //             this.user = user;
-    //             handler(user);
-    //         } else {
-    //             // TODO
-    //         }
-    //     });
-    // }
+    handleAuthStateChanged(handler) {
+        onAuthStateChanged(this.auth, (user) => {
+            if (user) {
+                this.user = user;
+                handler(user);
+            } else {
+                // TODO
+            }
+        });
+    }
 }
 export const authService = new AuthService(fbAuth);
 

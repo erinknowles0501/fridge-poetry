@@ -1,4 +1,4 @@
-import { a as authService, u as userService, f as fridgeService } from './api-d6e49f33.js';
+import { a as authService, u as userService, f as fridgeService } from './api-a3db9990.js';
 import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 var LoginSignup = {
@@ -19,6 +19,13 @@ var LoginSignup = {
         disableLogin() {
             return !(this.email && this.password);
         },
+    },
+    created() {
+        authService.handleAuthStateChanged((state) => {
+            if (state.uid) {
+                this.$emit("loggedIn");
+            }
+        });
     },
     template: `
         <div class="form" @keyup.enter="submitForm">

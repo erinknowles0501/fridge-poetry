@@ -19,6 +19,13 @@ export default {
             return !(this.email && this.password);
         },
     },
+    created() {
+        authService.handleAuthStateChanged((state) => {
+            if (state.uid) {
+                this.$emit("loggedIn");
+            }
+        });
+    },
     template: `
         <div class="form" @keyup.enter="submitForm">
             <Transition appear>
