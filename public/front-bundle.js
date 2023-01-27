@@ -1,4 +1,4 @@
-import { a as authService, u as userService, f as fridgeService } from './api-a3db9990.js';
+import { b as authService, u as userService, f as fridgeService } from './api-bf2237f7.js';
 import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 var LoginSignup = {
@@ -126,12 +126,11 @@ var FridgeSelection = {
             <div class="welcome">Welcome, <b>{{user.displayName}}</b></div>
             <div>Select a fridge:</div>
             <a v-for="fridge in fridges" :href="'/' + fridge.id" class="fridge">{{ fridge.name }}</a>
-            <div style="margin-top:1rem;">or, <a href="/new" class="fridge" style="display: inline">create a new fridge...</a></div>
+            <div style="margin-top:1rem;">or, <a href="" @click.prevent="$emit('newFridge')" class="fridge" style="display: inline">create a new fridge...</a></div>
         </div>
     `,
     created() {
         const currentUserUID = userService.auth.currentUser.uid;
-        console.log("currentUserUID", currentUserUID);
 
         userService
             .getUserByID(currentUserUID)
@@ -147,9 +146,36 @@ var FridgeSelection = {
     },
 };
 
+var NewFridge = {
+    data() {
+        return {
+            name: "",
+        };
+    },
+    template: `
+        <div>
+            <label><p>New fridge name:</p>
+                <input type="text" v-model="name" autofocus />
+            </label>
+            <button :disabled="!name" @click="newFridge">Make new fridge</button>
+        </div>
+    `,
+    methods: {
+        async newFridge() {
+            try {
+                const newFridgeID = await fridgeService.createFridge(this.name);
+                window.location = newFridgeID;
+            } catch (error) {
+                // TODO
+                console.log(error);
+            }
+        },
+    },
+};
+
 function startUI() {
     const app = createApp({
-        components: { LoginSignup, FridgeSelection },
+        components: { LoginSignup, FridgeSelection, NewFridge },
         data() {
             return {
                 activeComponent: "LoginSignup",
@@ -157,7 +183,7 @@ function startUI() {
         },
         template: `
             <div>
-                <component :is="activeComponent" @loggedIn="activeComponent = 'FridgeSelection'" />
+                <component :is="activeComponent" @loggedIn="activeComponent = 'FridgeSelection'" @newFridge="activeComponent = 'NewFridge'" />
             </div>
         `,
     });

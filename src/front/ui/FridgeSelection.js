@@ -12,12 +12,11 @@ export default {
             <div class="welcome">Welcome, <b>{{user.displayName}}</b></div>
             <div>Select a fridge:</div>
             <a v-for="fridge in fridges" :href="'/' + fridge.id" class="fridge">{{ fridge.name }}</a>
-            <div style="margin-top:1rem;">or, <a href="/new" class="fridge" style="display: inline">create a new fridge...</a></div>
+            <div style="margin-top:1rem;">or, <a href="" @click.prevent="$emit('newFridge')" class="fridge" style="display: inline">create a new fridge...</a></div>
         </div>
     `,
     created() {
         const currentUserUID = userService.auth.currentUser.uid;
-        console.log("currentUserUID", currentUserUID);
 
         userService
             .getUserByID(currentUserUID)

@@ -151,13 +151,13 @@ button:disabled {
     margin-bottom: 1.8rem;
 }
 
-a.fridge {
+.fridge {
     padding: 0.4rem 0;
     margin: 0.3rem 0;
     color: black;
     display: block;
 }
 
-a.fridge:hover {
+.fridge:hover {
     text-decoration: none;
 }

@@ -20,6 +20,7 @@ import {
 import app from "../firebase/index.js";
 const db = getFirestore(app);
 const fbAuth = getAuth();
+import { APP_WIDTH, APP_HEIGHT } from "../fridge/scale.js";
 
 import { default as defaultWords } from "../defaultWords.json";
 
@@ -140,21 +141,36 @@ class FridgeService {
 
     async createFridge(name) {
         // TODO: Create user permissions based on current user
-        // TODO: Capture and send user invites
         const newFridgeRef = doc(collection(db, "fridges"));
         await setDoc(newFridgeRef, {
             name: name,
             creatorUID: this.auth.currentUser.uid,
         });
         await this.createWordsOnFridge(newFridgeRef.id);
+
+        await addDoc(collection(db, "permissions"), {
+            fridgeID: newFridgeRef.id,
+            userID: this.auth.currentUser.uid,
+            permissions: ["test1", "testttt"],
+        });
+
         return newFridgeRef.id;
     }
 
     async createWordsOnFridge(fridgeID) {
+        const remSize = 8;
+        const paddingX = 0.5 * remSize;
+        const paddingY = 0.2 * remSize; // TODO de-magic these
+
+        // TODO Batch this so it doesn't take so long
         defaultWords.forEach(async (word) => {
+            const x =
+                Math.random() * (APP_WIDTH - remSize * word.length - paddingX);
+            const y = Math.random() * (APP_HEIGHT - remSize - paddingY);
+
             await addDoc(collection(db, `fridges/${fridgeID}/words`), {
                 wordText: word,
-                position: { y: 0, x: 0 },
+                position: { y, x },
             });
         });
     }

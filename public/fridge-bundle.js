@@ -1,37 +1,5 @@
-import { w as wordService, f as fridgeService, u as userService, s as services } from './api-a3db9990.js';
+import { w as wordService, u as userService, s as services, a as scaleApp } from './api-bf2237f7.js';
 import { createApp, reactive } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-
-const APP_WIDTH = 500;
-const APP_HEIGHT = 300;
-
-function scaleApp(appEl) {
-    appEl.style.width = APP_WIDTH + "px";
-    appEl.style.height = APP_HEIGHT + "px";
-
-    const clientWidth = document.documentElement.clientWidth;
-    const clientHeight = document.documentElement.clientHeight;
-
-    const scale = { x: 1, y: 1 };
-
-    if (clientHeight <= clientWidth) {
-        // is landscape
-        scale.x = clientWidth / APP_WIDTH;
-        scale.y = clientHeight / APP_HEIGHT;
-
-        appEl.style.rotate = "0deg";
-        appEl.style.translate = "0px";
-    } else {
-        // is portrait
-        scale.x = clientHeight / APP_WIDTH;
-        scale.y = clientWidth / APP_HEIGHT;
-
-        appEl.style.rotate = "90deg";
-        appEl.style.translate = clientWidth + "px";
-    }
-
-    appEl.style.scale = scale.x + " " + scale.y;
-    return scale;
-}
 
 function setElementPosition(element, positionY, positionX) {
     element.style.top = positionY + "px";
@@ -147,55 +115,6 @@ function addAppDragListeners() {
             adjustedX,
             store.fridge.fridgeID
         );
-    });
-}
-
-function createNewFridgeUI() {
-    const newFridgeModalToggleEl = document.querySelector(
-        "#new-fridge-modal-toggle"
-    );
-
-    const newFridgeModalEl = document.querySelector(".new-fridge-modal");
-    newFridgeModalToggleEl.addEventListener("click", () => {
-        newFridgeModalEl.classList.toggle("new-fridge-modal-hidden");
-    });
-
-    const createNewFridgeEl = document.querySelector("#create-new-fridge");
-
-    createNewFridgeEl.addEventListener("click", async () => {
-        const newFridgeID = await fridgeService.createFridge(
-            document.querySelector("#new-fridge-name").value
-        );
-
-        window.location.hash = newFridgeID;
-        makeFridge();
-        scatterWords(store.fridge.words);
-    });
-
-    // TODO Clear old word els, close modal
-}
-
-function scatterWords(words) {
-    const computedWordStyle = getComputedStyle(words[0].element);
-    function getPropertyFloat(prop) {
-        return parseFloat(
-            computedWordStyle.getPropertyValue(prop).split("px")[0]
-        );
-    }
-
-    const remSize = getPropertyFloat("font-size");
-    const paddingX =
-        getPropertyFloat("padding-left") + getPropertyFloat("padding-right");
-    const paddingY =
-        getPropertyFloat("padding-top") + getPropertyFloat("padding-bottom");
-
-    words.forEach((word) => {
-        const newX =
-            Math.random() *
-            (APP_WIDTH - remSize * word.wordText.length - paddingX);
-        const newY = Math.random() * (APP_HEIGHT - remSize - paddingY);
-        setElementPosition(word.element, newY, newX);
-        wordService.updateWord(word.id, newY, newX, store.fridge.fridgeID);
     });
 }
 
@@ -433,8 +352,6 @@ store.scale = scaleApp(store.appEl);
 onresize = () => {
     ({ x: store.scale.x, y: store.scale.y } = scaleApp(store.appEl));
 };
-
-createNewFridgeUI();
 
 store.watchCurrentUserState();
 
