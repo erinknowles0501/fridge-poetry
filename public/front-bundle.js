@@ -1,4 +1,4 @@
-import { b as authService, u as userService, f as fridgeService } from './api-bf2237f7.js';
+import { d as defaultWords, b as authService, u as userService, f as fridgeService } from './api-4929d2bd.js';
 import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 var LoginSignup = {
@@ -19,6 +19,38 @@ var LoginSignup = {
         disableLogin() {
             return !(this.email && this.password);
         },
+        randomDefaultWords() {
+            const numberOfWords = 3;
+            const words = [];
+            const suitableDefaultWords = defaultWords.filter(
+                (word) => word.length > 3
+            );
+            const randomIndexes = [];
+
+            for (let i = 0; i < numberOfWords; i++) {
+                const randomIndex = Math.floor(
+                    Math.random() * suitableDefaultWords.length
+                );
+                if (randomIndexes.includes(randomIndex)) {
+                    i--;
+                } else {
+                    randomIndexes.push(randomIndex);
+                }
+            }
+
+            randomIndexes.forEach((index) => {
+                words.push(suitableDefaultWords[index]);
+            });
+
+            return words;
+        },
+        randomTranslate() {
+            return [
+                this.getRandomTranslate(),
+                this.getRandomTranslate(),
+                this.getRandomTranslate(),
+            ];
+        },
     },
     created() {
         authService.handleAuthStateChanged((state) => {
@@ -28,6 +60,14 @@ var LoginSignup = {
         });
     },
     template: `
+        <Transition appear>
+            <div class="word-display">
+                <div v-for="(word, index) in randomDefaultWords" class="word" :style="'transform: translate(' + randomTranslate[index] + ')'">
+                    {{ word }}
+                </div>
+            </div>
+        </Transition>
+
         <div class="form" @keyup.enter="submitForm">
             <Transition appear>
                 <div class="error" v-if="error"><span>Error:</span> {{ error }}</div>
@@ -95,6 +135,10 @@ var LoginSignup = {
                         this.error =
                             "Can't sign up with that email - log in instead, or reset your password.";
                         break;
+                    case "auth/weak-password":
+                        this.error =
+                            "Password must be at least 6 characters long.";
+                        break;
                     default:
                         this.error =
                             "Something's broken - please show us this message: " +
@@ -111,6 +155,14 @@ var LoginSignup = {
                 this.$emit("loggedIn");
             }
         },
+        getRandomTranslate() {
+            const MAX_PX_AMOUNT = 5;
+            function getRandom() {
+                const sign = Math.random() < 0.5 ? "-" : "";
+                return sign + Math.round(Math.random() * MAX_PX_AMOUNT) + "px";
+            }
+            return getRandom() + ", " + getRandom();
+        },
     },
 };
 
@@ -121,9 +173,10 @@ var FridgeSelection = {
             user: {},
         };
     },
+    emits: ["newFridge"],
     template: `
         <div class="fridge-selection">
-            <div class="welcome">Welcome, <b>{{user.displayName}}</b></div>
+            <div class="welcome">Welcome, <b>{{user.displayName}}</b> <a href="" @click.prevent="logout">(Log out)</a></div>
             <div>Select a fridge:</div>
             <a v-for="fridge in fridges" :href="'/' + fridge.id" class="fridge">{{ fridge.name }}</a>
             <div style="margin-top:1rem;">or, <a href="" @click.prevent="$emit('newFridge')" class="fridge" style="display: inline">create a new fridge...</a></div>
@@ -143,6 +196,12 @@ var FridgeSelection = {
                 })
             );
         });
+    },
+    methods: {
+        async logout() {
+            await authService.logout();
+            window.location = "/";
+        },
     },
 };
 

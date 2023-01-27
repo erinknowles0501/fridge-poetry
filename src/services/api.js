@@ -16,6 +16,7 @@ import {
     signInWithEmailAndPassword,
     onAuthStateChanged,
     createUserWithEmailAndPassword,
+    signOut,
 } from "firebase/auth";
 import app from "../firebase/index.js";
 const db = getFirestore(app);
@@ -43,6 +44,11 @@ class AuthService {
         );
 
         return this.auth.currentUser;
+    }
+
+    async logout() {
+        await signOut(this.auth);
+        console.log("here");
     }
 
     async signUp(email, password) {

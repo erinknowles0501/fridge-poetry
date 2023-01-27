@@ -151,6 +151,13 @@ button:disabled {
     margin-bottom: 1.8rem;
 }
 
+.welcome a {
+    font-size: 0.9rem;
+    color: rgba(0, 0, 0, 0.8);
+    text-decoration: underline;
+    margin-left: 0.5rem;
+}
+
 .fridge {
     padding: 0.4rem 0;
     margin: 0.3rem 0;
@@ -160,4 +167,19 @@ button:disabled {
 
 .fridge:hover {
     text-decoration: none;
+}
+
+.word-display {
+    margin: 1rem 0 0 0;
+}
+
+.word {
+    font-family: monospace;
+    outline: 1px solid rgba(0, 0, 0, 0.3);
+    padding: 0.2rem 0.5rem;
+    color: black;
+    background: white;
+    font-size: 1rem;
+    display: inline-block;
+    margin-right: 0.4rem;
 }

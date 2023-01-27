@@ -1,4 +1,4 @@
-import { w as wordService, u as userService, s as services, a as scaleApp } from './api-bf2237f7.js';
+import { w as wordService, u as userService, s as services, a as scaleApp } from './api-4929d2bd.js';
 import { createApp, reactive } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 function setElementPosition(element, positionY, positionX) {
