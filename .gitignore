@@ -1,3 +1,4 @@
 node_modules
 bundled.js
 firebase-debug.log
+*.cache

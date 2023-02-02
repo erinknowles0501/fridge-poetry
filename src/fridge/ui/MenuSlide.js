@@ -1,10 +1,11 @@
 import UserSettings from "./user/UserSettings.js";
 import FridgeSettings from "./fridge/FridgeSettings.js";
+import Invitations from "./fridge/Invitations.js";
 
 export default {
     props: ["isOpen", "activeLink"],
     inject: ["navigate"],
-    components: { UserSettings, FridgeSettings },
+    components: { UserSettings, FridgeSettings, Invitations },
     template: `
     <div>
         <div class="menu-title-wrap">

@@ -2864,10 +2864,10 @@ k$1.toString=function(){if(this.i)return this.i;if(!this.g)return "";const a=[],
 function Qc(a,b){b&&!a.j&&(U$1(a),a.i=null,a.g.forEach(function(c,d){var e=d.toLowerCase();d!=e&&(Tc$1(this,d),fc$1(this,e,c));},a));a.j=b;}var Vc$1=class{constructor(a,b){this.h=a;this.g=b;}};function Wc(a){this.l=a||Xc;l.PerformanceNavigationTiming?(a=l.performance.getEntriesByType("navigation"),a=0<a.length&&("hq"==a[0].nextHopProtocol||"h2"==a[0].nextHopProtocol)):a=!!(l.g&&l.g.Ga&&l.g.Ga()&&l.g.Ga().$b);this.j=a?this.l:1;this.g=null;1<this.j&&(this.g=new Set);this.h=null;this.i=[];}var Xc=10;function Yc(a){return a.h?!0:a.g?a.g.size>=a.j:!1}function uc$1(a){return a.h?1:a.g?a.g.size:0}function qc$1(a,b){return a.h?a.h==b:a.g?a.g.has(b):!1}function vc$1(a,b){a.g?a.g.add(b):a.h=b;}
 function xc$1(a,b){a.h&&a.h==b?a.h=null:a.g&&a.g.has(b)&&a.g.delete(b);}Wc.prototype.cancel=function(){this.i=Zc(this);if(this.h)this.h.cancel(),this.h=null;else if(this.g&&0!==this.g.size){for(const a of this.g.values())a.cancel();this.g.clear();}};function Zc(a){if(null!=a.h)return a.i.concat(a.h.D);if(null!=a.g&&0!==a.g.size){let b=a.i;for(const c of a.g.values())b=b.concat(c.D);return b}return ma$1(a.i)}function $c$1(){}$c$1.prototype.stringify=function(a){return l.JSON.stringify(a,void 0)};$c$1.prototype.parse=function(a){return l.JSON.parse(a,void 0)};function ad(){this.g=new $c$1;}function bd(a,b,c){const d=c||"";try{Dc$1(a,function(e,f){let h=e;p(e)&&(h=lb(e));b.push(d+f+"="+encodeURIComponent(h));});}catch(e){throw b.push(d+"type="+encodeURIComponent("_badmap")),e;}}function cd(a,b){const c=new Gb;if(l.Image){const d=new Image;d.onload=ia(dd,c,d,"TestLoadImage: loaded",!0,b);d.onerror=ia(dd,c,d,"TestLoadImage: error",!1,b);d.onabort=ia(dd,c,d,"TestLoadImage: abort",!1,b);d.ontimeout=ia(dd,c,d,"TestLoadImage: timeout",!1,b);l.setTimeout(function(){if(d.ontimeout)d.ontimeout();},1E4);d.src=a;}else b(!1);}function dd(a,b,c,d,e){try{b.onload=null,b.onerror=null,b.onabort=null,b.ontimeout=null,e(d);}catch(f){}}function ed(a){this.l=a.ac||null;this.j=a.jb||!1;}t(ed,Sb);ed.prototype.g=function(){return new fd(this.l,this.j)};ed.prototype.i=function(a){return function(){return a}}({});function fd(a,b){B$1.call(this);this.D=a;this.u=b;this.m=void 0;this.readyState=gd;this.status=0;this.responseType=this.responseText=this.response=this.statusText="";this.onreadystatechange=null;this.v=new Headers;this.h=null;this.C="GET";this.B="";this.g=!1;this.A=this.j=this.l=null;}t(fd,B$1);var gd=0;k$1=fd.prototype;
 k$1.open=function(a,b){if(this.readyState!=gd)throw this.abort(),Error("Error reopening a connection");this.C=a;this.B=b;this.readyState=1;hd(this);};k$1.send=function(a){if(1!=this.readyState)throw this.abort(),Error("need to call open() first. ");this.g=!0;const b={headers:this.v,method:this.C,credentials:this.m,cache:void 0};a&&(b.body=a);(this.D||l).fetch(new Request(this.B,b)).then(this.Wa.bind(this),this.ga.bind(this));};
-k$1.abort=function(){this.response=this.responseText="";this.v=new Headers;this.status=0;this.j&&this.j.cancel("Request was aborted.").catch(()=>{});1<=this.readyState&&this.g&&4!=this.readyState&&(this.g=!1,id$1(this));this.readyState=gd;};
+k$1.abort=function(){this.response=this.responseText="";this.v=new Headers;this.status=0;this.j&&this.j.cancel("Request was aborted.").catch(()=>{});1<=this.readyState&&this.g&&4!=this.readyState&&(this.g=!1,id(this));this.readyState=gd;};
 k$1.Wa=function(a){if(this.g&&(this.l=a,this.h||(this.status=this.l.status,this.statusText=this.l.statusText,this.h=a.headers,this.readyState=2,hd(this)),this.g&&(this.readyState=3,hd(this),this.g)))if("arraybuffer"===this.responseType)a.arrayBuffer().then(this.Ua.bind(this),this.ga.bind(this));else if("undefined"!==typeof l.ReadableStream&&"body"in a){this.j=a.body.getReader();if(this.u){if(this.responseType)throw Error('responseType must be empty for "streamBinaryChunks" mode responses.');this.response=
-[];}else this.response=this.responseText="",this.A=new TextDecoder;jd(this);}else a.text().then(this.Va.bind(this),this.ga.bind(this));};function jd(a){a.j.read().then(a.Ta.bind(a)).catch(a.ga.bind(a));}k$1.Ta=function(a){if(this.g){if(this.u&&a.value)this.response.push(a.value);else if(!this.u){var b=a.value?a.value:new Uint8Array(0);if(b=this.A.decode(b,{stream:!a.done}))this.response=this.responseText+=b;}a.done?id$1(this):hd(this);3==this.readyState&&jd(this);}};
-k$1.Va=function(a){this.g&&(this.response=this.responseText=a,id$1(this));};k$1.Ua=function(a){this.g&&(this.response=a,id$1(this));};k$1.ga=function(){this.g&&id$1(this);};function id$1(a){a.readyState=4;a.l=null;a.j=null;a.A=null;hd(a);}k$1.setRequestHeader=function(a,b){this.v.append(a,b);};k$1.getResponseHeader=function(a){return this.h?this.h.get(a.toLowerCase())||"":""};
+[];}else this.response=this.responseText="",this.A=new TextDecoder;jd(this);}else a.text().then(this.Va.bind(this),this.ga.bind(this));};function jd(a){a.j.read().then(a.Ta.bind(a)).catch(a.ga.bind(a));}k$1.Ta=function(a){if(this.g){if(this.u&&a.value)this.response.push(a.value);else if(!this.u){var b=a.value?a.value:new Uint8Array(0);if(b=this.A.decode(b,{stream:!a.done}))this.response=this.responseText+=b;}a.done?id(this):hd(this);3==this.readyState&&jd(this);}};
+k$1.Va=function(a){this.g&&(this.response=this.responseText=a,id(this));};k$1.Ua=function(a){this.g&&(this.response=a,id(this));};k$1.ga=function(){this.g&&id(this);};function id(a){a.readyState=4;a.l=null;a.j=null;a.A=null;hd(a);}k$1.setRequestHeader=function(a,b){this.v.append(a,b);};k$1.getResponseHeader=function(a){return this.h?this.h.get(a.toLowerCase())||"":""};
 k$1.getAllResponseHeaders=function(){if(!this.h)return "";const a=[],b=this.h.entries();for(var c=b.next();!c.done;)c=c.value,a.push(c[0]+": "+c[1]),c=b.next();return a.join("\r\n")};function hd(a){a.onreadystatechange&&a.onreadystatechange.call(a);}Object.defineProperty(fd.prototype,"withCredentials",{get:function(){return "include"===this.m},set:function(a){this.m=a?"include":"same-origin";}});var kd=l.JSON.parse;function W$1(a){B$1.call(this);this.headers=new Map;this.u=a||null;this.h=!1;this.C=this.g=null;this.H="";this.m=0;this.j="";this.l=this.F=this.v=this.D=!1;this.B=0;this.A=null;this.J=ld;this.K=this.L=!1;}t(W$1,B$1);var ld="",md=/^https?$/i,nd=["POST","PUT"];k$1=W$1.prototype;k$1.Ka=function(a){this.L=a;};
 k$1.da=function(a,b,c,d){if(this.g)throw Error("[goog.net.XhrIo] Object is active with another request="+this.H+"; newUri="+a);b=b?b.toUpperCase():"GET";this.H=a;this.j="";this.m=0;this.D=!1;this.h=!0;this.g=this.u?this.u.g():Xb.g();this.C=this.u?Tb(this.u):Tb(Xb);this.g.onreadystatechange=q$1(this.Ha,this);try{this.F=!0,this.g.open(b,String(a),!0),this.F=!1;}catch(f){od(this,f);return}a=c||"";c=new Map(this.headers);if(d)if(Object.getPrototypeOf(d)===Object.prototype)for(var e in d)c.set(e,d[e]);else if("function"===
 typeof d.keys&&"function"===typeof d.get)for(const f of d.keys())c.set(f,d.get(f));else throw Error("Unknown input type for opt_headers: "+String(d));d=Array.from(c.keys()).find(f=>"content-type"==f.toLowerCase());e=l.FormData&&a instanceof l.FormData;!(0<=la$1(nd,b))||d||e||c.set("Content-Type","application/x-www-form-urlencoded;charset=utf-8");for(const [f,h]of c)this.g.setRequestHeader(f,h);this.J&&(this.g.responseType=this.J);"withCredentials"in this.g&&this.g.withCredentials!==this.L&&(this.g.withCredentials=
@@ -22084,6 +22084,13 @@ var defaultWords = [
 	"shut"
 ];
 
+const INVITATION_STATUSES = {
+    PENDING: "pending",
+    ACCEPTED: "accepted",
+    REVOKED: "revoked",
+    DENIED: "denied",
+};
+
 const PERMISSIONS_NAMES = {
     EDIT_FRIDGE_NAME: "edit-fridge-name",
     DELETE_FRIDGE: "delete-fridge",
@@ -22159,16 +22166,7 @@ class AuthService {
     }
 
     async signIn(email, password) {
-        await signInWithEmailAndPassword(
-            this.auth,
-            email || "erinknowles@protonmail.com",
-            password || "testtest111"
-        );
-        console.log(
-            "this.auth.currentUser after signin",
-            this.auth.currentUser
-        );
-
+        await signInWithEmailAndPassword(this.auth, email, password);
         return this.auth.currentUser;
     }
 
@@ -22179,11 +22177,6 @@ class AuthService {
 
     async signUp(email, password) {
         await createUserWithEmailAndPassword(this.auth, email, password);
-        console.log(
-            "this.auth.currentUser after signup",
-            this.auth.currentUser
-        );
-
         return this.auth.currentUser;
     }
 
@@ -22270,7 +22263,6 @@ class FridgeService {
     }
 
     async createFridge(name) {
-        // TODO: Create user permissions based on current user
         const newFridgeRef = Aa(Ta(db, "fridges"));
         await Ul(newFridgeRef, {
             name: name,
@@ -22342,8 +22334,8 @@ class UserService {
         this.auth = auth;
     }
 
-    createUser() {
-        return id;
+    async createUser(id, data) {
+        await Ul(Aa(db, "users", id), data);
     }
 
     async getUserByID(id) {
@@ -22374,7 +22366,6 @@ class UserService {
             rl("userID", "==", id)
         );
         const docs = await Bl(permissionQuery);
-
         return docs.docs.map((doc) => doc.data());
     }
 
@@ -22396,16 +22387,68 @@ class UserService {
         ).permissions;
         return userFridgePermissions;
     }
+
+    async getWhetherAUserHasEmail(email) {
+        const q = sl(Ta(db, "users"), rl("email", "==", email));
+        const docs = await Bl(q);
+        if (docs.docs[0]) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 const userService = new UserService(authService.auth);
+
+class InvitationService {
+    // create user invite
+    // mark invite accepted / revoked
+    // get user invite
+    // get invites by fridge
+    // re-send invite?
+
+    constructor(auth) {
+        this.auth = auth;
+    }
+
+    async sendInvite(email, fridgeID, senderDisplayName) {
+        const newInviteRef = Aa(Ta(db, "invitations"));
+        const acceptLink = `http://127.0.0.1:5000/?invite=${newInviteRef.id}`;
+        await Ul(newInviteRef, {
+            to: email,
+            message: {
+                // Required for firestore-send-email integration
+                subject: `${senderDisplayName} has invited you to join a fridge on FridgePoetry!`,
+                html: `
+        <h2>You've been invited</h2>
+        <p><b>Fridge name:</b> ${fridgeID}</p>
+        <p>Click the link below to accept the invitation.</p>
+        <p><a href="${acceptLink}">Accept</a></p>
+                        `,
+            },
+            fridgeID: fridgeID,
+            fromID: this.auth.currentUser.uid,
+            lastSent: new Date(),
+            status: INVITATION_STATUSES.PENDING,
+        });
+    }
+
+    async getInvitation(inviteID) {
+        const docSnap = await Ol(Aa(db, "invitations", inviteID));
+        return { id: inviteID, ...docSnap.data() };
+    }
+}
+
+const invitationService = new InvitationService(authService.auth);
 
 var services = /*#__PURE__*/Object.freeze({
     __proto__: null,
     authService: authService,
     wordService: wordService,
     fridgeService: fridgeService,
-    userService: userService
+    userService: userService,
+    invitationService: invitationService
 });
 
-export { PERMISSIONS_NAMES as P, scaleApp as a, authService as b, defaultWords as d, fridgeService as f, services as s, userService as u, wordService as w };
+export { INVITATION_STATUSES as I, PERMISSIONS_NAMES as P, scaleApp as a, authService as b, defaultWords as d, fridgeService as f, invitationService as i, services as s, userService as u, wordService as w };

@@ -1,4 +1,4 @@
-import { w as wordService, u as userService, f as fridgeService, P as PERMISSIONS_NAMES, s as services, a as scaleApp } from './chunks/api.js';
+import { w as wordService, u as userService, f as fridgeService, i as invitationService, P as PERMISSIONS_NAMES, s as services, a as scaleApp } from './chunks/api.js';
 import { createApp, reactive } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 function setElementPosition(element, positionY, positionX) {
@@ -35,7 +35,6 @@ class Store {
                     this.fridge.id
                 );
 
-            await this.services.authService.signIn();
             this.user = await this.services.userService.getUserByID(
                 this.services.authService.auth.currentUser.uid
             );
@@ -343,10 +342,33 @@ var FridgeSettings = {
     },
 };
 
+var Invitations = {
+    data() {
+        return {
+            inviteEmail: "@x.com",
+        };
+    },
+    template: `
+    <div>
+        <input type="email" placeholder="@x.com" v-model="inviteEmail" />
+        <button @click="sendInvite">Send</button>
+    </div>
+    `,
+    methods: {
+        sendInvite() {
+            invitationService.sendInvite(
+                this.inviteEmail,
+                this.store.fridge.id,
+                this.store.user.displayName
+            );
+        },
+    },
+};
+
 var MenuSlide = {
     props: ["isOpen", "activeLink"],
     inject: ["navigate"],
-    components: { UserSettings, FridgeSettings },
+    components: { UserSettings, FridgeSettings, Invitations },
     template: `
     <div>
         <div class="menu-title-wrap">
@@ -371,6 +393,7 @@ var menuItems = {
             permissions: {
                 showIfIn: [PERMISSIONS_NAMES.SEND_INVITES, PERMISSIONS_NAMES.REVOKE_INVITES],
             },
+            componentName: "Invitations",
         },
         {
             title: "Manage Words",

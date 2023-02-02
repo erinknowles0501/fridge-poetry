@@ -13,6 +13,7 @@ export default {
             permissions: {
                 showIfIn: [can.SEND_INVITES, can.REVOKE_INVITES],
             },
+            componentName: "Invitations",
         },
         {
             title: "Manage Words",

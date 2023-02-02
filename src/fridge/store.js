@@ -27,7 +27,6 @@ class Store {
                     this.fridge.id
                 );
 
-            await this.services.authService.signIn();
             this.user = await this.services.userService.getUserByID(
                 this.services.authService.auth.currentUser.uid
             );

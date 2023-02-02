@@ -1,5 +1,5 @@
-import { d as defaultWords, b as authService, u as userService, f as fridgeService } from './chunks/api.js';
 import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+import { d as defaultWords, b as authService, u as userService, f as fridgeService, i as invitationService, I as INVITATION_STATUSES } from './chunks/api.js';
 
 var LoginSignup = {
     emits: ["loggedIn"],
@@ -113,6 +113,8 @@ var LoginSignup = {
                         break;
                     case "auth/user-not-found":
                     case "auth/wrong-password":
+                        // TODO: Email error obfuscation with Identity or..?
+                        // https://cloud.google.com/identity-platform/docs/admin/email-enumeration-protection
                         this.error = "Email/password incorrect.";
                         break;
                     default:
@@ -124,7 +126,16 @@ var LoginSignup = {
         },
         async signUp() {
             try {
-                await authService.signUp(this.email, this.password);
+                const createdUser = await authService.signUp(
+                    this.email,
+                    this.password
+                );
+                const emailName = this.email.split("@")[0];
+                await userService.createUser(createdUser.uid, {
+                    displayName: emailName,
+                    displayColor: 0,
+                    email: this.email,
+                });
                 return true;
             } catch (error) {
                 switch (error.code) {
@@ -252,15 +263,49 @@ function startUI() {
                 <component :is="activeComponent" @loggedIn="activeComponent = 'FridgeSelection'" @newFridge="activeComponent = 'NewFridge'" />
             </div>
         `,
+        created() {
+            const hasInviteParam = window.location.search
+                .slice(1)
+                .includes("invite");
+            if (hasInviteParam) {
+                const inviteID = window.location.search
+                    .slice(1)
+                    .split("&")
+                    .find((param) => param.includes("invite"))
+                    .split("=")[1];
+                invitationService
+                    .getInvitation(inviteID)
+                    .then((invite) => this.invitationHandler(invite));
+            }
+        },
+        methods: {
+            async invitationHandler(invite) {
+                console.log("invite", invite);
+
+                if (invite.status !== INVITATION_STATUSES.PENDING) {
+                    // TODO: Error toast
+                    console.error("Invite does not exist or is not pending.");
+                    return;
+                }
+
+                if (authService.auth.currentUser) {
+                    if (authService.auth.currentUser.email !== invite.to) {
+                        // TODO: Error toast w/ logout + link prompt
+                        console.error(
+                            "Invite email / current user email mismatch."
+                        );
+                        return;
+                    }
+
+                    // TODO: Join fridge component and switching
+                } else {
+                    await userService.getWhetherAUserHasEmail(invite.to);
+                }
+            },
+        },
     });
 
     app.mount("#app");
 }
-
-//import { makeFridge } from "./appSetup.js";
-
-//await store.initialize(services);
-
-//store.watchCurrentUserState();
 
 startUI();

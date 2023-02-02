@@ -1,4 +1,4 @@
-import { authService } from "../../services/api";
+import { authService, userService } from "../../services/api";
 import defaultWords from "../../defaultWords.json";
 
 export default {
@@ -113,6 +113,8 @@ export default {
                         break;
                     case "auth/user-not-found":
                     case "auth/wrong-password":
+                        // TODO: Email error obfuscation with Identity or..?
+                        // https://cloud.google.com/identity-platform/docs/admin/email-enumeration-protection
                         this.error = "Email/password incorrect.";
                         break;
                     default:
@@ -124,7 +126,16 @@ export default {
         },
         async signUp() {
             try {
-                await authService.signUp(this.email, this.password);
+                const createdUser = await authService.signUp(
+                    this.email,
+                    this.password
+                );
+                const emailName = this.email.split("@")[0];
+                await userService.createUser(createdUser.uid, {
+                    displayName: emailName,
+                    displayColor: 0,
+                    email: this.email,
+                });
                 return true;
             } catch (error) {
                 switch (error.code) {

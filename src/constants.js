@@ -1,3 +1,10 @@
+export const INVITATION_STATUSES = {
+    PENDING: "pending",
+    ACCEPTED: "accepted",
+    REVOKED: "revoked",
+    DENIED: "denied",
+};
+
 export const PERMISSIONS_NAMES = {
     EDIT_FRIDGE_NAME: "edit-fridge-name",
     DELETE_FRIDGE: "delete-fridge",

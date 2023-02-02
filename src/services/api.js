@@ -25,7 +25,7 @@ const fbAuth = getAuth();
 import { APP_WIDTH, APP_HEIGHT } from "../fridge/scale.js";
 
 import { default as defaultWords } from "../defaultWords.json";
-import { PERMISSION_GROUPS } from "../constants.js";
+import { INVITATION_STATUSES, PERMISSION_GROUPS } from "../constants.js";
 
 class AuthService {
     auth = null;
@@ -35,16 +35,7 @@ class AuthService {
     }
 
     async signIn(email, password) {
-        await signInWithEmailAndPassword(
-            this.auth,
-            email || "erinknowles@protonmail.com",
-            password || "testtest111"
-        );
-        console.log(
-            "this.auth.currentUser after signin",
-            this.auth.currentUser
-        );
-
+        await signInWithEmailAndPassword(this.auth, email, password);
         return this.auth.currentUser;
     }
 
@@ -55,11 +46,6 @@ class AuthService {
 
     async signUp(email, password) {
         await createUserWithEmailAndPassword(this.auth, email, password);
-        console.log(
-            "this.auth.currentUser after signup",
-            this.auth.currentUser
-        );
-
         return this.auth.currentUser;
     }
 
@@ -148,7 +134,6 @@ class FridgeService {
     }
 
     async createFridge(name) {
-        // TODO: Create user permissions based on current user
         const newFridgeRef = doc(collection(db, "fridges"));
         await setDoc(newFridgeRef, {
             name: name,
@@ -220,8 +205,8 @@ class UserService {
         this.auth = auth;
     }
 
-    createUser() {
-        return id;
+    async createUser(id, data) {
+        await setDoc(doc(db, "users", id), data);
     }
 
     async getUserByID(id) {
@@ -252,7 +237,6 @@ class UserService {
             where("userID", "==", id)
         );
         const docs = await getDocs(permissionQuery);
-
         return docs.docs.map((doc) => doc.data());
     }
 
@@ -274,6 +258,16 @@ class UserService {
         ).permissions;
         return userFridgePermissions;
     }
+
+    async getWhetherAUserHasEmail(email) {
+        const q = query(collection(db, "users"), where("email", "==", email));
+        const docs = await getDocs(q);
+        if (docs.docs[0]) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 export const userService = new UserService(authService.auth);
@@ -284,4 +278,37 @@ class InvitationService {
     // get user invite
     // get invites by fridge
     // re-send invite?
+
+    constructor(auth) {
+        this.auth = auth;
+    }
+
+    async sendInvite(email, fridgeID, senderDisplayName) {
+        const newInviteRef = doc(collection(db, "invitations"));
+        const acceptLink = `http://127.0.0.1:5000/?invite=${newInviteRef.id}`;
+        await setDoc(newInviteRef, {
+            to: email,
+            message: {
+                // Required for firestore-send-email integration
+                subject: `${senderDisplayName} has invited you to join a fridge on FridgePoetry!`,
+                html: `
+        <h2>You've been invited</h2>
+        <p><b>Fridge name:</b> ${fridgeID}</p>
+        <p>Click the link below to accept the invitation.</p>
+        <p><a href="${acceptLink}">Accept</a></p>
+                        `,
+            },
+            fridgeID: fridgeID,
+            fromID: this.auth.currentUser.uid,
+            lastSent: new Date(),
+            status: INVITATION_STATUSES.PENDING,
+        });
+    }
+
+    async getInvitation(inviteID) {
+        const docSnap = await getDoc(doc(db, "invitations", inviteID));
+        return { id: inviteID, ...docSnap.data() };
+    }
 }
+
+export const invitationService = new InvitationService(authService.auth);
