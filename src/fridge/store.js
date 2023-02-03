@@ -29,7 +29,7 @@ class Store {
                 this.services.authService.auth.currentUser.uid
             );
             this.user.permissions =
-                await this.services.userService.getPermissionsByUserAndFridge(
+                await this.services.permissionService.getPermissionsByUserAndFridge(
                     this.user.id,
                     this.fridge.id
                 );

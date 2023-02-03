@@ -1,4 +1,4 @@
-import { w as wordService, u as userService, f as fridgeService, i as invitationService, P as PERMISSIONS_NAMES, s as services, a as scaleApp } from './chunks/api.js';
+import { w as wordService, u as userService, f as fridgeService, p as permissionService, i as invitationService, a as authService, P as PERMISSION_GROUPS, b as PERMISSIONS_NAMES, s as services, c as scaleApp } from './chunks/api.js';
 import { createApp, reactive } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 function setElementPosition(element, positionY, positionX) {
@@ -37,7 +37,7 @@ class Store {
                 this.services.authService.auth.currentUser.uid
             );
             this.user.permissions =
-                await this.services.userService.getPermissionsByUserAndFridge(
+                await this.services.permissionService.getPermissionsByUserAndFridge(
                     this.user.id,
                     this.fridge.id
                 );
@@ -332,6 +332,16 @@ var FridgeSettings = {
             if (this.deleteConfirmation == "delete") {
                 this.$refs.deleteConfirmation.blur();
                 this.disableDeletionField = true;
+
+                const permissionRefs =
+                    await permissionService.getPermissionRefsByFridge(
+                        store.fridge.id
+                    );
+
+                permissionRefs.forEach((ref) => {
+                    permissionService.delete(ref.id);
+                });
+
                 await fridgeService.deleteFridge(store.fridge.id);
                 window.location = "/";
             }
@@ -412,6 +422,14 @@ var AcceptInvite = {
                 .split("=")[1];
 
             this.invite = await invitationService.getInvitation(inviteID);
+
+            if (this.invite.status !== "pending") {
+                this.isActive = false;
+                window.location.search = window.location.search
+                    .replace("invite=", "")
+                    .replace(this.invite.id, "");
+            }
+
             await userService
                 .getUserByID(this.invite.fromID)
                 .then(
@@ -420,9 +438,22 @@ var AcceptInvite = {
                 );
         },
         async acceptInvite() {
-            await invitationService.acceptInvitation(
-                this.invite,
-                this.store.fridge.id
+            if (this.invite.fridgeID !== this.store.fridge.id) {
+                // TODO Error
+                console.error("This invitation is for a different fridge");
+                return;
+            }
+            if (this.invite.to !== authService.auth.currentUser.email) {
+                // TODO Error
+                console.error("Invite to/current user mismatch");
+                return;
+            }
+
+            await invitationService.acceptInvitation(this.invite.id);
+            await permissionService.create(
+                this.store.fridge.id,
+                authService.auth.currentUser.uid,
+                [...PERMISSION_GROUPS.OPTIONAL]
             );
             this.isActive = false;
         },

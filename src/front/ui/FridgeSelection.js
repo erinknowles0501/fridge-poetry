@@ -1,4 +1,9 @@
-import { fridgeService, userService, authService } from "../../services/api";
+import {
+    fridgeService,
+    userService,
+    authService,
+    permissionService,
+} from "../../services/api";
 
 export default {
     data() {
@@ -23,13 +28,21 @@ export default {
             .getUserByID(currentUserUID)
             .then((user) => (this.user = user));
 
-        userService.getFridgesByUser(currentUserUID).then(async (fridgeIDs) => {
-            this.fridges = await Promise.all(
-                fridgeIDs.map(async (fridgeID) => {
-                    return await fridgeService.getFridgeByID(fridgeID);
-                })
-            );
-        });
+        permissionService
+            .getPermissionsByUser(currentUserUID)
+            .then(async (permissions) => {
+                const fridgeIDs = [];
+                permissions.forEach((permission) => {
+                    if (!fridgeIDs.includes(permission.fridgeID)) {
+                        fridgeIDs.push(permission.fridgeID);
+                    }
+                });
+                this.fridges = await Promise.all(
+                    fridgeIDs.map(async (fridgeID) => {
+                        return await fridgeService.getFridgeByID(fridgeID);
+                    })
+                );
+            });
     },
     methods: {
         async logout() {

@@ -1,4 +1,9 @@
-import { fridgeService } from "../../services/api";
+import { PERMISSION_GROUPS } from "../../constants";
+import {
+    fridgeService,
+    permissionService,
+    authService,
+} from "../../services/api";
 
 export default {
     data() {
@@ -25,6 +30,14 @@ export default {
                 this.isWorking = true;
 
                 const newFridgeID = await fridgeService.createFridge(this.name);
+                await permissionService.create(
+                    newFridgeID,
+                    authService.auth.currentUser.uid,
+                    [
+                        ...PERMISSION_GROUPS.FRIDGE_OWNER,
+                        ...PERMISSION_GROUPS.OPTIONAL,
+                    ]
+                );
                 window.location = newFridgeID;
             } catch (error) {
                 // TODO

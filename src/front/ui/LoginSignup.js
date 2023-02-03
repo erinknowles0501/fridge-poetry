@@ -2,6 +2,7 @@ import {
     authService,
     userService,
     invitationService,
+    permissionService,
 } from "../../services/api";
 import defaultWords from "../../defaultWords.json";
 import { INVITATION_STATUSES } from "../../constants";
@@ -146,7 +147,7 @@ export default {
                     return;
                 }
 
-                await invitationService.writeInvitedPermission(
+                await permissionService.writeInvitedPermission(
                     authService.auth.currentUser.uid,
                     invite.fridgeID
                 );
@@ -222,7 +223,7 @@ export default {
 
             if (success) {
                 if (this.hasInviteParam) {
-                    await invitationService.writeInvitedPermission(
+                    await permissionService.writeInvitedPermission(
                         authService.auth.currentUser.uid,
                         this.invite.fridgeID
                     );

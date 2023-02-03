@@ -1,5 +1,5 @@
 import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-import { d as defaultWords, b as authService, i as invitationService, I as INVITATION_STATUSES, u as userService, f as fridgeService } from './chunks/api.js';
+import { d as defaultWords, a as authService, i as invitationService, I as INVITATION_STATUSES, p as permissionService, u as userService, f as fridgeService, P as PERMISSION_GROUPS } from './chunks/api.js';
 
 var LoginSignup = {
     emits: ["changeActiveComponent"],
@@ -141,7 +141,7 @@ var LoginSignup = {
                     return;
                 }
 
-                await invitationService.writeInvitedPermission(
+                await permissionService.writeInvitedPermission(
                     authService.auth.currentUser.uid,
                     invite.fridgeID
                 );
@@ -217,7 +217,7 @@ var LoginSignup = {
 
             if (success) {
                 if (this.hasInviteParam) {
-                    await invitationService.writeInvitedPermission(
+                    await permissionService.writeInvitedPermission(
                         authService.auth.currentUser.uid,
                         this.invite.fridgeID
                     );
@@ -259,13 +259,21 @@ var FridgeSelection = {
             .getUserByID(currentUserUID)
             .then((user) => (this.user = user));
 
-        userService.getFridgesByUser(currentUserUID).then(async (fridgeIDs) => {
-            this.fridges = await Promise.all(
-                fridgeIDs.map(async (fridgeID) => {
-                    return await fridgeService.getFridgeByID(fridgeID);
-                })
-            );
-        });
+        permissionService
+            .getPermissionsByUser(currentUserUID)
+            .then(async (permissions) => {
+                const fridgeIDs = [];
+                permissions.forEach((permission) => {
+                    if (!fridgeIDs.includes(permission.fridgeID)) {
+                        fridgeIDs.push(permission.fridgeID);
+                    }
+                });
+                this.fridges = await Promise.all(
+                    fridgeIDs.map(async (fridgeID) => {
+                        return await fridgeService.getFridgeByID(fridgeID);
+                    })
+                );
+            });
     },
     methods: {
         async logout() {
@@ -300,6 +308,14 @@ var NewFridge = {
                 this.isWorking = true;
 
                 const newFridgeID = await fridgeService.createFridge(this.name);
+                await permissionService.create(
+                    newFridgeID,
+                    authService.auth.currentUser.uid,
+                    [
+                        ...PERMISSION_GROUPS.FRIDGE_OWNER,
+                        ...PERMISSION_GROUPS.OPTIONAL,
+                    ]
+                );
                 window.location = newFridgeID;
             } catch (error) {
                 // TODO

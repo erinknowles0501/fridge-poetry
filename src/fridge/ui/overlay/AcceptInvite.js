@@ -1,6 +1,8 @@
+import { PERMISSION_GROUPS } from "../../../constants";
 import {
     invitationService,
     userService,
+    permissionService,
     authService,
 } from "../../../services/api";
 
@@ -39,6 +41,14 @@ export default {
                 .split("=")[1];
 
             this.invite = await invitationService.getInvitation(inviteID);
+
+            if (this.invite.status !== "pending") {
+                this.isActive = false;
+                window.location.search = window.location.search
+                    .replace("invite=", "")
+                    .replace(this.invite.id, "");
+            }
+
             await userService
                 .getUserByID(this.invite.fromID)
                 .then(
@@ -47,9 +57,22 @@ export default {
                 );
         },
         async acceptInvite() {
-            await invitationService.acceptInvitation(
-                this.invite,
-                this.store.fridge.id
+            if (this.invite.fridgeID !== this.store.fridge.id) {
+                // TODO Error
+                console.error("This invitation is for a different fridge");
+                return;
+            }
+            if (this.invite.to !== authService.auth.currentUser.email) {
+                // TODO Error
+                console.error("Invite to/current user mismatch");
+                return;
+            }
+
+            await invitationService.acceptInvitation(this.invite.id);
+            await permissionService.create(
+                this.store.fridge.id,
+                authService.auth.currentUser.uid,
+                [...PERMISSION_GROUPS.OPTIONAL]
             );
             this.isActive = false;
         },

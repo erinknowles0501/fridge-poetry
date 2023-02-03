@@ -1,5 +1,5 @@
 import { default as externalStore } from "../../store";
-import { fridgeService } from "../../../services/api";
+import { fridgeService, permissionService } from "../../../services/api";
 
 export default {
     data() {
@@ -77,6 +77,16 @@ export default {
             if (this.deleteConfirmation == "delete") {
                 this.$refs.deleteConfirmation.blur();
                 this.disableDeletionField = true;
+
+                const permissionRefs =
+                    await permissionService.getPermissionRefsByFridge(
+                        externalStore.fridge.id
+                    );
+
+                permissionRefs.forEach((ref) => {
+                    permissionService.delete(ref.id);
+                });
+
                 await fridgeService.deleteFridge(externalStore.fridge.id);
                 window.location = "/";
             }

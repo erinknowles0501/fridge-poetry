@@ -25,11 +25,7 @@ const fbAuth = getAuth();
 import { APP_WIDTH, APP_HEIGHT } from "../fridge/scale.js";
 
 import { default as defaultWords } from "../defaultWords.json";
-import {
-    INVITATION_STATUSES,
-    PERMISSIONS_NAMES,
-    PERMISSION_GROUPS,
-} from "../constants.js";
+import { INVITATION_STATUSES, PERMISSIONS_NAMES } from "../constants.js";
 
 class AuthService {
     auth = null;
@@ -45,7 +41,6 @@ class AuthService {
 
     async logout() {
         await signOut(this.auth);
-        console.log("here");
     }
 
     async signUp(email, password) {
@@ -146,15 +141,6 @@ class FridgeService {
             maxCustomWords: 5,
         });
         await this.createWordsOnFridge(newFridgeRef.id);
-        await addDoc(collection(db, "permissions"), {
-            fridgeID: newFridgeRef.id,
-            userID: this.auth.currentUser.uid,
-            permissions: [
-                ...PERMISSION_GROUPS.FRIDGE_OWNER,
-                ...PERMISSION_GROUPS.OPTIONAL,
-            ],
-        });
-
         return newFridgeRef.id;
     }
 
@@ -181,25 +167,10 @@ class FridgeService {
         await updateDoc(fridgeRef, data);
     }
 
-    async getPermissionsByFridge(fridgeID) {
-        const q = query(
-            collection(db, "permissions"),
-            where("fridgeID", "==", fridgeID)
-        );
-        const docs = await getDocs(q);
-        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-    }
-
     async deleteFridge(fridgeID) {
-        const permissionObjs = await this.getPermissionsByFridge(fridgeID);
-        const permissionIDs = permissionObjs.map((permission) => permission.id);
-        permissionIDs.forEach(async (id) => {
-            await deleteDoc(doc(db, "permissions", id));
-        });
         await deleteDoc(doc(db, "fridges", fridgeID));
     }
 }
-
 export const fridgeService = new FridgeService(authService.auth);
 
 class UserService {
@@ -235,34 +206,6 @@ class UserService {
         await updateDoc(docRef, data);
     }
 
-    async getPermissionsByUser(id) {
-        const permissionQuery = query(
-            collection(db, "permissions"),
-            where("userID", "==", id)
-        );
-        const docs = await getDocs(permissionQuery);
-        return docs.docs.map((doc) => doc.data());
-    }
-
-    async getFridgesByUser(id) {
-        const permissions = await this.getPermissionsByUser(id);
-        const fridges = [];
-        permissions.forEach((permission) => {
-            if (!fridges.includes(permission.fridgeID)) {
-                fridges.push(permission.fridgeID);
-            }
-        });
-        return fridges;
-    }
-
-    async getPermissionsByUserAndFridge(userID, fridgeID) {
-        const userPermissions = await this.getPermissionsByUser(userID);
-        const userFridgePermissions = userPermissions.find(
-            (entry) => entry.fridgeID == fridgeID
-        ).permissions;
-        return userFridgePermissions;
-    }
-
     async getWhetherAUserHasEmail(email) {
         const q = query(collection(db, "users"), where("email", "==", email));
         const docs = await getDocs(q);
@@ -273,22 +216,21 @@ class UserService {
         }
     }
 }
-
 export const userService = new UserService(authService.auth);
 
 class InvitationService {
-    // create user invite
-    // mark invite accepted / revoked
-    // get user invite
+    // mark invite/ revoked
     // get invites by fridge
     // re-send invite?
 
     constructor(auth) {
         this.auth = auth;
+        this.collectionName = "invitations";
+        this.collection = collection(db, this.collectionName);
     }
 
     async sendInvite(email, fridgeID, senderDisplayName) {
-        const newInviteRef = doc(collection(db, "invitations"));
+        const newInviteRef = doc(this.collection);
         const acceptLink = `http://127.0.0.1:5000/?invite=${newInviteRef.id}`;
         await setDoc(newInviteRef, {
             to: email,
@@ -310,37 +252,70 @@ class InvitationService {
     }
 
     async getInvitation(inviteID) {
-        const docSnap = await getDoc(doc(db, "invitations", inviteID));
+        const docSnap = await getDoc(doc(db, this.collectionName, inviteID));
         return { id: inviteID, ...docSnap.data() };
     }
 
-    async acceptInvitation(invite, fridgeID) {
-        if (invite.fridgeID !== fridgeID) {
-            // TODO Error
-            return;
-        }
-        if (invite.to !== this.auth.currentUser.email) {
-            // TODO Error
-            return;
-        }
-
-        await updateDoc(doc(db, "invitations", invite.id), {
+    async acceptInvitation(inviteID) {
+        await updateDoc(doc(db, this.collectionName, inviteID), {
             status: INVITATION_STATUSES.ACCEPTED,
         });
-        await addDoc(collection(db, "permissions"), {
-            fridgeID: fridgeID,
-            userID: this.auth.currentUser.uid,
-            permissions: [...PERMISSION_GROUPS.OPTIONAL],
-        });
+    }
+}
+export const invitationService = new InvitationService(authService.auth);
+
+class PermissionService {
+    constructor(auth) {
+        this.auth = auth;
+        this.collectionName = "permissions";
+        this.collection = collection(db, this.collectionName);
+    }
+
+    async getPermissionsByUser(userID) {
+        const q = query(this.collection, where("userID", "==", userID));
+        const docs = await getDocs(q);
+        return docs.docs.map((doc) => doc.data());
+    }
+
+    async getPermissionRefsByFridge(fridgeID) {
+        const q = query(this.collection, where("fridgeID", "==", fridgeID));
+        const docs = await getDocs(q);
+        return docs.docs;
+    }
+
+    async getPermissionsByFridge(fridgeID) {
+        const permissionRefs = await this.getPermissionRefsByFridge(fridgeID);
+        return permissionRefs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+
+    async getPermissionsByUserAndFridge(userID, fridgeID) {
+        // TODO: where(userID == userID), where(fridgeID == fridgeID)??
+        const userPermissions = await this.getPermissionsByUser(userID);
+        const userFridgePermissions = userPermissions.find(
+            (entry) => entry.fridgeID == fridgeID
+        ).permissions;
+        return userFridgePermissions;
     }
 
     async writeInvitedPermission(userID, fridgeID) {
-        await addDoc(collection(db, "permissions"), {
+        await addDoc(this.collection, {
             fridgeID: fridgeID,
             userID: userID,
             permissions: [...PERMISSIONS_NAMES.INVITED],
         });
     }
+
+    async create(fridgeID, userID, permissionArr) {
+        await addDoc(this.collection, {
+            fridgeID,
+            userID,
+            permissions: permissionArr,
+        });
+    }
+
+    async delete(id) {
+        await deleteDoc(doc(db, this.collectionName, id));
+    }
 }
 
-export const invitationService = new InvitationService(authService.auth);
+export const permissionService = new PermissionService(authService.auth);

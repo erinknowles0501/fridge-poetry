@@ -22173,7 +22173,6 @@ class AuthService {
 
     async logout() {
         await signOut(this.auth);
-        console.log("here");
     }
 
     async signUp(email, password) {
@@ -22272,15 +22271,6 @@ class FridgeService {
             maxCustomWords: 5,
         });
         await this.createWordsOnFridge(newFridgeRef.id);
-        await Ql(Ta(db, "permissions"), {
-            fridgeID: newFridgeRef.id,
-            userID: this.auth.currentUser.uid,
-            permissions: [
-                ...PERMISSION_GROUPS.FRIDGE_OWNER,
-                ...PERMISSION_GROUPS.OPTIONAL,
-            ],
-        });
-
         return newFridgeRef.id;
     }
 
@@ -22307,25 +22297,10 @@ class FridgeService {
         await Kl(fridgeRef, data);
     }
 
-    async getPermissionsByFridge(fridgeID) {
-        const q = sl(
-            Ta(db, "permissions"),
-            rl("fridgeID", "==", fridgeID)
-        );
-        const docs = await Bl(q);
-        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-    }
-
     async deleteFridge(fridgeID) {
-        const permissionObjs = await this.getPermissionsByFridge(fridgeID);
-        const permissionIDs = permissionObjs.map((permission) => permission.id);
-        permissionIDs.forEach(async (id) => {
-            await Gl(Aa(db, "permissions", id));
-        });
         await Gl(Aa(db, "fridges", fridgeID));
     }
 }
-
 const fridgeService = new FridgeService(authService.auth);
 
 class UserService {
@@ -22361,34 +22336,6 @@ class UserService {
         await Kl(docRef, data);
     }
 
-    async getPermissionsByUser(id) {
-        const permissionQuery = sl(
-            Ta(db, "permissions"),
-            rl("userID", "==", id)
-        );
-        const docs = await Bl(permissionQuery);
-        return docs.docs.map((doc) => doc.data());
-    }
-
-    async getFridgesByUser(id) {
-        const permissions = await this.getPermissionsByUser(id);
-        const fridges = [];
-        permissions.forEach((permission) => {
-            if (!fridges.includes(permission.fridgeID)) {
-                fridges.push(permission.fridgeID);
-            }
-        });
-        return fridges;
-    }
-
-    async getPermissionsByUserAndFridge(userID, fridgeID) {
-        const userPermissions = await this.getPermissionsByUser(userID);
-        const userFridgePermissions = userPermissions.find(
-            (entry) => entry.fridgeID == fridgeID
-        ).permissions;
-        return userFridgePermissions;
-    }
-
     async getWhetherAUserHasEmail(email) {
         const q = sl(Ta(db, "users"), rl("email", "==", email));
         const docs = await Bl(q);
@@ -22399,22 +22346,21 @@ class UserService {
         }
     }
 }
-
 const userService = new UserService(authService.auth);
 
 class InvitationService {
-    // create user invite
-    // mark invite accepted / revoked
-    // get user invite
+    // mark invite/ revoked
     // get invites by fridge
     // re-send invite?
 
     constructor(auth) {
         this.auth = auth;
+        this.collectionName = "invitations";
+        this.collection = Ta(db, this.collectionName);
     }
 
     async sendInvite(email, fridgeID, senderDisplayName) {
-        const newInviteRef = Aa(Ta(db, "invitations"));
+        const newInviteRef = Aa(this.collection);
         const acceptLink = `http://127.0.0.1:5000/?invite=${newInviteRef.id}`;
         await Ul(newInviteRef, {
             to: email,
@@ -22436,40 +22382,73 @@ class InvitationService {
     }
 
     async getInvitation(inviteID) {
-        const docSnap = await Ol(Aa(db, "invitations", inviteID));
+        const docSnap = await Ol(Aa(db, this.collectionName, inviteID));
         return { id: inviteID, ...docSnap.data() };
     }
 
-    async acceptInvitation(invite, fridgeID) {
-        if (invite.fridgeID !== fridgeID) {
-            // TODO Error
-            return;
-        }
-        if (invite.to !== this.auth.currentUser.email) {
-            // TODO Error
-            return;
-        }
-
-        await Kl(Aa(db, "invitations", invite.id), {
+    async acceptInvitation(inviteID) {
+        await Kl(Aa(db, this.collectionName, inviteID), {
             status: INVITATION_STATUSES.ACCEPTED,
         });
-        await Ql(Ta(db, "permissions"), {
-            fridgeID: fridgeID,
-            userID: this.auth.currentUser.uid,
-            permissions: [...PERMISSION_GROUPS.OPTIONAL],
-        });
+    }
+}
+const invitationService = new InvitationService(authService.auth);
+
+class PermissionService {
+    constructor(auth) {
+        this.auth = auth;
+        this.collectionName = "permissions";
+        this.collection = Ta(db, this.collectionName);
+    }
+
+    async getPermissionsByUser(userID) {
+        const q = sl(this.collection, rl("userID", "==", userID));
+        const docs = await Bl(q);
+        return docs.docs.map((doc) => doc.data());
+    }
+
+    async getPermissionRefsByFridge(fridgeID) {
+        const q = sl(this.collection, rl("fridgeID", "==", fridgeID));
+        const docs = await Bl(q);
+        return docs.docs;
+    }
+
+    async getPermissionsByFridge(fridgeID) {
+        const permissionRefs = await this.getPermissionRefsByFridge(fridgeID);
+        return permissionRefs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+
+    async getPermissionsByUserAndFridge(userID, fridgeID) {
+        // TODO: where(userID == userID), where(fridgeID == fridgeID)??
+        const userPermissions = await this.getPermissionsByUser(userID);
+        const userFridgePermissions = userPermissions.find(
+            (entry) => entry.fridgeID == fridgeID
+        ).permissions;
+        return userFridgePermissions;
     }
 
     async writeInvitedPermission(userID, fridgeID) {
-        await Ql(Ta(db, "permissions"), {
+        await Ql(this.collection, {
             fridgeID: fridgeID,
             userID: userID,
             permissions: [...PERMISSIONS_NAMES.INVITED],
         });
     }
+
+    async create(fridgeID, userID, permissionArr) {
+        await Ql(this.collection, {
+            fridgeID,
+            userID,
+            permissions: permissionArr,
+        });
+    }
+
+    async delete(id) {
+        await Gl(Aa(db, this.collectionName, id));
+    }
 }
 
-const invitationService = new InvitationService(authService.auth);
+const permissionService = new PermissionService(authService.auth);
 
 var services = /*#__PURE__*/Object.freeze({
     __proto__: null,
@@ -22477,7 +22456,8 @@ var services = /*#__PURE__*/Object.freeze({
     wordService: wordService,
     fridgeService: fridgeService,
     userService: userService,
-    invitationService: invitationService
+    invitationService: invitationService,
+    permissionService: permissionService
 });
 
-export { INVITATION_STATUSES as I, PERMISSIONS_NAMES as P, scaleApp as a, authService as b, defaultWords as d, fridgeService as f, invitationService as i, services as s, userService as u, wordService as w };
+export { INVITATION_STATUSES as I, PERMISSION_GROUPS as P, authService as a, PERMISSIONS_NAMES as b, scaleApp as c, defaultWords as d, fridgeService as f, invitationService as i, permissionService as p, services as s, userService as u, wordService as w };
