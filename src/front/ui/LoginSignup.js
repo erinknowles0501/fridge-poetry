@@ -1,8 +1,13 @@
-import { authService, userService } from "../../services/api";
+import {
+    authService,
+    userService,
+    invitationService,
+} from "../../services/api";
 import defaultWords from "../../defaultWords.json";
+import { INVITATION_STATUSES } from "../../constants";
 
 export default {
-    emits: ["loggedIn"],
+    emits: ["changeActiveComponent"],
     data() {
         return {
             isSigningUp: false,
@@ -10,6 +15,8 @@ export default {
             email: "",
             password: "",
             passwordConfirm: "",
+            hasInviteParam: false,
+            invite: null,
         };
     },
     computed: {
@@ -55,10 +62,25 @@ export default {
     created() {
         authService.handleAuthStateChanged((state) => {
             if (state.uid) {
-                this.$emit("loggedIn");
+                this.$emit("changeActiveComponent", "FridgeSelection");
             }
         });
+
+        this.hasInviteParam = window.location.search
+            .slice(1)
+            .includes("invite");
+        if (this.hasInviteParam) {
+            const inviteID = window.location.search
+                .slice(1)
+                .split("&")
+                .find((param) => param.includes("invite"))
+                .split("=")[1];
+            invitationService
+                .getInvitation(inviteID)
+                .then((invite) => this.invitationHandler(invite));
+        }
     },
+
     template: `
         <Transition appear>
             <div class="word-display">
@@ -102,6 +124,42 @@ export default {
         </div>
     `,
     methods: {
+        async invitationHandler(invite) {
+            if (invite.status !== INVITATION_STATUSES.PENDING) {
+                // TODO: Error toast
+                console.error("Invite does not exist or is not pending.");
+                window.location.search = window.location.search
+                    .replace("invite=", "")
+                    .replace(invite.id, "");
+                return;
+            }
+
+            if (authService.auth.currentUser) {
+                if (authService.auth.currentUser.email !== invite.to) {
+                    // TODO: Error toast w/ logout + link prompt
+                    console.error(
+                        "Invite email / current user email mismatch."
+                    );
+                    window.location.search = window.location.search
+                        .replace("invite=", "")
+                        .replace(invite.id, "");
+                    return;
+                }
+
+                await invitationService.writeInvitedPermission(
+                    authService.auth.currentUser.uid,
+                    invite.fridgeID
+                );
+                window.location.pathname = invite.fridgeID;
+            } else {
+                const emailMatchesUser =
+                    await userService.getWhetherAUserHasEmail(invite.to);
+
+                this.email = invite.to;
+                this.isSigningUp = !emailMatchesUser;
+                this.invite = invite;
+            }
+        },
         async login() {
             try {
                 await authService.signIn(this.email, this.password);
@@ -163,7 +221,13 @@ export default {
                 : !this.disableLogin && (await this.login());
 
             if (success) {
-                this.$emit("loggedIn");
+                if (this.hasInviteParam) {
+                    await invitationService.writeInvitedPermission(
+                        authService.auth.currentUser.uid,
+                        this.invite.fridgeID
+                    );
+                }
+                this.$emit("changeActiveComponent", "FridgeSelection");
             }
         },
         getRandomTranslate() {

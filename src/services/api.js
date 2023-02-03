@@ -25,7 +25,11 @@ const fbAuth = getAuth();
 import { APP_WIDTH, APP_HEIGHT } from "../fridge/scale.js";
 
 import { default as defaultWords } from "../defaultWords.json";
-import { INVITATION_STATUSES, PERMISSION_GROUPS } from "../constants.js";
+import {
+    INVITATION_STATUSES,
+    PERMISSIONS_NAMES,
+    PERMISSION_GROUPS,
+} from "../constants.js";
 
 class AuthService {
     auth = null;
@@ -294,8 +298,8 @@ class InvitationService {
                 html: `
         <h2>You've been invited</h2>
         <p><b>Fridge name:</b> ${fridgeID}</p>
-        <p>Click the link below to accept the invitation.</p>
-        <p><a href="${acceptLink}">Accept</a></p>
+        <p>Click the link below to view the invitation.</p>
+        <p><a href="${acceptLink}">View</a></p>
                         `,
             },
             fridgeID: fridgeID,
@@ -308,6 +312,34 @@ class InvitationService {
     async getInvitation(inviteID) {
         const docSnap = await getDoc(doc(db, "invitations", inviteID));
         return { id: inviteID, ...docSnap.data() };
+    }
+
+    async acceptInvitation(invite, fridgeID) {
+        if (invite.fridgeID !== fridgeID) {
+            // TODO Error
+            return;
+        }
+        if (invite.to !== this.auth.currentUser.email) {
+            // TODO Error
+            return;
+        }
+
+        await updateDoc(doc(db, "invitations", invite.id), {
+            status: INVITATION_STATUSES.ACCEPTED,
+        });
+        await addDoc(collection(db, "permissions"), {
+            fridgeID: fridgeID,
+            userID: this.auth.currentUser.uid,
+            permissions: [...PERMISSION_GROUPS.OPTIONAL],
+        });
+    }
+
+    async writeInvitedPermission(userID, fridgeID) {
+        await addDoc(collection(db, "permissions"), {
+            fridgeID: fridgeID,
+            userID: userID,
+            permissions: [...PERMISSIONS_NAMES.INVITED],
+        });
     }
 }
 

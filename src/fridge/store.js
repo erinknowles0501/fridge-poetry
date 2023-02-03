@@ -8,7 +8,6 @@ class Store {
     currentDrag = { el: null, offset: { x: 0, y: 0 } };
     user = null;
     services = {};
-    router = null;
 
     async initialize(services) {
         return new Promise(async (resolve) => {
@@ -18,7 +17,6 @@ class Store {
             this.appEl = document.querySelector("#app");
 
             this.fridge.id = window.location.pathname.slice(1);
-
             this.fridge.info = await this.services.fridgeService.getFridgeByID(
                 this.fridge.id
             );
@@ -35,7 +33,6 @@ class Store {
                     this.user.id,
                     this.fridge.id
                 );
-            console.log("this.user", this.user);
 
             resolve();
         });

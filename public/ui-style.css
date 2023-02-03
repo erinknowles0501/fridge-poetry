@@ -181,3 +181,28 @@ p.label {
 .display-color-option:hover {
     outline: 0.2rem solid white;
 }
+
+.overlay-wrap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+}
+
+.overlay-wrap .modal {
+    background: white;
+    box-shadow: 0px 5px 10px 10px rgba(0, 0, 0, 0.2);
+    padding: 2rem;
+}
+
+.overlay-wrap button {
+    color: black;
+    outline: 2px solid black;
+}

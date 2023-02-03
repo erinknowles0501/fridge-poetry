@@ -1,8 +1,8 @@
 import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-import { d as defaultWords, b as authService, u as userService, f as fridgeService, i as invitationService, I as INVITATION_STATUSES } from './chunks/api.js';
+import { d as defaultWords, b as authService, i as invitationService, I as INVITATION_STATUSES, u as userService, f as fridgeService } from './chunks/api.js';
 
 var LoginSignup = {
-    emits: ["loggedIn"],
+    emits: ["changeActiveComponent"],
     data() {
         return {
             isSigningUp: false,
@@ -10,6 +10,8 @@ var LoginSignup = {
             email: "",
             password: "",
             passwordConfirm: "",
+            hasInviteParam: false,
+            invite: null,
         };
     },
     computed: {
@@ -55,10 +57,25 @@ var LoginSignup = {
     created() {
         authService.handleAuthStateChanged((state) => {
             if (state.uid) {
-                this.$emit("loggedIn");
+                this.$emit("changeActiveComponent", "FridgeSelection");
             }
         });
+
+        this.hasInviteParam = window.location.search
+            .slice(1)
+            .includes("invite");
+        if (this.hasInviteParam) {
+            const inviteID = window.location.search
+                .slice(1)
+                .split("&")
+                .find((param) => param.includes("invite"))
+                .split("=")[1];
+            invitationService
+                .getInvitation(inviteID)
+                .then((invite) => this.invitationHandler(invite));
+        }
     },
+
     template: `
         <Transition appear>
             <div class="word-display">
@@ -102,6 +119,42 @@ var LoginSignup = {
         </div>
     `,
     methods: {
+        async invitationHandler(invite) {
+            if (invite.status !== INVITATION_STATUSES.PENDING) {
+                // TODO: Error toast
+                console.error("Invite does not exist or is not pending.");
+                window.location.search = window.location.search
+                    .replace("invite=", "")
+                    .replace(invite.id, "");
+                return;
+            }
+
+            if (authService.auth.currentUser) {
+                if (authService.auth.currentUser.email !== invite.to) {
+                    // TODO: Error toast w/ logout + link prompt
+                    console.error(
+                        "Invite email / current user email mismatch."
+                    );
+                    window.location.search = window.location.search
+                        .replace("invite=", "")
+                        .replace(invite.id, "");
+                    return;
+                }
+
+                await invitationService.writeInvitedPermission(
+                    authService.auth.currentUser.uid,
+                    invite.fridgeID
+                );
+                window.location.pathname = invite.fridgeID;
+            } else {
+                const emailMatchesUser =
+                    await userService.getWhetherAUserHasEmail(invite.to);
+
+                this.email = invite.to;
+                this.isSigningUp = !emailMatchesUser;
+                this.invite = invite;
+            }
+        },
         async login() {
             try {
                 await authService.signIn(this.email, this.password);
@@ -163,7 +216,13 @@ var LoginSignup = {
                 : !this.disableLogin && (await this.login());
 
             if (success) {
-                this.$emit("loggedIn");
+                if (this.hasInviteParam) {
+                    await invitationService.writeInvitedPermission(
+                        authService.auth.currentUser.uid,
+                        this.invite.fridgeID
+                    );
+                }
+                this.$emit("changeActiveComponent", "FridgeSelection");
             }
         },
         getRandomTranslate() {
@@ -184,13 +243,13 @@ var FridgeSelection = {
             user: {},
         };
     },
-    emits: ["newFridge"],
+    emits: ["changeActiveComponent"],
     template: `
         <div class="fridge-selection">
             <div class="welcome">Welcome, <b>{{user.displayName}}</b> <a href="" @click.prevent="logout">(Log out)</a></div>
             <div>Select a fridge:</div>
             <a v-for="fridge in fridges" :href="'/' + fridge.id" class="fridge">{{ fridge.name }}</a>
-            <div style="margin-top:1rem;">or, <a href="" @click.prevent="$emit('newFridge')" class="fridge" style="display: inline">create a new fridge...</a></div>
+            <div style="margin-top:1rem;">or, <a href="" @click.prevent="$emit('changeActiveComponent', 'NewFridge')" class="fridge" style="display: inline">create a new fridge...</a></div>
         </div>
     `,
     created() {
@@ -260,49 +319,9 @@ function startUI() {
         },
         template: `
             <div>
-                <component :is="activeComponent" @loggedIn="activeComponent = 'FridgeSelection'" @newFridge="activeComponent = 'NewFridge'" />
+                <component :is="activeComponent" @changeActiveComponent="activeComponent = $event" />
             </div>
         `,
-        created() {
-            const hasInviteParam = window.location.search
-                .slice(1)
-                .includes("invite");
-            if (hasInviteParam) {
-                const inviteID = window.location.search
-                    .slice(1)
-                    .split("&")
-                    .find((param) => param.includes("invite"))
-                    .split("=")[1];
-                invitationService
-                    .getInvitation(inviteID)
-                    .then((invite) => this.invitationHandler(invite));
-            }
-        },
-        methods: {
-            async invitationHandler(invite) {
-                console.log("invite", invite);
-
-                if (invite.status !== INVITATION_STATUSES.PENDING) {
-                    // TODO: Error toast
-                    console.error("Invite does not exist or is not pending.");
-                    return;
-                }
-
-                if (authService.auth.currentUser) {
-                    if (authService.auth.currentUser.email !== invite.to) {
-                        // TODO: Error toast w/ logout + link prompt
-                        console.error(
-                            "Invite email / current user email mismatch."
-                        );
-                        return;
-                    }
-
-                    // TODO: Join fridge component and switching
-                } else {
-                    await userService.getWhetherAUserHasEmail(invite.to);
-                }
-            },
-        },
     });
 
     app.mount("#app");

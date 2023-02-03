@@ -22102,6 +22102,7 @@ const PERMISSIONS_NAMES = {
     FREEZE_USER: "freeze-user",
     UNFREEZE_USER: "unfreeze-user",
     CREATE_CUSTOM_WORDS: "create-custom-words",
+    INVITED: "invited",
 };
 
 const PERMISSION_GROUPS = {
@@ -22423,8 +22424,8 @@ class InvitationService {
                 html: `
         <h2>You've been invited</h2>
         <p><b>Fridge name:</b> ${fridgeID}</p>
-        <p>Click the link below to accept the invitation.</p>
-        <p><a href="${acceptLink}">Accept</a></p>
+        <p>Click the link below to view the invitation.</p>
+        <p><a href="${acceptLink}">View</a></p>
                         `,
             },
             fridgeID: fridgeID,
@@ -22437,6 +22438,34 @@ class InvitationService {
     async getInvitation(inviteID) {
         const docSnap = await Ol(Aa(db, "invitations", inviteID));
         return { id: inviteID, ...docSnap.data() };
+    }
+
+    async acceptInvitation(invite, fridgeID) {
+        if (invite.fridgeID !== fridgeID) {
+            // TODO Error
+            return;
+        }
+        if (invite.to !== this.auth.currentUser.email) {
+            // TODO Error
+            return;
+        }
+
+        await Kl(Aa(db, "invitations", invite.id), {
+            status: INVITATION_STATUSES.ACCEPTED,
+        });
+        await Ql(Ta(db, "permissions"), {
+            fridgeID: fridgeID,
+            userID: this.auth.currentUser.uid,
+            permissions: [...PERMISSION_GROUPS.OPTIONAL],
+        });
+    }
+
+    async writeInvitedPermission(userID, fridgeID) {
+        await Ql(Ta(db, "permissions"), {
+            fridgeID: fridgeID,
+            userID: userID,
+            permissions: [...PERMISSIONS_NAMES.INVITED],
+        });
     }
 }
 

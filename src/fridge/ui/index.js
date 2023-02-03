@@ -1,13 +1,14 @@
 import { createApp, reactive } from "vue";
 import MenuRoot from "./MenuRoot.js";
 import MenuSlide from "./MenuSlide.js";
+import AcceptInvite from "./overlay/AcceptInvite.js";
 
 import menuItems from "./menuItems.js";
 import store from "../store.js";
 
 export default function startUI() {
     const app = createApp({
-        components: { MenuRoot, MenuSlide },
+        components: { MenuRoot, MenuSlide, AcceptInvite },
         data() {
             return {
                 isOpen: false,
@@ -38,6 +39,7 @@ export default function startUI() {
         <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false">
             <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="filteredMenuItems" :activeLink="activeLink" />
         </div>
+        <AcceptInvite />
         `,
         methods: {
             navigateMenu(event) {

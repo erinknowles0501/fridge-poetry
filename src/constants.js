@@ -16,6 +16,7 @@ export const PERMISSIONS_NAMES = {
     FREEZE_USER: "freeze-user",
     UNFREEZE_USER: "unfreeze-user",
     CREATE_CUSTOM_WORDS: "create-custom-words",
+    INVITED: "invited",
 };
 
 export const PERMISSION_GROUPS = {

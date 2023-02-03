@@ -16,7 +16,6 @@ class Store {
     currentDrag = { el: null, offset: { x: 0, y: 0 } };
     user = null;
     services = {};
-    router = null;
 
     async initialize(services) {
         return new Promise(async (resolve) => {
@@ -26,7 +25,6 @@ class Store {
             this.appEl = document.querySelector("#app");
 
             this.fridge.id = window.location.pathname.slice(1);
-
             this.fridge.info = await this.services.fridgeService.getFridgeByID(
                 this.fridge.id
             );
@@ -43,7 +41,6 @@ class Store {
                     this.user.id,
                     this.fridge.id
                 );
-            console.log("this.user", this.user);
 
             resolve();
         });
@@ -380,6 +377,58 @@ var MenuSlide = {
     `,
 };
 
+var AcceptInvite = {
+    data() {
+        return {
+            isActive: false,
+            invite: null,
+        };
+    },
+    template: `
+        <div>
+            <div class="overlay-wrap" v-if="isActive">
+                <div class="modal">
+                    <h2>Join '{{store.fridge.info.name}}'?</h2>
+                    <p>
+                        {{invite?.fromDisplayName || 'A user' }} has invited you to join this fridge. Accept this invitation?
+                    </p>
+                    <button @click="acceptInvite">Accept</button>
+                </div>
+            </div>
+        </div>
+    `,
+    created() {
+        this.isActive = window.location.search.includes("invite");
+        if (this.isActive) {
+            this.handleInvite();
+        }
+    },
+    methods: {
+        async handleInvite() {
+            const inviteID = window.location.search
+                .slice(1)
+                .split("&")
+                .find((param) => param.includes("invite"))
+                .split("=")[1];
+
+            this.invite = await invitationService.getInvitation(inviteID);
+            await userService
+                .getUserByID(this.invite.fromID)
+                .then(
+                    (inviter) =>
+                        (this.invite.fromDisplayName = inviter.displayName)
+                );
+        },
+        async acceptInvite() {
+            await invitationService.acceptInvitation(
+                this.invite,
+                this.store.fridge.id
+            );
+            this.isActive = false;
+        },
+    },
+};
+
 var menuItems = {
     fridge: [
         {
@@ -439,7 +488,7 @@ var menuItems = {
 
 function startUI() {
     const app = createApp({
-        components: { MenuRoot, MenuSlide },
+        components: { MenuRoot, MenuSlide, AcceptInvite },
         data() {
             return {
                 isOpen: false,
@@ -470,6 +519,7 @@ function startUI() {
         <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false">
             <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="filteredMenuItems" :activeLink="activeLink" />
         </div>
+        <AcceptInvite />
         `,
         methods: {
             navigateMenu(event) {
