@@ -1,4 +1,4 @@
-import { createApp, reactive } from "vue";
+import { createApp, reactive, computed } from "vue";
 import MenuRoot from "./MenuRoot.js";
 import MenuSlide from "./MenuSlide.js";
 import AcceptInvite from "./overlay/AcceptInvite.js";
@@ -54,6 +54,7 @@ export default function startUI() {
         provide() {
             return {
                 navigate: this.navigateMenu,
+                providedStore: computed(() => reactive(store)),
             };
         },
     });

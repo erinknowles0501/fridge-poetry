@@ -1,9 +1,48 @@
 import { userService } from "../../../services/api";
+import { computed, inject, ref } from "vue";
 
 export default {
+    setup() {
+        const hello = ref("hello!");
+        const test2 = computed(() => hello.value + "aaaa", {
+            onTrack(e) {
+                console.log("e", e);
+            },
+            onTrigger(e) {
+                console.log("e", e);
+            },
+        });
+
+        const providedStore = inject("providedStore");
+        console.log("providedStore", providedStore.value);
+
+        const storeTestColor = computed(
+            {
+                get: () => {
+                    return providedStore.value.user.displayColor;
+                },
+                set: (value) => {
+                    console.log("value", value);
+
+                    providedStore.value.user.displayColor = value;
+                },
+            },
+            {
+                onTrack(e) {
+                    console.log("store track", e);
+                },
+                onTrigger(e) {
+                    console.log("store trigger", e);
+                },
+            }
+        );
+        return { test2, storeTestColor };
+    },
+    // inject: ["providedStore"],
     data() {
         return {
             localDisplayName: "",
+            test: "erin",
         };
     },
     computed: {
@@ -19,8 +58,29 @@ export default {
 
             return hues;
         },
-        activeHue() {
-            return this.$store.user.displayColor;
+        activeHue: {
+            get() {
+                console.log("here get");
+                return this.$store.user.displayColor;
+            },
+            onTrack(e) {
+                console.log("here inactivehue", e);
+            },
+            onTrigger(e) {
+                console.log("here inactivehue", e);
+            },
+        },
+        getName: {
+            get() {
+                console.log("here getname");
+                return this.test;
+            },
+            onTrack() {
+                console.log("here getname track");
+            },
+            onTrigger() {
+                console.log("here in getname trigger");
+            },
         },
     },
     methods: {
@@ -43,15 +103,20 @@ export default {
                     this.$forceUpdate();
                 });
         },
-        setDisplayColor(hue) {
-            userService
-                .updateUser(this.$store.user.id, {
-                    displayColor: hue,
-                })
-                .then(() => {
-                    this.$forceUpdate();
-                });
-        },
+        // setDisplayColor(hue) {
+        //     console.log("here");
+        //     //this.$store.user.displayColor = hue;
+        //     console.log(
+        //         "this.$store.user.displayColor",
+        //         this.$store.user.displayColor
+        //     );
+
+        //     userService
+        //         .updateUser(this.$store.user.id, {
+        //             displayColor: hue,
+        //         })
+        //         .then(() => this.$forceUpdate);
+        // },
     },
     template: `
         <div>
@@ -68,14 +133,16 @@ export default {
                 
             </label>
 
+            {{ getName }}  {{test2}}
+
             <p class="label">Display color:</p>
 
-            <div class="display-color-selector">
+            <div class="display-color-selector" :key="storeTestColor">
                 <div 
                 v-for="hue in getDisplayColors" 
-                :class="['display-color-option', {'active': hue == activeHue}]" 
+                :class="['display-color-option', {'active': hue == storeTestColor}]" 
                 :style="'background: hsl(' + hue + 'deg 100% 50%)'"
-                @click="setDisplayColor(hue)"
+                @click="storeTestColor = hue"
                 > 
                 </div>
             </div>
