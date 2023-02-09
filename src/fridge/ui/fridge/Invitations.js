@@ -1,6 +1,7 @@
 import { invitationService } from "../../../services/api";
 
 export default {
+    inject: ["store"],
     data() {
         return {
             inviteEmail: "",
@@ -34,10 +35,10 @@ export default {
     `,
     created() {
         invitationService
-            .getInvitationsByFridge(this.$store.fridge.id)
+            .getInvitationsByFridge(this.store.fridge.id)
             .then((result) => (this.pendingInvites = result));
         invitationService
-            .getSentInvitesByUser(this.$store.user.id)
+            .getSentInvitesByUser(this.store.user.id)
             .then((result) => (this.userInvites = result));
     },
     methods: {
@@ -54,8 +55,8 @@ export default {
             this.isWorking = true;
             await invitationService.sendInvite(
                 this.inviteEmail,
-                this.$store.fridge.id,
-                this.$store.user.displayName
+                this.store.fridge.id,
+                this.store.user.displayName
             );
             this.isWorking = false;
             this.inviteEmail = "";

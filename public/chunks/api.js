@@ -14113,41 +14113,6 @@ class th {
     }
 }
 
-function eh(t) {
-    /**
- * Returns true if obj is an object and contains at least one of the specified
- * methods.
- */
-    return function(t, e) {
-        if ("object" != typeof t || null === t) return !1;
-        const n = t;
-        for (const t of e) if (t in n && "function" == typeof n[t]) return !0;
-        return !1;
-    }
-    /**
- * @license
- * Copyright 2020 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-    /**
- * Represents the task of loading a Firestore bundle. It provides progress of bundle
- * loading, as well as task completion and error events.
- *
- * The API is compatible with `Promise<LoadBundleTaskProgress>`.
- */ (t, [ "next", "error", "complete" ]);
-}
-
 /**
  * The Cloud Firestore service interface.
  *
@@ -15678,48 +15643,6 @@ function Kl(t, e, n, ...s) {
  */ function Ql(t, e) {
     const n = fa(t.firestore, ih), s = Aa(t), i = vl(t.converter, e);
     return zl(n, [ xh(Ch(t.firestore), "addDoc", s._key, i, null !== t.converter, {}).toMutation(s._key, Qn.exists(!1)) ]).then((() => s));
-}
-
-function jl(t, ...e) {
-    var n, s, i;
-    t = getModularInstance(t);
-    let r = {
-        includeMetadataChanges: !1
-    }, o = 0;
-    "object" != typeof e[o] || eh(e[o]) || (r = e[o], o++);
-    const u = {
-        includeMetadataChanges: r.includeMetadataChanges
-    };
-    if (eh(e[o])) {
-        const t = e[o];
-        e[o] = null === (n = t.next) || void 0 === n ? void 0 : n.bind(t), e[o + 1] = null === (s = t.error) || void 0 === s ? void 0 : s.bind(t), 
-        e[o + 2] = null === (i = t.complete) || void 0 === i ? void 0 : i.bind(t);
-    }
-    let c, a, h;
-    if (t instanceof ya) a = fa(t.firestore, ih), h = ln(t._key.path), c = {
-        next: n => {
-            e[o] && e[o](Hl(a, t, n));
-        },
-        error: e[o + 1],
-        complete: e[o + 2]
-    }; else {
-        const n = fa(t, pa);
-        a = fa(n.firestore, ih), h = n._query;
-        const s = new Ml(a);
-        c = {
-            next: t => {
-                e[o] && e[o](new xl(a, s, n, t));
-            },
-            error: e[o + 1],
-            complete: e[o + 2]
-        }, tl(t._query);
-    }
-    return function(t, e, n, s) {
-        const i = new va(s), r = new _c(e, i, n);
-        return t.asyncQueue.enqueueAndForget((async () => ac(await Ga(t), r))), () => {
-            i.bc(), t.asyncQueue.enqueueAndForget((async () => hc(await Ga(t), r)));
-        };
-    }(uh(a), h, u, c);
 }
 
 /**
@@ -22317,13 +22240,6 @@ class UserService {
         const docRef = Aa(db, "users", id);
         const docSnap = await Ol(docRef);
         return { ...docSnap.data(), id: docSnap.id };
-    }
-
-    handleCurrentUserDataChange(handler) {
-        jl(
-            Aa(db, "users", this.auth.currentUser.uid),
-            handler
-        );
     }
 
     async updateUser(id, data) {

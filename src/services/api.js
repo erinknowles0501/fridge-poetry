@@ -189,13 +189,6 @@ class UserService {
         return { ...docSnap.data(), id: docSnap.id };
     }
 
-    handleCurrentUserDataChange(handler) {
-        const unsub = onSnapshot(
-            doc(db, "users", this.auth.currentUser.uid),
-            handler
-        );
-    }
-
     async updateUser(id, data) {
         const docRef = doc(db, "users", id);
         await updateDoc(docRef, data);

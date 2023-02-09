@@ -1,7 +1,8 @@
 export default {
+    inject: ["store"],
     computed: {
         colorValue() {
-            return `hsl(${this.$store.user.displayColor}deg 100% 50%)`;
+            return `hsl(${this.store.user.displayColor}deg 100% 50%)`;
         },
     },
     template: `

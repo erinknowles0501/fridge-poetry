@@ -16,8 +16,4 @@ onresize = () => {
     ({ x: store.scale.x, y: store.scale.y } = scaleApp(store.appEl));
 };
 
-services.userService.handleCurrentUserDataChange(
-    store.initialize.bind(store, services)
-);
-
 startUI();

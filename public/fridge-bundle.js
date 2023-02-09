@@ -1,5 +1,5 @@
-import { w as wordService, u as userService, f as fridgeService, p as permissionService, i as invitationService, a as authService, P as PERMISSION_GROUPS, b as PERMISSIONS_NAMES, s as services, c as scaleApp } from './chunks/api.js';
-import { ref, computed, inject, createApp, reactive } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+import { w as wordService, f as fridgeService, p as permissionService, i as invitationService, u as userService, a as authService, P as PERMISSION_GROUPS, b as PERMISSIONS_NAMES, s as services, c as scaleApp } from './chunks/api.js';
+import { computed, reactive, createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 function setElementPosition(element, positionY, positionX) {
     element.style.top = positionY + "px";
@@ -32,18 +32,38 @@ class Store {
             this.fridge.id
         );
 
-        this.user = await this.services.userService.getUserByID(
+        this._user = await this.services.userService.getUserByID(
             this.services.authService.auth.currentUser.uid
         );
-        this.user.permissions =
+        this._user.permissions =
             await this.services.permissionService.getPermissionsByUserAndFridge(
-                this.user.id,
+                this._user.id,
                 this.fridge.id
             );
+        this.makeUpdateProxy(
+            this._user,
+            this,
+            "user",
+            services.userService.updateUser
+        );
     }
 
     clear() {
         Object.assign(this, new Store()); // TODO double check this...
+    }
+
+    makeUpdateProxy(plainObj, target, key, update) {
+        const proxy = new Proxy(plainObj, {
+            set(obj, prop, value) {
+                if (obj.id) {
+                    update(obj.id, {
+                        [prop]: value,
+                    });
+                }
+                return Reflect.set(...arguments);
+            },
+        });
+        target[key] = proxy;
     }
 }
 
@@ -110,9 +130,10 @@ function addAppDragListeners() {
 }
 
 var UserColorDisplay = {
+    inject: ["store"],
     computed: {
         colorValue() {
-            return `hsl(${this.$store.user.displayColor}deg 100% 50%)`;
+            return `hsl(${this.store.user.displayColor}deg 100% 50%)`;
         },
     },
     template: `
@@ -123,13 +144,13 @@ var UserColorDisplay = {
 var User = {
     name: "user",
     props: ["isOpen", "menuItems"],
-    inject: ["navigate"],
+    inject: ["navigate", "store"],
     components: { UserColorDisplay },
     template: `
     <div class="user">
-        <h3 class="user-name" v-if="!isOpen"><UserColorDisplay/>{{ $store.user.displayName }}</h3>
+        <h3 class="user-name" v-if="!isOpen"><UserColorDisplay/>{{ store.user.displayName }}</h3>
         <div class="menu" style="margin-top: 3rem;" v-else>
-            <div class="menu-title">Logged in as <div style="display: inline-block"><UserColorDisplay/><span>{{ $store.user.displayName }}</span></div></div>
+            <div class="menu-title">Logged in as <div style="display: inline-block"><UserColorDisplay/><span>{{ store.user?.displayName }}</span></div></div>
             <a v-for="link in menuItems" @click.prevent="navigate(link)" href="#">{{link.title}}</a>
         </div>
     </div>
@@ -139,10 +160,10 @@ var User = {
 var Fridge = {
     name: "fridge",
     props: ["isOpen", "menuItems"],
-    inject: ["navigate"],
+    inject: ["navigate", "store"],
     template: `
     <div class="fridge">
-        <h2 :class="['fridge-name', {'ellipsis-overflow': !isOpen}]">{{ $store.fridge.info.name }}</h2>
+        <h2 :class="['fridge-name', {'ellipsis-overflow': !isOpen}]">{{ store.fridge.info.name }}</h2>
         <div v-if="isOpen" class="menu">
             <a v-for="link in menuItems" @click.prevent="navigate(link)" href="#">{{link.title}}</a>
         </div>
@@ -162,47 +183,10 @@ var MenuRoot = {
 };
 
 var UserSettings = {
-    setup() {
-        const hello = ref("hello!");
-        const test2 = computed(() => hello.value + "aaaa", {
-            onTrack(e) {
-                console.log("e", e);
-            },
-            onTrigger(e) {
-                console.log("e", e);
-            },
-        });
-
-        const providedStore = inject("providedStore");
-        console.log("providedStore", providedStore.value);
-
-        const storeTestColor = computed(
-            {
-                get: () => {
-                    return providedStore.value.user.displayColor;
-                },
-                set: (value) => {
-                    console.log("value", value);
-
-                    providedStore.value.user.displayColor = value;
-                },
-            },
-            {
-                onTrack(e) {
-                    console.log("store track", e);
-                },
-                onTrigger(e) {
-                    console.log("store trigger", e);
-                },
-            }
-        );
-        return { test2, storeTestColor };
-    },
-    // inject: ["providedStore"],
+    inject: ["store"],
     data() {
         return {
             localDisplayName: "",
-            test: "erin",
         };
     },
     computed: {
@@ -218,30 +202,6 @@ var UserSettings = {
 
             return hues;
         },
-        activeHue: {
-            get() {
-                console.log("here get");
-                return this.$store.user.displayColor;
-            },
-            onTrack(e) {
-                console.log("here inactivehue", e);
-            },
-            onTrigger(e) {
-                console.log("here inactivehue", e);
-            },
-        },
-        getName: {
-            get() {
-                console.log("here getname");
-                return this.test;
-            },
-            onTrack() {
-                console.log("here getname track");
-            },
-            onTrigger() {
-                console.log("here in getname trigger");
-            },
-        },
     },
     methods: {
         setDisplayName() {
@@ -252,31 +212,9 @@ var UserSettings = {
             );
 
             this.$refs.displayName.blur();
-            this.$store.user.displayName = tempValue;
+            this.store.user.displayName = tempValue;
             this.localDisplayName = "";
-
-            userService
-                .updateUser(this.$store.user.id, {
-                    displayName: tempValue,
-                })
-                .then(() => {
-                    this.$forceUpdate();
-                });
         },
-        // setDisplayColor(hue) {
-        //     console.log("here");
-        //     //this.$store.user.displayColor = hue;
-        //     console.log(
-        //         "this.$store.user.displayColor",
-        //         this.$store.user.displayColor
-        //     );
-
-        //     userService
-        //         .updateUser(this.$store.user.id, {
-        //             displayColor: hue,
-        //         })
-        //         .then(() => this.$forceUpdate);
-        // },
     },
     template: `
         <div>
@@ -285,24 +223,22 @@ var UserSettings = {
                 <input 
                 ref="displayName" 
                 type="text" 
-                @click="localDisplayName = $store.user.displayName" 
-                :placeholder="$store.user.displayName" 
+                @click="localDisplayName = store.user.displayName" 
+                :placeholder="store.user.displayName" 
                 v-model="localDisplayName" 
                 @keyup.enter="setDisplayName" 
                 autofocus />
                 
             </label>
 
-            {{ getName }}  {{test2}}
-
             <p class="label">Display color:</p>
 
-            <div class="display-color-selector" :key="storeTestColor">
+            <div class="display-color-selector">
                 <div 
                 v-for="hue in getDisplayColors" 
-                :class="['display-color-option', {'active': hue == storeTestColor}]" 
+                :class="['display-color-option', {'active': hue == store.user.displayColor}]" 
                 :style="'background: hsl(' + hue + 'deg 100% 50%)'"
-                @click="storeTestColor = hue"
+                @click="store.user.displayColor = hue"
                 > 
                 </div>
             </div>
@@ -311,11 +247,10 @@ var UserSettings = {
 };
 
 var FridgeSettings = {
+    inject: ["store"],
     data() {
         return {
-            localFridgeInfo: JSON.parse(
-                JSON.stringify(this.$store.fridge.info)
-            ),
+            localFridgeInfo: JSON.parse(JSON.stringify(this.store.fridge.info)),
             isDeleting: false,
             deleteConfirmation: "",
             disableDeletionField: false,
@@ -372,8 +307,8 @@ var FridgeSettings = {
             const data = {
                 ...this.localFridgeInfo,
             };
-            await fridgeService.updateFridge(this.$store.fridge.id, data);
-            this.$store.fridge.info = data;
+            await fridgeService.updateFridge(this.store.fridge.id, data);
+            this.store.fridge.info = data;
             this.$forceUpdate();
         },
         startDeleting() {
@@ -389,14 +324,14 @@ var FridgeSettings = {
 
                 const permissionRefs =
                     await permissionService.getPermissionRefsByFridge(
-                        this.$store.fridge.id
+                        this.store.fridge.id
                     );
 
                 permissionRefs.forEach((ref) => {
                     permissionService.delete(ref.id);
                 });
 
-                await fridgeService.deleteFridge(this.$store.fridge.id);
+                await fridgeService.deleteFridge(this.store.fridge.id);
                 window.location = "/";
             }
         },
@@ -404,6 +339,7 @@ var FridgeSettings = {
 };
 
 var Invitations = {
+    inject: ["store"],
     data() {
         return {
             inviteEmail: "",
@@ -437,10 +373,10 @@ var Invitations = {
     `,
     created() {
         invitationService
-            .getInvitationsByFridge(this.$store.fridge.id)
+            .getInvitationsByFridge(this.store.fridge.id)
             .then((result) => (this.pendingInvites = result));
         invitationService
-            .getSentInvitesByUser(this.$store.user.id)
+            .getSentInvitesByUser(this.store.user.id)
             .then((result) => (this.userInvites = result));
     },
     methods: {
@@ -457,8 +393,8 @@ var Invitations = {
             this.isWorking = true;
             await invitationService.sendInvite(
                 this.inviteEmail,
-                this.$store.fridge.id,
-                this.$store.user.displayName
+                this.store.fridge.id,
+                this.store.user.displayName
             );
             this.isWorking = false;
             this.inviteEmail = "";
@@ -487,6 +423,7 @@ var MenuSlide = {
 };
 
 var AcceptInvite = {
+    inject: ["store"],
     data() {
         return {
             isActive: false,
@@ -497,7 +434,7 @@ var AcceptInvite = {
         <div>
             <div class="overlay-wrap" v-if="isActive">
                 <div class="modal">
-                    <h2>Join '{{$store.fridge.info.name}}'?</h2>
+                    <h2>Join '{{store.fridge.info.name}}'?</h2>
                     <p>
                         {{invite?.fromDisplayName || 'A user' }} has invited you to join this fridge. Accept this invitation?
                     </p>
@@ -537,7 +474,7 @@ var AcceptInvite = {
                 );
         },
         async acceptInvite() {
-            if (this.invite.fridgeID !== this.$store.fridge.id) {
+            if (this.invite.fridgeID !== this.store.fridge.id) {
                 // TODO Error
                 console.error("This invitation is for a different fridge");
                 return;
@@ -550,7 +487,7 @@ var AcceptInvite = {
 
             await invitationService.acceptInvitation(this.invite.id);
             await permissionService.create(
-                this.$store.fridge.id,
+                this.store.fridge.id,
                 authService.auth.currentUser.uid,
                 [...PERMISSION_GROUPS.OPTIONAL]
             );
@@ -616,6 +553,8 @@ var menuItems = {
     ],
 };
 
+const reactiveStore = computed(() => reactive(store)).value;
+
 function startUI() {
     const app = createApp({
         components: { MenuRoot, MenuSlide, AcceptInvite },
@@ -627,13 +566,12 @@ function startUI() {
         },
         computed: {
             filteredMenuItems() {
-                const vm = this;
                 function filterMenuItem(item) {
                     if (!item.permissions) {
                         return true;
                     }
                     return item.permissions.showIfIn?.some((showPermission) =>
-                        vm.$store.user.permissions.includes(showPermission)
+                        reactiveStore.user.permissions.includes(showPermission)
                     );
                 }
 
@@ -664,12 +602,12 @@ function startUI() {
         provide() {
             return {
                 navigate: this.navigateMenu,
-                providedStore: computed(() => reactive(store)),
+                store: reactiveStore,
             };
         },
     });
 
-    app.config.globalProperties.$store = reactive(store);
+    app.config.unwrapInjectedRef = true;
 
     app.mount("#app-ui-wrap");
 }
@@ -685,9 +623,5 @@ store.scale = scaleApp(store.appEl);
 onresize = () => {
     ({ x: store.scale.x, y: store.scale.y } = scaleApp(store.appEl));
 };
-
-userService.handleCurrentUserDataChange(
-    store.initialize.bind(store, services)
-);
 
 startUI();

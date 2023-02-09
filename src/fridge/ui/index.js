@@ -5,6 +5,7 @@ import AcceptInvite from "./overlay/AcceptInvite.js";
 
 import menuItems from "./menuItems.js";
 import store from "../store.js";
+const reactiveStore = computed(() => reactive(store)).value;
 
 export default function startUI() {
     const app = createApp({
@@ -17,13 +18,12 @@ export default function startUI() {
         },
         computed: {
             filteredMenuItems() {
-                const vm = this;
                 function filterMenuItem(item) {
                     if (!item.permissions) {
                         return true;
                     }
                     return item.permissions.showIfIn?.some((showPermission) =>
-                        vm.$store.user.permissions.includes(showPermission)
+                        reactiveStore.user.permissions.includes(showPermission)
                     );
                 }
 
@@ -54,12 +54,12 @@ export default function startUI() {
         provide() {
             return {
                 navigate: this.navigateMenu,
-                providedStore: computed(() => reactive(store)),
+                store: reactiveStore,
             };
         },
     });
 
-    app.config.globalProperties.$store = reactive(store);
+    app.config.unwrapInjectedRef = true;
 
     app.mount("#app-ui-wrap");
 }

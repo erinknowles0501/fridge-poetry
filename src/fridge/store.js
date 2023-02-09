@@ -24,18 +24,38 @@ class Store {
             this.fridge.id
         );
 
-        this.user = await this.services.userService.getUserByID(
+        this._user = await this.services.userService.getUserByID(
             this.services.authService.auth.currentUser.uid
         );
-        this.user.permissions =
+        this._user.permissions =
             await this.services.permissionService.getPermissionsByUserAndFridge(
-                this.user.id,
+                this._user.id,
                 this.fridge.id
             );
+        this.makeUpdateProxy(
+            this._user,
+            this,
+            "user",
+            services.userService.updateUser
+        );
     }
 
     clear() {
         Object.assign(this, new Store()); // TODO double check this...
+    }
+
+    makeUpdateProxy(plainObj, target, key, update) {
+        const proxy = new Proxy(plainObj, {
+            set(obj, prop, value) {
+                if (obj.id) {
+                    update(obj.id, {
+                        [prop]: value,
+                    });
+                }
+                return Reflect.set(...arguments);
+            },
+        });
+        target[key] = proxy;
     }
 }
 
