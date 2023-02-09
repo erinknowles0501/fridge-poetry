@@ -20,7 +20,7 @@ export default {
             return hues;
         },
         activeHue() {
-            return this.store.user.displayColor;
+            return this.$store.user.displayColor;
         },
     },
     methods: {
@@ -32,11 +32,11 @@ export default {
             );
 
             this.$refs.displayName.blur();
-            this.store.user.displayName = tempValue;
+            this.$store.user.displayName = tempValue;
             this.localDisplayName = "";
 
             userService
-                .updateUser(this.store.user.id, {
+                .updateUser(this.$store.user.id, {
                     displayName: tempValue,
                 })
                 .then(() => {
@@ -45,7 +45,7 @@ export default {
         },
         setDisplayColor(hue) {
             userService
-                .updateUser(this.store.user.id, {
+                .updateUser(this.$store.user.id, {
                     displayColor: hue,
                 })
                 .then(() => {
@@ -60,8 +60,8 @@ export default {
                 <input 
                 ref="displayName" 
                 type="text" 
-                @click="localDisplayName = store.user.displayName" 
-                :placeholder="store.user.displayName" 
+                @click="localDisplayName = $store.user.displayName" 
+                :placeholder="$store.user.displayName" 
                 v-model="localDisplayName" 
                 @keyup.enter="setDisplayName" 
                 autofocus />

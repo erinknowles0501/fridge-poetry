@@ -17,12 +17,13 @@ export default function startUI() {
         },
         computed: {
             filteredMenuItems() {
+                const vm = this;
                 function filterMenuItem(item) {
                     if (!item.permissions) {
                         return true;
                     }
                     return item.permissions.showIfIn?.some((showPermission) =>
-                        store.user.permissions.includes(showPermission)
+                        vm.$store.user.permissions.includes(showPermission)
                     );
                 }
 
@@ -57,7 +58,7 @@ export default function startUI() {
         },
     });
 
-    app.config.globalProperties.store = reactive(store);
+    app.config.globalProperties.$store = reactive(store);
 
     app.mount("#app-ui-wrap");
 }

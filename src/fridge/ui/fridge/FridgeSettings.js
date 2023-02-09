@@ -1,11 +1,10 @@
-import { default as externalStore } from "../../store";
 import { fridgeService, permissionService } from "../../../services/api";
 
 export default {
     data() {
         return {
             localFridgeInfo: JSON.parse(
-                JSON.stringify(externalStore.fridge.info)
+                JSON.stringify(this.$store.fridge.info)
             ),
             isDeleting: false,
             deleteConfirmation: "",
@@ -63,8 +62,8 @@ export default {
             const data = {
                 ...this.localFridgeInfo,
             };
-            await fridgeService.updateFridge(externalStore.fridge.id, data);
-            externalStore.fridge.info = data;
+            await fridgeService.updateFridge(this.$store.fridge.id, data);
+            this.$store.fridge.info = data;
             this.$forceUpdate();
         },
         startDeleting() {
@@ -80,14 +79,14 @@ export default {
 
                 const permissionRefs =
                     await permissionService.getPermissionRefsByFridge(
-                        externalStore.fridge.id
+                        this.$store.fridge.id
                     );
 
                 permissionRefs.forEach((ref) => {
                     permissionService.delete(ref.id);
                 });
 
-                await fridgeService.deleteFridge(externalStore.fridge.id);
+                await fridgeService.deleteFridge(this.$store.fridge.id);
                 window.location = "/";
             }
         },

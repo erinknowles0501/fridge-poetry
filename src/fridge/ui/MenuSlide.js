@@ -12,7 +12,7 @@ export default {
             <a href="#" @click.prevent="navigate('root')" class="back">&lt;</a>
             <h3 class="menu-title">{{ activeLink.title }}</h3>
         </div>
-        <component v-if="isOpen" :is="activeLink.componentName" :activeLink="activeLink" />
+        <component v-show="isOpen" :is="activeLink.componentName" :activeLink="activeLink" />
     </div>
     `,
 };

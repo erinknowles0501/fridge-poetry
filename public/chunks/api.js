@@ -22183,7 +22183,6 @@ class AuthService {
     handleAuthStateChanged(handler) {
         onAuthStateChanged(this.auth, (user) => {
             if (user) {
-                this.user = user;
                 handler(user);
             }
         });
@@ -22320,14 +22319,10 @@ class UserService {
         return { ...docSnap.data(), id: docSnap.id };
     }
 
-    handleCurrentUserDataChange(updateWith) {
+    handleCurrentUserDataChange(handler) {
         jl(
             Aa(db, "users", this.auth.currentUser.uid),
-            (doc) => {
-                const data = doc.data();
-                data.id = doc.id;
-                updateWith(data);
-            }
+            handler
         );
     }
 
@@ -22365,7 +22360,7 @@ class InvitationService {
         await Ul(newInviteRef, {
             to: email,
             message: {
-                // Required for firestore-send-email integration
+                // 'message' property required for firestore-send-email integration
                 subject: `${senderDisplayName} has invited you to join a fridge on FridgePoetry!`,
                 html: `
         <h2>You've been invited</h2>
@@ -22390,6 +22385,18 @@ class InvitationService {
         await Kl(Aa(db, this.collectionName, inviteID), {
             status: INVITATION_STATUSES.ACCEPTED,
         });
+    }
+
+    async getInvitationsByFridge(fridgeID) {
+        const q = sl(this.collection, rl("fridgeID", "==", fridgeID));
+        const docs = await Bl(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+
+    async getSentInvitesByUser(userID) {
+        const q = sl(this.collection, rl("fromID", "==", userID));
+        const docs = await Bl(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     }
 }
 const invitationService = new InvitationService(authService.auth);
@@ -22419,20 +22426,21 @@ class PermissionService {
     }
 
     async getPermissionsByUserAndFridge(userID, fridgeID) {
-        // TODO: where(userID == userID), where(fridgeID == fridgeID)??
-        const userPermissions = await this.getPermissionsByUser(userID);
-        const userFridgePermissions = userPermissions.find(
-            (entry) => entry.fridgeID == fridgeID
-        ).permissions;
-        return userFridgePermissions;
+        const q = sl(
+            this.collection,
+            rl("fridgeID", "==", fridgeID),
+            rl("userID", "==", userID)
+        );
+        const docs = await Bl(q);
+        if (docs.docs.length > 0) {
+            return docs.docs[0].data().permissions;
+        } else {
+            return false;
+        }
     }
 
     async writeInvitedPermission(userID, fridgeID) {
-        await Ql(this.collection, {
-            fridgeID: fridgeID,
-            userID: userID,
-            permissions: [...PERMISSIONS_NAMES.INVITED],
-        });
+        await this.create(fridgeID, userID, [PERMISSIONS_NAMES.INVITED]);
     }
 
     async create(fridgeID, userID, permissionArr) {

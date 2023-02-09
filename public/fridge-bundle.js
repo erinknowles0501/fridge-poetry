@@ -1,5 +1,5 @@
 import { w as wordService, u as userService, f as fridgeService, p as permissionService, i as invitationService, a as authService, P as PERMISSION_GROUPS, b as PERMISSIONS_NAMES, s as services, c as scaleApp } from './chunks/api.js';
-import { createApp, reactive } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 function setElementPosition(element, positionY, positionX) {
     element.style.top = positionY + "px";
@@ -16,46 +16,34 @@ class Store {
     currentDrag = { el: null, offset: { x: 0, y: 0 } };
     user = null;
     services = {};
+    id = Date.now();
 
     async initialize(services) {
-        return new Promise(async (resolve) => {
-            this.clear();
+        this.clear();
 
-            this.services = services;
-            this.appEl = document.querySelector("#app");
+        this.services = services;
+        this.appEl = document.querySelector("#app");
 
-            this.fridge.id = window.location.pathname.slice(1);
-            this.fridge.info = await this.services.fridgeService.getFridgeByID(
+        this.fridge.id = window.location.pathname.slice(1);
+        this.fridge.info = await this.services.fridgeService.getFridgeByID(
+            this.fridge.id
+        );
+        this.fridge.words = await this.services.wordService.getWordsByFridge(
+            this.fridge.id
+        );
+
+        this.user = await this.services.userService.getUserByID(
+            this.services.authService.auth.currentUser.uid
+        );
+        this.user.permissions =
+            await this.services.permissionService.getPermissionsByUserAndFridge(
+                this.user.id,
                 this.fridge.id
             );
-            this.fridge.words =
-                await this.services.wordService.getWordsByFridge(
-                    this.fridge.id
-                );
-
-            this.user = await this.services.userService.getUserByID(
-                this.services.authService.auth.currentUser.uid
-            );
-            this.user.permissions =
-                await this.services.permissionService.getPermissionsByUserAndFridge(
-                    this.user.id,
-                    this.fridge.id
-                );
-
-            resolve();
-        });
     }
 
     clear() {
-        // TODO double check this...
-        Object.assign(this, new Store());
-    }
-
-    watchCurrentUserState() {
-        // Update user and UI on user changes
-        this.services.userService.handleCurrentUserDataChange(
-            (data) => (this.user = data)
-        );
+        Object.assign(this, new Store()); // TODO double check this...
     }
 }
 
@@ -124,7 +112,7 @@ function addAppDragListeners() {
 var UserColorDisplay = {
     computed: {
         colorValue() {
-            return `hsl(${this.store.user.displayColor}deg 100% 50%)`;
+            return `hsl(${this.$store.user.displayColor}deg 100% 50%)`;
         },
     },
     template: `
@@ -139,9 +127,9 @@ var User = {
     components: { UserColorDisplay },
     template: `
     <div class="user">
-        <h3 class="user-name" v-if="!isOpen"><UserColorDisplay/>{{ this.store.user.displayName }}</h3>
+        <h3 class="user-name" v-if="!isOpen"><UserColorDisplay/>{{ $store.user.displayName }}</h3>
         <div class="menu" style="margin-top: 3rem;" v-else>
-            <div class="menu-title">Logged in as <div style="display: inline-block"><UserColorDisplay/><span>{{ this.store.user.displayName }}</span></div></div>
+            <div class="menu-title">Logged in as <div style="display: inline-block"><UserColorDisplay/><span>{{ $store.user.displayName }}</span></div></div>
             <a v-for="link in menuItems" @click.prevent="navigate(link)" href="#">{{link.title}}</a>
         </div>
     </div>
@@ -154,7 +142,7 @@ var Fridge = {
     inject: ["navigate"],
     template: `
     <div class="fridge">
-        <h2 :class="['fridge-name', {'ellipsis-overflow': !isOpen}]">{{ this.store.fridge.info.name }}</h2>
+        <h2 :class="['fridge-name', {'ellipsis-overflow': !isOpen}]">{{ $store.fridge.info.name }}</h2>
         <div v-if="isOpen" class="menu">
             <a v-for="link in menuItems" @click.prevent="navigate(link)" href="#">{{link.title}}</a>
         </div>
@@ -193,7 +181,7 @@ var UserSettings = {
             return hues;
         },
         activeHue() {
-            return this.store.user.displayColor;
+            return this.$store.user.displayColor;
         },
     },
     methods: {
@@ -205,11 +193,11 @@ var UserSettings = {
             );
 
             this.$refs.displayName.blur();
-            this.store.user.displayName = tempValue;
+            this.$store.user.displayName = tempValue;
             this.localDisplayName = "";
 
             userService
-                .updateUser(this.store.user.id, {
+                .updateUser(this.$store.user.id, {
                     displayName: tempValue,
                 })
                 .then(() => {
@@ -218,7 +206,7 @@ var UserSettings = {
         },
         setDisplayColor(hue) {
             userService
-                .updateUser(this.store.user.id, {
+                .updateUser(this.$store.user.id, {
                     displayColor: hue,
                 })
                 .then(() => {
@@ -233,8 +221,8 @@ var UserSettings = {
                 <input 
                 ref="displayName" 
                 type="text" 
-                @click="localDisplayName = store.user.displayName" 
-                :placeholder="store.user.displayName" 
+                @click="localDisplayName = $store.user.displayName" 
+                :placeholder="$store.user.displayName" 
                 v-model="localDisplayName" 
                 @keyup.enter="setDisplayName" 
                 autofocus />
@@ -260,7 +248,7 @@ var FridgeSettings = {
     data() {
         return {
             localFridgeInfo: JSON.parse(
-                JSON.stringify(store.fridge.info)
+                JSON.stringify(this.$store.fridge.info)
             ),
             isDeleting: false,
             deleteConfirmation: "",
@@ -318,8 +306,8 @@ var FridgeSettings = {
             const data = {
                 ...this.localFridgeInfo,
             };
-            await fridgeService.updateFridge(store.fridge.id, data);
-            store.fridge.info = data;
+            await fridgeService.updateFridge(this.$store.fridge.id, data);
+            this.$store.fridge.info = data;
             this.$forceUpdate();
         },
         startDeleting() {
@@ -335,14 +323,14 @@ var FridgeSettings = {
 
                 const permissionRefs =
                     await permissionService.getPermissionRefsByFridge(
-                        store.fridge.id
+                        this.$store.fridge.id
                     );
 
                 permissionRefs.forEach((ref) => {
                     permissionService.delete(ref.id);
                 });
 
-                await fridgeService.deleteFridge(store.fridge.id);
+                await fridgeService.deleteFridge(this.$store.fridge.id);
                 window.location = "/";
             }
         },
@@ -352,21 +340,66 @@ var FridgeSettings = {
 var Invitations = {
     data() {
         return {
-            inviteEmail: "@x.com",
+            inviteEmail: "",
+            isWorking: false,
+            pendingInvites: [],
+            userInvites: [],
+            isEditing: true,
         };
+    },
+    computed: {
+        canEditAll() {
+            return true;
+        },
     },
     template: `
     <div>
-        <input type="email" placeholder="@x.com" v-model="inviteEmail" />
-        <button @click="sendInvite">Send</button>
+        <label class="label">
+            <p>Email to send invitation to: </p>
+            <input type="email" v-model="inviteEmail" @keyup.enter="sendInvite" :disabled="isWorking" />
+        </label>
+        <button @click="sendInvite" style="margin-top: 0.5rem">Send</button>
+
+        <p class="label">Pending invites:</p>
+        <div style="display: flex" v-for="invite in pendingInvites" v-if="pendingInvites">
+            <p>{{invite.to}}</p>
+            <button v-if="isEditing && (canEditAll || canEditOne(invite.id))">X</button>
+        </div>
+        <div v-else>No invites to show.</div>
+
     </div>
     `,
+    created() {
+        invitationService
+            .getInvitationsByFridge(this.$store.fridge.id)
+            .then((result) => (this.pendingInvites = result));
+        invitationService
+            .getSentInvitesByUser(this.$store.user.id)
+            .then((result) => (this.userInvites = result));
+    },
     methods: {
-        sendInvite() {
-            invitationService.sendInvite(
+        async sendInvite() {
+            if (
+                !this.inviteEmail ||
+                !this.inviteEmail.includes("@") ||
+                !this.inviteEmail.includes(".")
+            ) {
+                // TODO Errors
+                return;
+            }
+
+            this.isWorking = true;
+            await invitationService.sendInvite(
                 this.inviteEmail,
-                this.store.fridge.id,
-                this.store.user.displayName
+                this.$store.fridge.id,
+                this.$store.user.displayName
+            );
+            this.isWorking = false;
+            this.inviteEmail = "";
+        },
+        canEditOne(inviteID) {
+            return this.userInvites.includes(
+                (invite) => invite.id === inviteID
             );
         },
     },
@@ -382,7 +415,7 @@ var MenuSlide = {
             <a href="#" @click.prevent="navigate('root')" class="back">&lt;</a>
             <h3 class="menu-title">{{ activeLink.title }}</h3>
         </div>
-        <component v-if="isOpen" :is="activeLink.componentName" :activeLink="activeLink" />
+        <component v-show="isOpen" :is="activeLink.componentName" :activeLink="activeLink" />
     </div>
     `,
 };
@@ -398,7 +431,7 @@ var AcceptInvite = {
         <div>
             <div class="overlay-wrap" v-if="isActive">
                 <div class="modal">
-                    <h2>Join '{{store.fridge.info.name}}'?</h2>
+                    <h2>Join '{{$store.fridge.info.name}}'?</h2>
                     <p>
                         {{invite?.fromDisplayName || 'A user' }} has invited you to join this fridge. Accept this invitation?
                     </p>
@@ -438,7 +471,7 @@ var AcceptInvite = {
                 );
         },
         async acceptInvite() {
-            if (this.invite.fridgeID !== this.store.fridge.id) {
+            if (this.invite.fridgeID !== this.$store.fridge.id) {
                 // TODO Error
                 console.error("This invitation is for a different fridge");
                 return;
@@ -451,7 +484,7 @@ var AcceptInvite = {
 
             await invitationService.acceptInvitation(this.invite.id);
             await permissionService.create(
-                this.store.fridge.id,
+                this.$store.fridge.id,
                 authService.auth.currentUser.uid,
                 [...PERMISSION_GROUPS.OPTIONAL]
             );
@@ -528,12 +561,13 @@ function startUI() {
         },
         computed: {
             filteredMenuItems() {
+                const vm = this;
                 function filterMenuItem(item) {
                     if (!item.permissions) {
                         return true;
                     }
                     return item.permissions.showIfIn?.some((showPermission) =>
-                        store.user.permissions.includes(showPermission)
+                        vm.$store.user.permissions.includes(showPermission)
                     );
                 }
 
@@ -568,7 +602,7 @@ function startUI() {
         },
     });
 
-    app.config.globalProperties.store = reactive(store);
+    app.config.globalProperties.$store = store;
 
     app.mount("#app-ui-wrap");
 }
@@ -585,6 +619,8 @@ onresize = () => {
     ({ x: store.scale.x, y: store.scale.y } = scaleApp(store.appEl));
 };
 
-store.watchCurrentUserState();
+userService.handleCurrentUserDataChange(
+    store.initialize.bind(store, services)
+);
 
 startUI();

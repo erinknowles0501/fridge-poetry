@@ -17,7 +17,7 @@ export default {
         <div>
             <div class="overlay-wrap" v-if="isActive">
                 <div class="modal">
-                    <h2>Join '{{store.fridge.info.name}}'?</h2>
+                    <h2>Join '{{$store.fridge.info.name}}'?</h2>
                     <p>
                         {{invite?.fromDisplayName || 'A user' }} has invited you to join this fridge. Accept this invitation?
                     </p>
@@ -57,7 +57,7 @@ export default {
                 );
         },
         async acceptInvite() {
-            if (this.invite.fridgeID !== this.store.fridge.id) {
+            if (this.invite.fridgeID !== this.$store.fridge.id) {
                 // TODO Error
                 console.error("This invitation is for a different fridge");
                 return;
@@ -70,7 +70,7 @@ export default {
 
             await invitationService.acceptInvitation(this.invite.id);
             await permissionService.create(
-                this.store.fridge.id,
+                this.$store.fridge.id,
                 authService.auth.currentUser.uid,
                 [...PERMISSION_GROUPS.OPTIONAL]
             );

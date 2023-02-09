@@ -51,7 +51,6 @@ class AuthService {
     handleAuthStateChanged(handler) {
         onAuthStateChanged(this.auth, (user) => {
             if (user) {
-                this.user = user;
                 handler(user);
             } else {
                 // TODO
@@ -190,14 +189,10 @@ class UserService {
         return { ...docSnap.data(), id: docSnap.id };
     }
 
-    handleCurrentUserDataChange(updateWith) {
+    handleCurrentUserDataChange(handler) {
         const unsub = onSnapshot(
             doc(db, "users", this.auth.currentUser.uid),
-            (doc) => {
-                const data = doc.data();
-                data.id = doc.id;
-                updateWith(data);
-            }
+            handler
         );
     }
 
@@ -235,7 +230,7 @@ class InvitationService {
         await setDoc(newInviteRef, {
             to: email,
             message: {
-                // Required for firestore-send-email integration
+                // 'message' property required for firestore-send-email integration
                 subject: `${senderDisplayName} has invited you to join a fridge on FridgePoetry!`,
                 html: `
         <h2>You've been invited</h2>
@@ -260,6 +255,18 @@ class InvitationService {
         await updateDoc(doc(db, this.collectionName, inviteID), {
             status: INVITATION_STATUSES.ACCEPTED,
         });
+    }
+
+    async getInvitationsByFridge(fridgeID) {
+        const q = query(this.collection, where("fridgeID", "==", fridgeID));
+        const docs = await getDocs(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+
+    async getSentInvitesByUser(userID) {
+        const q = query(this.collection, where("fromID", "==", userID));
+        const docs = await getDocs(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     }
 }
 export const invitationService = new InvitationService(authService.auth);
@@ -289,20 +296,21 @@ class PermissionService {
     }
 
     async getPermissionsByUserAndFridge(userID, fridgeID) {
-        // TODO: where(userID == userID), where(fridgeID == fridgeID)??
-        const userPermissions = await this.getPermissionsByUser(userID);
-        const userFridgePermissions = userPermissions.find(
-            (entry) => entry.fridgeID == fridgeID
-        ).permissions;
-        return userFridgePermissions;
+        const q = query(
+            this.collection,
+            where("fridgeID", "==", fridgeID),
+            where("userID", "==", userID)
+        );
+        const docs = await getDocs(q);
+        if (docs.docs.length > 0) {
+            return docs.docs[0].data().permissions;
+        } else {
+            return false;
+        }
     }
 
     async writeInvitedPermission(userID, fridgeID) {
-        await addDoc(this.collection, {
-            fridgeID: fridgeID,
-            userID: userID,
-            permissions: [...PERMISSIONS_NAMES.INVITED],
-        });
+        await this.create(fridgeID, userID, [PERMISSIONS_NAMES.INVITED]);
     }
 
     async create(fridgeID, userID, permissionArr) {
