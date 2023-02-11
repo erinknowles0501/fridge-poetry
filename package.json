@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --no-cache --silent=false tests",
         "build": "rollup --config",
         "builddev": "rollup --config --watch",
         "serve": "node ./src/server.js PORT=7020",
@@ -25,6 +25,7 @@
     "devDependencies": {
         "@rollup/plugin-commonjs": "^24.0.1",
         "@rollup/plugin-json": "^5.0.2",
-        "@rollup/plugin-node-resolve": "^13.3.0"
+        "@rollup/plugin-node-resolve": "^13.3.0",
+        "jest": "^29.4.2"
     }
 }

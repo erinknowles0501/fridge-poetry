@@ -24,7 +24,7 @@ const db = getFirestore(app);
 const fbAuth = getAuth();
 import { APP_WIDTH, APP_HEIGHT } from "../fridge/scale.js";
 
-import { default as defaultWords } from "../defaultWords.json";
+import { default as defaultWords } from "../defaultWords.json" assert { type: "json" };
 import { INVITATION_STATUSES, PERMISSIONS_NAMES } from "../constants.js";
 
 class AuthService {

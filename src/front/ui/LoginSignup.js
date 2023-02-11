@@ -4,7 +4,7 @@ import {
     invitationService,
     permissionService,
 } from "../../services/api";
-import defaultWords from "../../defaultWords.json";
+import defaultWords from "../../defaultWords.json" assert { type: "json" };
 import { INVITATION_STATUSES } from "../../constants";
 
 export default {
