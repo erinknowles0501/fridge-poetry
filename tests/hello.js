@@ -1,3 +1,5 @@
+import world from "./world";
+
 export default function hello(name) {
-    return "hello " + name + "!";
+    return `Hello ${world()}, ${name}!`;
 }
