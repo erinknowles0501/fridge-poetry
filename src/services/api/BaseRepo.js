@@ -20,13 +20,15 @@ export default class BaseRepo {
     createWithID(id) {}
 
     async getOne(id, asRef = false) {
-        const docSnap = await firestore.getDoc(
+        const docRef = await firestore.getDoc(
             firestore.doc(db, this.collectionName, id)
         );
+
         if (asRef) {
-            return docSnap;
+            return docRef;
         }
-        return { ...docSnap.data(), id: docSnap.id };
+
+        return { ...docRef.data(), id: docRef.id };
     }
 
     getAll(asRefs = false) {}

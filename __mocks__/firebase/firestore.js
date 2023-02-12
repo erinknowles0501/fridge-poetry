@@ -1,15 +1,20 @@
 import { jest } from "@jest/globals";
 
+export const mockDB = {
+    collection: [],
+};
+
 jest.unstable_mockModule("firebase/firestore", () => ({
     __esModule: true,
     default: jest.fn(),
-    getDoc: jest.fn(() => ({
-        default: jest.fn(data),
-        data: jest.fn(data),
-        id: id,
-        metadata: true,
-        doc: jest.fn(doc),
-    })),
+    getDoc: jest.fn((id) => {
+        return {
+            data: jest.fn(() => data(id)),
+            id: id,
+            metadata: true,
+            doc: jest.fn(),
+        };
+    }),
     collection: jest.fn(() => "collection"),
     getFirestore: jest.fn(),
     doc: jest.fn(doc),
@@ -17,15 +22,13 @@ jest.unstable_mockModule("firebase/firestore", () => ({
 const firestore = await import("firebase/firestore");
 
 function doc(db, collection, id) {
-    //console.log("id", id);
-    //return mockUsers.find((user) => user.id === id);
     return id;
 }
 
 function data(id) {
-    return mockUsers.find((user) => user.id === id);
-}
+    const foundUser = mockDB.collection.find((user) => user.id === id);
 
-export let mockUsers = [];
+    return foundUser;
+}
 
 export default firestore;
