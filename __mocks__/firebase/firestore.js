@@ -15,20 +15,34 @@ jest.unstable_mockModule("firebase/firestore", () => ({
             doc: jest.fn(),
         };
     }),
+    getDocs: jest.fn((query) => {
+        console.log("query", query);
+
+        return {
+            docs: [query],
+        };
+    }),
     collection: jest.fn(() => "collection"),
     getFirestore: jest.fn(),
-    doc: jest.fn(doc),
+    doc: jest.fn((db, collection, id) => id),
+    query: jest.fn(() => ({
+        where: jest.fn(where),
+    })),
+    where: jest.fn(where),
 }));
 const firestore = await import("firebase/firestore");
 
-function doc(db, collection, id) {
-    return id;
+function data(id) {
+    const foundUser = mockDB.collection.find((item) => item.id === id);
+    return foundUser;
 }
 
-function data(id) {
-    const foundUser = mockDB.collection.find((user) => user.id === id);
+function where(key, operator, value) {
+    console.log("key, operator, value", key, operator, value);
 
-    return foundUser;
+    if (operator == "==") {
+        return mockDB.collection.find((item) => item[key] == value);
+    }
 }
 
 export default firestore;

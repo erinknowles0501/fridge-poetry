@@ -6,11 +6,11 @@ const auth = "hahaha";
 export default class BaseRepo {
     collectionName = null;
     collection = null;
+    firestore = firestore;
 
-    constructor(auth, db, firestore) {
+    constructor(auth, db) {
         // this.auth = auth;
         // this.db = db;
-        // this.firestore = firestore;
     }
 
     create() {
@@ -31,7 +31,9 @@ export default class BaseRepo {
         return { ...docRef.data(), id: docRef.id };
     }
 
-    getAll(asRefs = false) {}
+    // getAll(asRefs = false) {
+
+    // }
 
     getAllWhere(clause, asRefs = false) {}
 

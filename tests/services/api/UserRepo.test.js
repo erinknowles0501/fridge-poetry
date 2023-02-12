@@ -46,6 +46,17 @@ test("UserRepo can get one user", async () => {
 });
 
 test("UserRepo can get one user as ref", async () => {
-    const user = await userRepo.getOne("gtEA56NNwMXLcK0ik38CA8VjXr43", true);
+    const user = await userRepo.getOne("testid1", true);
     expect(!!user.metadata).toEqual(true);
+});
+
+test("Can get that an email is not in use", async () => {
+    const result = await userRepo.getWhetherEmailInUse("email@provider.com");
+    expect(result).toEqual(false);
+});
+
+test("Can get that an email is in use", async () => {
+    const result = await userRepo.getWhetherEmailInUse("test@abc.com");
+    console.log("result", result);
+    expect(result).toEqual(true);
 });
