@@ -1,4 +1,4 @@
 node_modules
 bundled.js
-firebase-debug.log
+firebase-debug.*
 *.cache
