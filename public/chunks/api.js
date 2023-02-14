@@ -21885,8 +21885,7 @@ var version = "9.16.0";
  */
 registerVersion(name, version, 'app');
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
+var firebaseConfig = {
     apiKey: "AIzaSyA9mJ8pnpsPYephd3H9FJU4-mRLsn4y2do",
     authDomain: "fridge-poetry-ek.firebaseapp.com",
     projectId: "fridge-poetry-ek",

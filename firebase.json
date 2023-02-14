@@ -13,5 +13,6 @@
             }
         ],
         "clearUrls": true
-    }
+    },
+    "firestore": {}
 }
