@@ -7,9 +7,9 @@
         "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --no-cache --silent=false tests",
         "build": "rollup --config",
         "builddev": "rollup --config --watch",
-        "serve": "node ./src/server.js PORT=7020",
+        "servedev": "firebase emulators:start",
         "tunnel": "lt --port=7020 --subdomain=fridgepoetry",
-        "dev": "npm-run-all -p builddev serve tunnel"
+        "dev": "npm-run-all -p builddev servedev tunnel"
     },
     "type": "module",
     "author": "",
@@ -17,9 +17,7 @@
     "dependencies": {
         "firebase": "^9.16.0",
         "npm-run-all": "^4.1.5",
-        "polka": "^0.5.2",
         "rollup": "^2.75.6",
-        "sirv": "^2.0.2",
         "vue": "^3.2.45"
     },
     "devDependencies": {

@@ -194,11 +194,13 @@ class UserService {
         await updateDoc(docRef, data);
     }
 
-    async getWhetherAUserHasEmail(email) {
+    async getWhetherAUserHasEmail(email, returnUser = false) {
         const q = query(collection(db, "users"), where("email", "==", email));
         const docs = await getDocs(q);
         if (docs.docs[0]) {
-            return true;
+            return returnUser
+                ? { ...docs.docs[0].data(), id: docs.docs[0].id }
+                : true;
         } else {
             return false;
         }
@@ -289,14 +291,12 @@ class PermissionService {
     }
 
     async getPermissionsByUserAndFridge(userID, fridgeID) {
-        const q = query(
-            this.collection,
-            where("fridgeID", "==", fridgeID),
-            where("userID", "==", userID)
+        const docRef = await getDoc(
+            doc(this.collection, `${fridgeID}_${userID}`)
         );
-        const docs = await getDocs(q);
-        if (docs.docs.length > 0) {
-            return docs.docs[0].data().permissions;
+
+        if (docRef.exists()) {
+            return await docRef.data().permissions;
         } else {
             return false;
         }
@@ -307,7 +307,9 @@ class PermissionService {
     }
 
     async create(fridgeID, userID, permissionArr) {
-        await addDoc(this.collection, {
+        // Creates doc at id if not exists, otherwise, gets it and updates it
+        const docRef = doc(this.collection, `${fridgeID}_${userID}`);
+        await setDoc(docRef, {
             fridgeID,
             userID,
             permissions: permissionArr,
