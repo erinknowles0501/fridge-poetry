@@ -1,25 +1,27 @@
 import { initializeApp } from "@firebase/app";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-import firebaseConfig from "../.firebase/config.js";
-import * as firestore from "firebase/firestore";
+import { readFileSync } from "fs";
 
-const app = initializeApp(firebaseConfig);
+import * as firestore from "firebase/firestore";
+import { initializeTestEnvironment } from "@firebase/rules-unit-testing";
+
+const testEnv = await initializeTestEnvironment({
+    projectId: "demo-fridge-poetry-ek",
+    firestore: {
+        host: "127.0.0.1",
+        port: 8081,
+        rules: readFileSync(".firebase/firestore.test.rules", "utf8"),
+    },
+});
+
+const app = initializeApp({ projectId: "demo-fridge-poetry-ek" });
 const db = getFirestore(app);
 connectFirestoreEmulator(db, "localhost", 8081);
 
 export default db;
 
 export async function clearDB() {
-    try {
-        await fetch(
-            "http://127.0.0.1:8081/emulator/v1/projects/fridge-poetry-ek/databases/(default)/documents",
-            {
-                method: "DELETE",
-            }
-        );
-    } catch (error) {
-        console.error(error);
-    }
+    await testEnv.clearFirestore();
 }
 
 export async function writeDB(collectionName, dataArr) {

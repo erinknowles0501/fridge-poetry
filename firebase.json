@@ -14,7 +14,9 @@
         ],
         "clearUrls": true
     },
-    "firestore": {},
+    "firestore": {
+        "rules": ".firebase/firestore.rules"
+    },
     "emulators": {
         "firestore": {
             "host": "localhost",
