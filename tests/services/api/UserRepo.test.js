@@ -1,10 +1,7 @@
-import { jest } from "@jest/globals";
-const { default: firestore, mockDB } = await import(
-    "../../../__mocks__/firebase/firestore"
-);
 const { default: UserRepo } = await import(
     "../../../src/services/api/UserRepo"
 );
+import db, { clearDB, writeDB } from "../../emulator-setup.js";
 
 const MOCK_USERS = [
     {
@@ -28,20 +25,15 @@ const MOCK_NEW_USER = {
     id: "testid111",
 };
 
-const userRepo = new UserRepo();
+const userRepo = new UserRepo("helo", db);
 
 beforeEach(async () => {
-    mockDB.collection = MOCK_USERS;
-});
-
-test("Firestore is mocked", () => {
-    expect(jest.isMockFunction(firestore.default)).toEqual(true);
+    await clearDB();
+    await writeDB("users", MOCK_USERS);
 });
 
 test("UserRepo can get one user", async () => {
     const user = await userRepo.getOne("testid1");
-    expect(firestore.getDoc).toHaveBeenCalled();
-    expect(firestore.doc).toHaveBeenCalled();
     expect(user).toEqual(MOCK_USERS[0]);
 });
 
@@ -57,6 +49,5 @@ test("Can get that an email is not in use", async () => {
 
 test("Can get that an email is in use", async () => {
     const result = await userRepo.getWhetherEmailInUse("test@abc.com");
-    console.log("result", result);
     expect(result).toEqual(true);
 });

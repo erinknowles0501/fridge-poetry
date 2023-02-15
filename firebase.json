@@ -14,5 +14,11 @@
         ],
         "clearUrls": true
     },
-    "firestore": {}
+    "firestore": {},
+    "emulators": {
+        "firestore": {
+            "host": "localhost",
+            "port": 8081
+        }
+    }
 }

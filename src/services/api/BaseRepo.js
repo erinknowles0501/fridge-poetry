@@ -1,6 +1,6 @@
 import * as firestore from "firebase/firestore";
 import app from "../../firebase/index.js";
-const db = firestore.getFirestore(app);
+const fbdb = firestore.getFirestore(app);
 const auth = "hahaha";
 
 export default class BaseRepo {
@@ -8,9 +8,9 @@ export default class BaseRepo {
     collection = null;
     firestore = firestore;
 
-    constructor(auth, db) {
-        // this.auth = auth;
-        // this.db = db;
+    constructor(auth, db = fbdb) {
+        this.auth = auth;
+        this.db = db;
     }
 
     create() {
@@ -21,13 +21,9 @@ export default class BaseRepo {
 
     async getOne(id, asRef = false) {
         const docRef = await firestore.getDoc(
-            firestore.doc(db, this.collectionName, id)
+            firestore.doc(this.db, this.collectionName, id)
         );
-
-        if (asRef) {
-            return docRef;
-        }
-
+        if (asRef) return docRef;
         return { ...docRef.data(), id: docRef.id };
     }
 
