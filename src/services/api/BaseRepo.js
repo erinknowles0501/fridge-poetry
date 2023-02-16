@@ -43,6 +43,7 @@ export default class BaseRepo {
     }
 
     async getAll(asRefs = false) {
+        // TODO: This method isn't implemented by some repos (for request-rules reasons): move from here
         const docs = await getDocs(this.collection);
         if (asRefs) return docs;
 
@@ -53,15 +54,20 @@ export default class BaseRepo {
         return data;
     }
 
-    //getMany(clause = , asRefs = false) {}
-
-    update(id, data) {
-        //
+    async update(id, data) {
+        const docRef = doc(this.collection, id);
+        await updateDoc(docRef, data);
     }
 
-    // updateMany(ids, data) {
+    async delete(id) {
+        await deleteDoc(doc(this.collection, id));
+    }
+
+    // async upsert
+
+    // async getMany(clause = where(), asRefs = false) {}
+
+    // async updateMany(ids, data) {
     //     // Transaction / batch write
     // }
-
-    delete(id) {}
 }

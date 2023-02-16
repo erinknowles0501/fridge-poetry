@@ -9,9 +9,8 @@ export default class UserRepo extends BaseRepo {
         super(auth, db);
     }
 
-    async getCurrentUser() {
-        //
-    }
+    // async getCurrentUser() {
+    // }
 
     async getWhetherEmailInUse(email) {
         const q = firestore.query(

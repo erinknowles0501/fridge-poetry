@@ -1,68 +1,105 @@
 const { default: UserRepo } = await import(
     "../../../src/services/api/UserRepo"
 );
-import db, { clearDB, writeDB } from "../../emulator-setup.js";
+import {
+    db,
+    testEnv,
+    writeDB,
+    authAlice,
+    authBob,
+    authNone,
+} from "../../emulator-setup.js";
+
+import { getDocs, collection } from "firebase/firestore";
 
 const MOCK_USERS = [
     {
-        email: "test@abc.com",
-        displayName: "Test",
+        email: "alice@test.com",
+        displayName: "Alice",
         displayColor: 18,
-        id: "testid1",
+        id: "alice",
     },
     {
-        email: "test@def.com",
-        displayName: "Test2",
+        email: "bob@test.com",
+        displayName: "Bob",
         displayColor: 27,
-        id: "testid2",
+        id: "bob",
     },
 ];
 
 const MOCK_NEW_USER = {
-    email: "newUser@111.com",
+    email: "newuser@test.com",
     displayName: "New user",
     displayColor: 0,
-    id: "testid111",
+    id: "newuser",
 };
 
-const userRepo = new UserRepo("helo", db);
+const userRepoAlice = new UserRepo(null, authAlice.firestore());
+const userRepoNone = new UserRepo(null, authNone.firestore());
 
 beforeEach(async () => {
-    await clearDB();
+    await testEnv.clearFirestore();
     await writeDB("users", MOCK_USERS);
 });
 
-test("Get one user", async () => {
-    const user = await userRepo.getOne("testid1");
-    expect(user).toEqual(MOCK_USERS[0]);
+afterAll(async () => {
+    await testEnv.cleanup();
 });
 
-test("Get one user as ref", async () => {
-    const user = await userRepo.getOne("testid1", true);
-    expect(!!user.metadata).toEqual(true);
+test("Get one", async () => {
+    const result = await userRepoAlice.getOne(MOCK_USERS[0].id);
+    expect(result).toEqual(MOCK_USERS[0]);
+});
+
+test("Get one as ref", async () => {
+    const result = await userRepoAlice.getOne(MOCK_USERS[0].id, true);
+    expect(!!result.metadata).toEqual(true);
+    expect(result.id).toEqual(MOCK_USERS[0].id);
+});
+
+test("Create returns new id", async () => {
+    const result = await userRepoNone.create(MOCK_NEW_USER);
+    expect(result).toBeTruthy();
+});
+
+test("CreateWithID returns same id as passed", async () => {
+    const id = await userRepoNone.createWithID(MOCK_NEW_USER.id, MOCK_NEW_USER);
+    expect(id).toEqual(MOCK_NEW_USER.id);
+});
+
+test("Update", async () => {
+    const update = { displayName: "New name" };
+    await userRepoAlice.update(MOCK_USERS[0].id, update);
+
+    const result = await userRepoAlice.getOne(MOCK_USERS[0].id);
+    expect(result).toEqual({
+        ...MOCK_USERS[0],
+        displayName: update.displayName,
+    });
+});
+
+test("Delete", async () => {
+    await userRepoAlice.delete(MOCK_USERS[0].id);
+
+    const remainingData = [];
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+        const docs = await getDocs(collection(context.firestore(), "users"));
+        docs.docs.forEach((doc) => remainingData.push(doc.data()));
+    });
+
+    expect(remainingData).toEqual(
+        MOCK_USERS.filter((item) => item.id != MOCK_USERS[0].id)
+    );
 });
 
 test("Get that an email is NOT in use", async () => {
-    const result = await userRepo.getWhetherEmailInUse("email@provider.com");
+    const result = await userRepoNone.getWhetherEmailInUse("unused@email.com");
     expect(result).toEqual(false);
 });
 
 test("Get that an email IS in use", async () => {
-    const result = await userRepo.getWhetherEmailInUse("test@abc.com");
+    const result = await userRepoNone.getWhetherEmailInUse(MOCK_USERS[0].email);
     expect(result).toEqual(true);
 });
 
-test("Get all users", async () => {
-    const result = await userRepo.getAll();
-    expect(result).toEqual(MOCK_USERS);
-});
-
-test("Create user returns new id", async () => {
-    const id = await userRepo.create(MOCK_NEW_USER);
-    expect(id).toBeTruthy();
-});
-
-test("Create user with id returns same id as passed", async () => {
-    const id = await userRepo.createWithID(MOCK_NEW_USER.id, MOCK_NEW_USER);
-    expect(id).toEqual(MOCK_NEW_USER.id);
-});
+// TODO: Updating user with bad data fails

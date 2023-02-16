@@ -70,7 +70,9 @@ service cloud.firestore {
     }
     
     match /users/{userID} {
-    	allow read, write: if isLoggedIn() && resource.id == request.auth.uid
+        allow read;
+        allow create: if request.auth == null;
+    	allow update, delete: if isLoggedIn() && resource.id == request.auth.uid
     }
     
     match /permissions/{permissionID} {
