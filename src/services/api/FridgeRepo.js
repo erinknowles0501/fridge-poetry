@@ -1,9 +1,23 @@
-import BaseRepo from "./BaseRepo.js";
-import * as firestore from "firebase/firestore";
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    updateDoc,
+    onSnapshot,
+    doc,
+    getDoc,
+    setDoc,
+    addDoc,
+    query,
+    where,
+    deleteDoc,
+} from "firebase/firestore";
 
-export default class UserRepo extends BaseRepo {
-    collectionName = "users";
-    collection = firestore.collection(this.db, this.collectionName);
+import BaseRepo from "./BaseRepo.js";
+
+export default class FridgeRepo extends BaseRepo {
+    collectionName = "fridges";
+    collection = collection(this.db, this.collectionName);
 
     constructor(auth, db) {
         super(auth, db);

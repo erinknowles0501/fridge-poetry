@@ -1,9 +1,23 @@
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    updateDoc,
+    onSnapshot,
+    doc,
+    getDoc,
+    setDoc,
+    addDoc,
+    query,
+    where,
+    deleteDoc,
+} from "firebase/firestore";
+
 import BaseRepo from "./BaseRepo.js";
-import * as firestore from "firebase/firestore";
 
 export default class UserRepo extends BaseRepo {
     collectionName = "users";
-    collection = firestore.collection(this.db, this.collectionName);
+    collection = collection(this.db, this.collectionName);
 
     constructor(auth, db) {
         super(auth, db);
@@ -13,12 +27,9 @@ export default class UserRepo extends BaseRepo {
     // }
 
     async getWhetherEmailInUse(email) {
-        const q = firestore.query(
-            firestore.collection(this.db, "users"),
-            firestore.where("email", "==", email)
-        );
+        const q = query(this.collection, where("email", "==", email));
 
-        const docs = await firestore.getDocs(q);
+        const docs = await getDocs(q);
         if (docs.docs[0]) {
             return true;
         } else {

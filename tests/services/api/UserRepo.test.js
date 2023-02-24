@@ -1,14 +1,6 @@
-const { default: UserRepo } = await import(
-    "../../../src/services/api/UserRepo"
-);
-import {
-    db,
-    testEnv,
-    writeDB,
-    authAlice,
-    authBob,
-    authNone,
-} from "../../emulator-setup.js";
+import UserRepo from "../../../src/services/api/UserRepo";
+
+import { testEnvFactory, writeDB } from "../../emulator-setup.js";
 
 import { getDocs, collection } from "firebase/firestore";
 
@@ -34,12 +26,35 @@ const MOCK_NEW_USER = {
     id: "newuser",
 };
 
-const userRepoAlice = new UserRepo(null, authAlice.firestore());
-const userRepoNone = new UserRepo(null, authNone.firestore());
+let testEnv,
+    authAlice,
+    userRepoAlice,
+    authBob,
+    userRepoBob,
+    authNone,
+    userRepoNone;
+
+beforeAll(async () => {
+    testEnv = await testEnvFactory("userrepo");
+
+    authAlice = testEnv.authenticatedContext("alice", {
+        email: "alice@test.com",
+    });
+    userRepoAlice = new UserRepo(authAlice, authAlice.firestore());
+    authBob = testEnv.authenticatedContext("bob", {
+        email: "bob@test.com",
+    });
+    userRepoBob = new UserRepo(authBob, authBob.firestore());
+    authNone = testEnv.unauthenticatedContext();
+    userRepoNone = new UserRepo(authNone, authNone.firestore());
+});
+
+// const userRepoAlice = new UserRepo(null, authAlice.firestore());
+// const userRepoNone = new UserRepo(null, authNone.firestore());
 
 beforeEach(async () => {
     await testEnv.clearFirestore();
-    await writeDB("users", MOCK_USERS);
+    await writeDB(testEnv, "users", MOCK_USERS);
 });
 
 afterAll(async () => {

@@ -21,6 +21,7 @@
         "firestore": {
             "host": "localhost",
             "port": 8081
-        }
+        },
+        "singleProjectMode": false
     }
 }
