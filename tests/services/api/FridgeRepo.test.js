@@ -58,7 +58,7 @@ const MOCK_PERMISSIONS = [
     // },
 ];
 
-let testEnv, authAlice, fridgeRepoAlice;
+let testEnv, authAlice, fridgeRepoAlice, dbAlice;
 
 beforeAll(async () => {
     testEnv = await testEnvFactory("fridgerepo");
@@ -66,7 +66,8 @@ beforeAll(async () => {
     authAlice = testEnv.authenticatedContext("alice", {
         email: "alice@test.com",
     });
-    fridgeRepoAlice = new FridgeRepo(authAlice, authAlice.firestore());
+    dbAlice = authAlice.firestore();
+    fridgeRepoAlice = new FridgeRepo(authAlice, dbAlice);
 });
 
 beforeEach(async () => {
@@ -127,4 +128,20 @@ test("Delete", async () => {
     expect(remainingData).toEqual(
         MOCK_FRIDGES.filter((item) => item.id != MOCK_FRIDGES[0].id)
     );
+});
+
+test("Create words", async () => {
+    await fridgeRepoAlice.createWords(MOCK_FRIDGES[0].id, [
+        "word1",
+        "word2",
+        "word3",
+    ]);
+
+    const docs = (
+        await getDocs(
+            collection(dbAlice, `fridges/${MOCK_FRIDGES[0].id}/words`)
+        )
+    ).docs;
+
+    expect(docs.length).toEqual(3);
 });

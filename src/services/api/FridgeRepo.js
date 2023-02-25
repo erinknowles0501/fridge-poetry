@@ -11,7 +11,10 @@ import {
     query,
     where,
     deleteDoc,
+    writeBatch,
 } from "firebase/firestore";
+import { default as defaultWords } from "../../defaultWords.json" assert { type: "json" };
+import { APP_WIDTH, APP_HEIGHT } from "../../fridge/scale.js";
 
 import BaseRepo from "./BaseRepo.js";
 
@@ -23,20 +26,22 @@ export default class FridgeRepo extends BaseRepo {
         super(auth, db);
     }
 
-    // async getCurrentUser() {
-    // }
+    async createWords(fridgeID, words = defaultWords) {
+        const remSize = 8;
+        const paddingX = 0.5 * remSize;
+        const paddingY = 0.2 * remSize; // TODO de-magic these
 
-    // async getWhetherEmailInUse(email) {
-    //     const q = firestore.query(
-    //         firestore.collection(this.db, "users"),
-    //         firestore.where("email", "==", email)
-    //     );
+        const batch = writeBatch(this.db);
+        words.forEach(async (word) => {
+            const x =
+                Math.random() * (APP_WIDTH - remSize * word.length - paddingX);
+            const y = Math.random() * (APP_HEIGHT - remSize - paddingY);
 
-    //     const docs = await firestore.getDocs(q);
-    //     if (docs.docs[0]) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
+            batch.set(doc(collection(this.db, `fridges/${fridgeID}/words`)), {
+                wordText: word,
+                position: { y, x },
+            });
+        });
+        await batch.commit();
+    }
 }
