@@ -1,7 +1,8 @@
 import FridgeRepo from "../../../src/services/api/FridgeRepo";
 import { PERMISSIONS_NAMES } from "../../../src/constants.js";
 import { testEnvFactory, writeDB } from "../../emulator-setup.js";
-import { getDocs, collection } from "firebase/firestore";
+import { getDocs, collection, getDoc, doc } from "firebase/firestore";
+import { default as defaultWords } from "../../../src/defaultWords.json" assert { type: "json" };
 
 const MOCK_FRIDGES = [
     {
@@ -58,6 +59,14 @@ const MOCK_PERMISSIONS = [
     // },
 ];
 
+const MOCK_WORDS = defaultWords.map((word, index) => {
+    return {
+        wordText: word,
+        position: { y: 0, x: 0 },
+        id: "word" + index,
+    };
+});
+
 let testEnv, authAlice, fridgeRepoAlice, dbAlice;
 
 beforeAll(async () => {
@@ -74,6 +83,12 @@ beforeEach(async () => {
     await testEnv.clearFirestore();
     await writeDB(testEnv, "permissions", MOCK_PERMISSIONS);
     await writeDB(testEnv, "fridges", MOCK_FRIDGES);
+
+    await Promise.all(
+        MOCK_FRIDGES.map(async (fridge) => {
+            await writeDB(testEnv, `fridges/${fridge.id}/words`, MOCK_WORDS);
+        })
+    );
 });
 
 afterAll(async () => {
@@ -143,5 +158,24 @@ test("Create words", async () => {
         )
     ).docs;
 
-    expect(docs.length).toEqual(3);
+    expect(docs.length).toEqual(defaultWords.length + 3);
+});
+
+test("Update word", async () => {
+    await fridgeRepoAlice.updateWord(
+        MOCK_WORDS[0].id,
+        10,
+        10,
+        MOCK_FRIDGES[0].id
+    );
+
+    const docRef = await getDoc(
+        doc(dbAlice, `fridges/${MOCK_FRIDGES[0].id}/words`, MOCK_WORDS[0].id)
+    );
+    expect(docRef.data().position).toEqual({ x: 10, y: 10 });
+});
+
+test("Get words", async () => {
+    const words = await fridgeRepoAlice.getWords(MOCK_FRIDGES[0].id);
+    expect(words.length).toEqual(MOCK_WORDS.length);
 });

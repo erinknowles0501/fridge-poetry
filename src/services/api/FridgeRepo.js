@@ -44,4 +44,25 @@ export default class FridgeRepo extends BaseRepo {
         });
         await batch.commit();
     }
+
+    async getWords(fridgeID) {
+        const docs = await getDocs(
+            collection(this.db, `fridges/${fridgeID}/words`)
+        );
+
+        let words = [];
+        docs.forEach((word) => {
+            words.push({ ...word.data(), id: word.id });
+        });
+        return words;
+    }
+
+    async updateWord(wordID, top, left, fridgeID) {
+        // TODO Constraints on top and left
+        const docRef = doc(this.db, `fridges/${fridgeID}/words`, wordID);
+        await updateDoc(docRef, {
+            "position.y": top,
+            "position.x": left,
+        });
+    }
 }
