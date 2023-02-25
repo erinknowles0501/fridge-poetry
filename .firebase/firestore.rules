@@ -77,7 +77,7 @@ service cloud.firestore {
     }
     
     match /permissions/{permissionID} {
-    	allow read, write: if isLoggedIn() && resource.userID == request.auth.uid;
+        allow read, write: if isLoggedIn();
     }
   }
 }
