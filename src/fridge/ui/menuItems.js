@@ -11,7 +11,7 @@ export default {
         {
             title: "Invitations",
             permissions: {
-                showIfIn: [can.SEND_INVITES, can.REVOKE_INVITES],
+                showIfIn: [can.SEND_INVITES, can.EDIT_BLACKLIST],
             },
             componentName: "Invitations",
         },
@@ -28,6 +28,7 @@ export default {
                     can.EDIT_FRIDGE_NAME,
                     can.EDIT_MAX_USERS,
                     can.EDIT_MAX_CUSTOM_WORDS_PER_USER,
+                    can.EDIT_BLACKLIST,
                 ],
             },
         },

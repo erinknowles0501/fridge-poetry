@@ -6,68 +6,68 @@ service cloud.firestore {
     	return request.auth != null
     }
     function permissionExists(fridgeID, userID) {
-    	let concatPath = fridgeID + '_' + userID;
-      return exists(/databases/$(database)/documents/permissions/$(concatPath))
+        let concatPath = fridgeID + '_' + userID;
+        return exists(/databases/$(database)/documents/permissions/$(concatPath))
     }
     function hasAllPermissionsOf(fridgeID, userID, permissionsArr) {
-      let concatPath = fridgeID + '_' + userID;
-      let userPermissions = get(/databases/$(database)/documents/permissions/$(concatPath)).data.permissions;
-      return userPermissions.hasAll(permissionsArr);
+        let concatPath = fridgeID + '_' + userID;
+        let userPermissions = get(/databases/$(database)/documents/permissions/$(concatPath)).data.permissions;
+        return userPermissions.hasAll(permissionsArr);
     }
     function hasNeededPermissionsForUpdate(fridgeID) {
-    	let permissions = [];
-      let permissions2 = request.resource.data.name != resource.data.name ? permissions.concat(['edit-fridge-name']) : permissions;
-      let permissions3 = request.resource.data.maxUsers != resource.data.maxUsers ? permissions2.concat(['edit-max-users']) : permissions2;
-      let permissions4 = request.resource.data.fridgeVisibility != resource.data.fridgeVisibility ? permissions3.concat(['change-fridge-visibility']) : permissions3;
-      return hasAllPermissionsOf(fridgeID, request.auth.uid, permissions4)
+        let permissions = [];
+        let permissions2 = 
+            request.resource.data.name != resource.data.name 
+                ? permissions.concat(['edit-fridge-name']) 
+                : permissions;
+        let permissions3 = 
+            request.resource.data.maxUsers != resource.data.maxUsers 
+                ? permissions2.concat(['edit-max-users']) 
+                : permissions2;
+        let permissions4 = 
+            request.resource.data.fridgeVisibility != resource.data.fridgeVisibility 
+                ? permissions3.concat(['change-fridge-visibility']) 
+                : permissions3;
+
+        return hasAllPermissionsOf(fridgeID, request.auth.uid, permissions4)
     }
     
    	match /fridges/{fridgeID} {
     	match /words/{wordID} {
       	    allow read, write: if isLoggedIn() && permissionExists(fridgeID, request.auth.uid)
-      }
+        }
       
-      allow create;
-      allow read: if isLoggedIn() && permissionExists(fridgeID, request.auth.uid)
-      allow update: if isLoggedIn() 
-        && hasNeededPermissionsForUpdate(fridgeID);
-      allow delete: if isLoggedIn() 
-      	&& hasAllPermissionsOf(fridgeID, request.auth.uid, ['delete-fridge']);
+        allow create;
+        allow read: if isLoggedIn() && permissionExists(fridgeID, request.auth.uid)
+        allow update: if isLoggedIn() 
+            && hasNeededPermissionsForUpdate(fridgeID);
+        allow delete: if isLoggedIn() 
+      	    && hasAllPermissionsOf(fridgeID, request.auth.uid, ['delete-fridge']);
     }
     
     match /invitations/{inviteID} {
-    	allow update: if 
-      	isLoggedIn() 
+    	allow update: if isLoggedIn() 
         && (
         	// Invite is TO the current user: 
         	// can only accept or deny, and only if currently pending
         	resource.data.to == request.auth.token.email
-          && resource.data.status == 'pending'
-          && request.resource.data.status in ['accepted', 'denied']
-        ) || (
-        	// Invite is FROM the current user:
-        	// can only toggle between revoked and pending
-        	(	
-          	resource.data.fromID == request.auth.uid
-        	) && (
-          	(
-          		resource.data.status == 'pending'
-          		&& request.resource.data.status == 'revoked'
-          	) || (
-            	resource.data.status == 'revoked'
-          		&& request.resource.data.status == 'pending'
-          	)
-        	)
-        )
+            && resource.data.status == 'pending'
+            && request.resource.data.status in ['accepted', 'denied']
+        );
+
+        allow delete: if isLoggedIn() 
+            && resource.data.fromID == request.auth.uid
+            && resource.data.status == 'pending';
+
+        allow read: if isLoggedIn() && (
+            resource.data.fromID == request.auth.uid
+            || resource.data.to == request.auth.token.email
+        );
         
-      allow read: if isLoggedIn() && (
-        (resource.data.fromID == request.auth.uid) 
-        || (resource.data.to == request.auth.token.email)
-      );
-      allow create: if
-        isLoggedIn() 
-        && request.resource.data.fromID == request.auth.uid
-        && hasAllPermissionsOf(resource.data.fridgeID, request.auth.uid, ['invite-users']);
+        allow create: if
+            isLoggedIn()
+            && request.resource.data.fromID == request.auth.uid
+            && hasAllPermissionsOf(request.resource.data.fridgeID, request.auth.uid, ['send-invites']);
     }
     
     match /users/{userID} {
