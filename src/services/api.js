@@ -11,6 +11,7 @@ import {
     query,
     where,
     deleteDoc,
+    writeBatch,
 } from "firebase/firestore";
 import {
     getAuth,
@@ -148,17 +149,18 @@ class FridgeService {
         const paddingX = 0.5 * remSize;
         const paddingY = 0.2 * remSize; // TODO de-magic these
 
-        // TODO Batch this so it doesn't take so long
+        const batch = writeBatch(db);
         defaultWords.forEach(async (word) => {
             const x =
                 Math.random() * (APP_WIDTH - remSize * word.length - paddingX);
             const y = Math.random() * (APP_HEIGHT - remSize - paddingY);
 
-            await addDoc(collection(db, `fridges/${fridgeID}/words`), {
+            batch.set(doc(collection(db, `fridges/${fridgeID}/words`)), {
                 wordText: word,
                 position: { y, x },
             });
         });
+        await batch.commit();
     }
 
     async updateFridge(fridgeID, data) {
