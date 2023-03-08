@@ -13,7 +13,25 @@ import {
     deleteDoc,
     writeBatch,
 } from "firebase/firestore";
-import { INVITATION_STATUSES } from "../../constants";
+import {
+    getFunctions,
+    connectFunctionsEmulator,
+    httpsCallable,
+} from "firebase/functions";
+import app from "../../firebase/index.js";
+import { INVITATION_STATUSES } from "../../constants.js";
+
+const functions = getFunctions(app);
+
+connectFunctionsEmulator(functions, "localhost", 5001);
+
+const helloWorld = httpsCallable(functions, "helloWorld");
+
+try {
+    helloWorld({ data: "aaaaa" }).then((result) => console.log(result));
+} catch (e) {
+    console.log("e", e);
+}
 
 export default class InvitesRepo {
     collectionName = "invitations";
