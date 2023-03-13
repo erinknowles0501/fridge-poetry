@@ -2,6 +2,11 @@ import InviteRepo from "../../../src/services/api/InviteRepo";
 import { testEnvFactory, writeDB } from "../../emulator-setup.js";
 import { getDocs, collection, getDoc, doc } from "firebase/firestore";
 import { INVITATION_STATUSES, PERMISSIONS_NAMES } from "../../../src/constants";
+import {
+    getFunctions,
+    connectFunctionsEmulator,
+    httpsCallable,
+} from "firebase/functions";
 
 const MOCK_INVITES = [
     {
@@ -27,10 +32,20 @@ const MOCK_INVITES = [
     },
 ];
 
-let testEnv, authAlice, repoAlice, dbAlice;
+let testEnv, functions, authAlice, repoAlice, dbAlice;
 
 beforeAll(async () => {
-    testEnv = await testEnvFactory("inviterepo");
+    ({ testEnv, functions } = await testEnvFactory("inviterepo", true));
+
+    const helloWorld = httpsCallable(functions, "helloWorld");
+
+    try {
+        const result = await helloWorld({ data: "aaaaaaaaaaa!!!!" });
+        console.log("result", result);
+    } catch (e) {
+        console.error(e);
+    }
+
     authAlice = testEnv.authenticatedContext("alice", {
         email: "alice@test.com",
     });
