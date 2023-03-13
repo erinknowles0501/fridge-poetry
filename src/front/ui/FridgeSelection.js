@@ -42,6 +42,9 @@ export default {
                         return await fridgeService.getFridgeByID(fridgeID);
                     })
                 );
+            })
+            .catch((error) => {
+                console.error(error);
             });
     },
     methods: {

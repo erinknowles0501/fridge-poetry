@@ -273,6 +273,9 @@ var FridgeSelection = {
                         return await fridgeService.getFridgeByID(fridgeID);
                     })
                 );
+            })
+            .catch((error) => {
+                console.error(error);
             });
     },
     methods: {

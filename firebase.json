@@ -1,45 +1,40 @@
 {
-  "hosting": {
-    "public": "public",
-    "ignore": [
-      "firebase.json",
-      "**/.*"
-    ],
-    "rewrites": [
-      {
-        "source": "**/",
-        "destination": "/front.html"
-      },
-      {
-        "source": "**/!(*.js|*.css)",
-        "destination": "/fridge.html"
-      }
-    ],
-    "clearUrls": true
-  },
-  "firestore": {
-    "rules": ".firebase/firestore.rules"
-  },
-  "emulators": {
-    "firestore": {
-      "host": "localhost",
-      "port": 8081
+    "hosting": {
+        "public": "public",
+        "ignore": ["firebase.json", "**/.*"],
+        "rewrites": [
+            {
+                "source": "**/",
+                "destination": "/front.html"
+            },
+            {
+                "source": "**/!(*.js|*.css)",
+                "destination": "/fridge.html"
+            }
+        ],
+        "clearUrls": true
     },
-    "singleProjectMode": false
-  },
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log"
-      ],
-      "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run lint"
-      ]
-    }
-  ]
+    "firestore": {
+        "rules": ".firebase/firestore.rules"
+    },
+    "emulators": {
+        "firestore": {
+            "host": "localhost",
+            "port": 8081
+        },
+        "singleProjectMode": false
+    },
+    "functions": [
+        {
+            "source": "functions",
+            "codebase": "default",
+            "ignore": [
+                "node_modules",
+                ".git",
+                "firebase-debug.log",
+                "firebase-debug.*.log"
+            ],
+            "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run lint"]
+        }
+    ]
 }
