@@ -1,9 +1,4 @@
-import {
-    authService,
-    userService,
-    invitationService,
-    permissionService,
-} from "../../services/api";
+import { authService, userRepo, inviteRepo } from "../../services/api/index";
 import defaultWords from "../../defaultWords.json"; // assert { type: "json" };
 import { INVITATION_STATUSES } from "../../constants";
 
@@ -76,8 +71,8 @@ export default {
                 .split("&")
                 .find((param) => param.includes("invite"))
                 .split("=")[1];
-            invitationService
-                .getInvitation(inviteID)
+            inviteRepo
+                .getOne(inviteID)
                 .then((invite) => this.invitationHandler(invite));
         }
     },
@@ -147,14 +142,11 @@ export default {
                     return;
                 }
 
-                await permissionService.writeInvitedPermission(
-                    authService.auth.currentUser.uid,
-                    invite.fridgeID
-                );
                 window.location.pathname = invite.fridgeID;
             } else {
-                const emailMatchesUser =
-                    await userService.getWhetherAUserHasEmail(invite.to);
+                const emailMatchesUser = await userRepo.getWhetherEmailInUse(
+                    invite.to
+                );
 
                 this.email = invite.to;
                 this.isSigningUp = !emailMatchesUser;
@@ -190,7 +182,7 @@ export default {
                     this.password
                 );
                 const emailName = this.email.split("@")[0];
-                await userService.createUser(createdUser.uid, {
+                await userRepo.createWithID(createdUser.uid, {
                     displayName: emailName,
                     displayColor: 0,
                     email: this.email,
@@ -222,12 +214,6 @@ export default {
                 : !this.disableLogin && (await this.login());
 
             if (success) {
-                if (this.hasInviteParam) {
-                    await permissionService.writeInvitedPermission(
-                        authService.auth.currentUser.uid,
-                        this.invite.fridgeID
-                    );
-                }
                 this.$emit("changeActiveComponent", "FridgeSelection");
             }
         },

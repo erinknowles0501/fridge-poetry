@@ -1,7 +1,11 @@
 import UserRepo from "./UserRepo";
-//import WordRepo from './WordRepo";
 import FridgeRepo from "./FridgeRepo";
+import InviteRepo from "./InviteRepo";
+import PermissionRepo from "./PermissionRepo";
+import AuthService from "../auth";
 
-// export const userRepo = new UserRepo(auth, db, firestore);
-// export const FridgeRepo = new FridgeRepo(auth, db, firestore);
-// export const userRepo = new UserRepo(auth, db, firestore);
+export const authService = new AuthService();
+export const userRepo = new UserRepo(db, firestore);
+export const FridgeRepo = new FridgeRepo(db, firestore);
+export const inviteRepo = new InviteRepo(db, firestore);
+export const permissionRepo = new PermissionRepo(db, firestore);

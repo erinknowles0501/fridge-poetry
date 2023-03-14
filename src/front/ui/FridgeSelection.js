@@ -1,9 +1,9 @@
 import {
-    fridgeService,
-    userService,
     authService,
-    permissionService,
-} from "../../services/api";
+    userRepo,
+    fridgeRepo,
+    permissionRepo,
+} from "../../services/api/index";
 
 export default {
     data() {
@@ -22,13 +22,11 @@ export default {
         </div>
     `,
     created() {
-        const currentUserUID = userService.auth.currentUser.uid;
+        const currentUserUID = authService.auth.currentUser.uid;
 
-        userService
-            .getUserByID(currentUserUID)
-            .then((user) => (this.user = user));
+        userRepo.getOne(currentUserUID).then((user) => (this.user = user));
 
-        permissionService
+        permissionRepo
             .getPermissionsByUser(currentUserUID)
             .then(async (permissions) => {
                 const fridgeIDs = [];
@@ -39,7 +37,7 @@ export default {
                 });
                 this.fridges = await Promise.all(
                     fridgeIDs.map(async (fridgeID) => {
-                        return await fridgeService.getFridgeByID(fridgeID);
+                        return await fridgeRepo.getFridgeByID(fridgeID);
                     })
                 );
             })

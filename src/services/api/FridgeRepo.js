@@ -26,6 +26,26 @@ export default class FridgeRepo extends BaseRepo {
         super(auth, db);
     }
 
+    async create(data) {
+        data = {
+            maxUsers: 20,
+            maxCustomWords: 5,
+            ...data,
+        };
+        const fridgeID = await super.create(data);
+        await this.createWords(fridgeID);
+        return fridgeID;
+    }
+
+    async getOne(id, asRef = false) {
+        const fridge = await super.getOne(id, asRef);
+        if (asRef) return fridge;
+
+        const words = await this.getWords(id);
+
+        return { ...fridge, id, words };
+    }
+
     async createWords(fridgeID, words = defaultWords) {
         const remSize = 8;
         const paddingX = 0.5 * remSize;
@@ -45,10 +65,15 @@ export default class FridgeRepo extends BaseRepo {
         await batch.commit();
     }
 
-    async getWords(fridgeID) {
+    async getWords(fridgeID, asRefs = false) {
         const docs = await getDocs(
             collection(this.db, `fridges/${fridgeID}/words`)
         );
+
+        if (asRefs)
+            return docs.docs.map((snap) =>
+                doc(this.db, `fridges/${fridgeID}/words`, snap.id)
+            );
 
         let words = [];
         docs.forEach((word) => {
@@ -64,5 +89,24 @@ export default class FridgeRepo extends BaseRepo {
             "position.y": top,
             "position.x": left,
         });
+    }
+
+    async delete(id) {
+        // TODO Also delete permisisons associated with this fridge
+        await this.deleteAllWords(id);
+        await super.delete(id);
+    }
+
+    async deleteWord(wordRef, fridgeID) {
+        await deleteDoc(doc(this.db, `fridges/${fridgeID}/words`, wordRef.id));
+    }
+
+    async deleteAllWords(fridgeID) {
+        const wordRefs = await this.getWords(fridgeID, true);
+        const batch = writeBatch(this.db);
+        wordRefs.forEach(async (wordRef) => {
+            batch.delete(wordRef);
+        });
+        await batch.commit();
     }
 }

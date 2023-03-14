@@ -13,22 +13,6 @@ const MOCK_FRIDGES = [
         name: "Test fridge 1",
         id: "testid1",
     },
-    // {
-    //     creatorUID: "alice",
-    //     fridgeVisibility: "private",
-    //     maxCustomWords: 5,
-    //     maxUsers: 20,
-    //     name: "Test fridge 2",
-    //     id: "testid2",
-    // },
-    // {
-    //     creatorUID: "bob",
-    //     fridgeVisibility: "private",
-    //     maxCustomWords: 5,
-    //     maxUsers: 20,
-    //     name: "Test fridge 3",
-    //     id: "testid3",
-    // },
 ];
 
 const MOCK_NEW_FRIDGE = {
@@ -47,19 +31,9 @@ const MOCK_PERMISSIONS = [
         userID: "alice",
         permissions: [...Object.values(PERMISSIONS_NAMES)],
     },
-    // {
-    //     id: "testid2_alice",
-    //     fridgeID: "testid2",
-    //     userID: "alice",
-    // },
-    // {
-    //     id: "testid1_bob",
-    //     fridgeID: "testid1",
-    //     userID: "bob",
-    // },
 ];
 
-const MOCK_WORDS = defaultWords.map((word, index) => {
+const MOCK_WORDS = defaultWords.slice(0, 10).map((word, index) => {
     return {
         wordText: word,
         position: { y: 0, x: 0 },
@@ -98,13 +72,18 @@ afterAll(async () => {
 test("Get one", async () => {
     const result = await fridgeRepoAlice.getOne(MOCK_FRIDGES[0].id);
 
-    expect(result).toEqual(MOCK_FRIDGES[0]);
+    expect(result).toEqual({ ...MOCK_FRIDGES[0], words: MOCK_WORDS });
 });
 
 test("Get one as ref", async () => {
     const result = await fridgeRepoAlice.getOne(MOCK_FRIDGES[0].id, true);
     expect(!!result.metadata).toEqual(true);
     expect(result.id).toEqual(MOCK_FRIDGES[0].id);
+});
+
+test("Get one also gets words", async () => {
+    const result = await fridgeRepoAlice.getOne(MOCK_FRIDGES[0].id);
+    expect(result.words.length).toEqual(MOCK_WORDS.length);
 });
 
 test("Create returns new id", async () => {
@@ -120,6 +99,20 @@ test("CreateWithID returns same id as passed", async () => {
     expect(id).toEqual(MOCK_NEW_FRIDGE.id);
 });
 
+test("Create also creates words", async () => {
+    const newFridgeID = await fridgeRepoAlice.create(MOCK_NEW_FRIDGE);
+
+    let newWords = [];
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+        const docs = await getDocs(
+            collection(context.firestore(), "fridges/" + newFridgeID + "/words")
+        );
+        docs.docs.forEach((doc) => newWords.push(doc.data()));
+    });
+
+    expect(newWords.length).toEqual(defaultWords.length);
+});
+
 test("Update", async () => {
     const update = { name: "New name" };
     await fridgeRepoAlice.update(MOCK_FRIDGES[0].id, update);
@@ -128,6 +121,7 @@ test("Update", async () => {
     expect(result).toEqual({
         ...MOCK_FRIDGES[0],
         name: update.name,
+        words: MOCK_WORDS,
     });
 });
 
@@ -139,9 +133,8 @@ test("Delete", async () => {
         const docs = await getDocs(collection(context.firestore(), "fridges"));
         docs.docs.forEach((doc) => remainingData.push(doc.data()));
     });
-
-    expect(remainingData).toEqual(
-        MOCK_FRIDGES.filter((item) => item.id != MOCK_FRIDGES[0].id)
+    expect(remainingData.length).toEqual(
+        MOCK_FRIDGES.filter((item) => item.id != MOCK_FRIDGES[0].id).length
     );
 });
 
@@ -158,7 +151,7 @@ test("Create words", async () => {
         )
     ).docs;
 
-    expect(docs.length).toEqual(defaultWords.length + 3);
+    expect(docs.length).toEqual(MOCK_WORDS.length + 3);
 });
 
 test("Update word", async () => {

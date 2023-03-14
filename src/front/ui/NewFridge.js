@@ -1,9 +1,9 @@
-import { PERMISSION_GROUPS } from "../../constants";
 import {
-    fridgeService,
-    permissionService,
     authService,
-} from "../../services/api";
+    fridgeRepo,
+    permissionRepo,
+} from "../../services/api/index";
+import { PERMISSION_GROUPS } from "../../constants";
 
 export default {
     data() {
@@ -29,8 +29,12 @@ export default {
                 this.$refs.name.blur();
                 this.isWorking = true;
 
-                const newFridgeID = await fridgeService.createFridge(this.name);
-                await permissionService.create(
+                // TODO: Fridge 'owners'
+                const newFridgeID = await fridgeRepo.create({
+                    name: this.name,
+                    owners: [authService.auth.currentUser.uid],
+                });
+                await permissionRepo.create(
                     newFridgeID,
                     authService.auth.currentUser.uid,
                     [
