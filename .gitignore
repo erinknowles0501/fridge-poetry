@@ -2,3 +2,4 @@ node_modules
 bundled.js
 *debug.*
 *.cache
+secrets

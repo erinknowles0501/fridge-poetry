@@ -61,7 +61,8 @@ service cloud.firestore {
 
         allow read: if isLoggedIn() && (
             resource.data.fromID == request.auth.uid
-            || resource.data.to == request.auth.token.email
+            || resource.data.to == request.auth.token.email 
+            || hasAllPermissionsOf(resource.data.fridgeID, request.auth.uid, ['edit-blacklist'])
         );
         
         allow create: if

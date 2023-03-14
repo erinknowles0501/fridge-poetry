@@ -14,7 +14,7 @@ import {
     writeBatch,
 } from "firebase/firestore";
 
-import { INVITATION_STATUSES } from "../../constants.js";
+import { INVITATION_STATUSES, PERMISSIONS_NAMES } from "../../constants.js";
 
 export default class InviteRepo {
     collectionName = "invitations";
@@ -26,6 +26,7 @@ export default class InviteRepo {
     }
 
     async sendInvite(email, fridgeID, fromID, fromDisplayName) {
+        // TODO: This will mostly be handled by callable server-side GC function.
         const newInviteRef = doc(this.collection);
         const acceptLink = `http://127.0.0.1:5000/?invite=${newInviteRef.id}`;
         await setDoc(newInviteRef, {
@@ -65,18 +66,50 @@ export default class InviteRepo {
     }
 
     async delete(id) {
-        // TODO: Call serv-side func
-        //await deleteDoc(doc(this.db, this.collectionName, id));
+        await deleteDoc(doc(this.db, this.collectionName, id));
     }
 
-    async getAccessibleInvites(userID, fridgeID) {
-        // TODO: call serv-side func
-        // const q = query(
-        //     this.collection,
-        //     where("fridgeID", "==", fridgeID),
-        //     where("fromID", "==", userID)
-        // );
-        // const docs = await getDocs(q);
-        // return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    async getAccessibleInvitesByFridge(userID, fridgeID) {
+        // Returns all invites on this fridge if user has
+        // appropriate permissions, otherwise,
+        // returns invites on this fridge that this user
+        // has sent.
+        const permissionsDoc = await getDoc(
+            doc(this.db, "permissions", `${fridgeID}_${userID}`)
+        );
+        const permissions = permissionsDoc.get("permissions");
+        const userHasPermission = permissions?.includes(
+            PERMISSIONS_NAMES.EDIT_BLACKLIST
+        );
+
+        let q;
+        if (userHasPermission) {
+            q = query(
+                this.collection,
+                where("fridgeID", "==", fridgeID),
+                where("status", "==", INVITATION_STATUSES.PENDING)
+            );
+        } else {
+            q = query(
+                this.collection,
+                where("fridgeID", "==", fridgeID),
+                where("status", "==", INVITATION_STATUSES.PENDING),
+                where("fromID", "==", userID)
+            );
+        }
+        const docs = await getDocs(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+
+    async getAccessibleInvitesByUser(userID) {
+        const userDoc = await getDoc(doc(this.db, "users", userID));
+
+        const q = query(
+            this.collection,
+            where("to", "==", userDoc.get("email")),
+            where("status", "==", INVITATION_STATUSES.PENDING)
+        );
+        const docs = await getDocs(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     }
 }

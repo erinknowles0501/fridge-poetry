@@ -2,11 +2,6 @@ import InviteRepo from "../../../src/services/api/InviteRepo";
 import { testEnvFactory, writeDB } from "../../emulator-setup.js";
 import { getDocs, collection, getDoc, doc } from "firebase/firestore";
 import { INVITATION_STATUSES, PERMISSIONS_NAMES } from "../../../src/constants";
-import {
-    getFunctions,
-    connectFunctionsEmulator,
-    httpsCallable,
-} from "firebase/functions";
 
 const MOCK_INVITES = [
     {
@@ -30,21 +25,33 @@ const MOCK_INVITES = [
         to: "alice@test.com",
         status: INVITATION_STATUSES.PENDING,
     },
+    {
+        id: "invite4",
+        fridgeID: "fridge1",
+        fromID: "bob",
+        to: "erin@test.com",
+        status: INVITATION_STATUSES.PENDING,
+    },
+    {
+        id: "invite5",
+        fridgeID: "fridge2",
+        fromID: "alice",
+        to: "bob@test.com",
+        status: INVITATION_STATUSES.PENDING,
+    },
+    {
+        id: "invite6",
+        fridgeID: "fridge2",
+        fromID: "carla",
+        to: "doug@test.com",
+        status: INVITATION_STATUSES.PENDING,
+    },
 ];
 
-let testEnv, functions, authAlice, repoAlice, dbAlice;
+let testEnv, authAlice, repoAlice, dbAlice;
 
 beforeAll(async () => {
-    ({ testEnv, functions } = await testEnvFactory("inviterepo", true));
-
-    const helloWorld = httpsCallable(functions, "helloWorld");
-
-    try {
-        const result = await helloWorld({ data: "aaaaaaaaaaa!!!!" });
-        console.log("result", result);
-    } catch (e) {
-        console.error(e);
-    }
+    ({ testEnv } = await testEnvFactory("inviterepo", true));
 
     authAlice = testEnv.authenticatedContext("alice", {
         email: "alice@test.com",
@@ -116,29 +123,58 @@ test("Can deny invite", async () => {
     expect(result.status).toEqual(INVITATION_STATUSES.DENIED);
 });
 
-// test("Can delete (revoke) invite", async () => {
-//     await repoAlice.delete(MOCK_INVITES[1].id);
+test("Can delete (revoke) invite", async () => {
+    await repoAlice.delete(MOCK_INVITES[1].id);
 
-//     let results = [];
-//     await testEnv.withSecurityRulesDisabled(async (context) => {
-//         results = (
-//             await getDocs(collection(context.firestore(), "invitations"))
-//         ).docs;
-//     });
-//     expect(results.length).toEqual(MOCK_INVITES.length - 1);
-// });
+    let results = [];
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+        results = (
+            await getDocs(collection(context.firestore(), "invitations"))
+        ).docs;
+    });
+    expect(results.length).toEqual(MOCK_INVITES.length - 1);
+});
 
-// test("Can get accessible invites", async () => {
-//     const results = await repoAlice.getAccessibleInvites(
-//         MOCK_INVITES[0].fromID,
-//         MOCK_INVITES[0].fridgeID
-//     );
+test("Can get all pending invites on fridge if user has permission", async () => {
+    const results = await repoAlice.getAccessibleInvitesByFridge(
+        MOCK_INVITES[0].fromID,
+        MOCK_INVITES[0].fridgeID
+    );
 
-//     expect(results.length).toEqual(
-//         MOCK_INVITES.filter(
-//             (invite) =>
-//                 invite.fromID === MOCK_INVITES[0].fromID &&
-//                 invite.fridgeID === MOCK_INVITES[0].fridgeID
-//         ).length
-//     );
-// });
+    expect(results.length).toEqual(
+        MOCK_INVITES.filter(
+            (invite) =>
+                invite.fridgeID === MOCK_INVITES[0].fridgeID &&
+                invite.status === INVITATION_STATUSES.PENDING
+        ).length
+    );
+});
+
+test("If user does not have permission, get invites they have sent", async () => {
+    const results = await repoAlice.getAccessibleInvitesByFridge(
+        "alice",
+        "fridge2"
+    );
+
+    expect(results.length).toEqual(
+        MOCK_INVITES.filter(
+            (invite) =>
+                invite.fridgeID === "fridge2" &&
+                invite.fromID === "alice" &&
+                invite.status === INVITATION_STATUSES.PENDING
+        ).length
+    );
+});
+
+test("Can get pending invites by user", async () => {
+    await writeDB(testEnv, "users", [{ id: "alice", email: "alice@test.com" }]);
+    const results = await repoAlice.getAccessibleInvitesByUser("alice");
+
+    expect(results.length).toEqual(
+        MOCK_INVITES.filter(
+            (invite) =>
+                invite.to === "alice@test.com" &&
+                invite.status === INVITATION_STATUSES.PENDING
+        ).length
+    );
+});
