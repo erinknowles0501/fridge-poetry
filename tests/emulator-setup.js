@@ -1,13 +1,10 @@
 import { readFileSync } from "fs";
 import * as firestore from "firebase/firestore";
-import { getApp, initializeApp } from "firebase/app";
-import {
-    getFunctions,
-    connectFunctionsEmulator,
-    httpsCallable,
-} from "firebase/functions";
+import { initializeApp } from "firebase/app";
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 import config from "../.firebase/config.js";
 import { initializeTestEnvironment } from "@firebase/rules-unit-testing";
+import ffsTest from "firebase-functions-test";
 
 export async function testEnvFactory(projectID, withFunctions = false) {
     const generatedID = `demo-${projectID}-fridge-poetry-ek`;
@@ -25,7 +22,12 @@ export async function testEnvFactory(projectID, withFunctions = false) {
         const functionsApp = initializeApp(config, generatedID);
         const functions = getFunctions(functionsApp);
         connectFunctionsEmulator(functions, "127.0.0.1", 5001);
-        return { testEnv, functions };
+
+        const { wrap } = ffsTest(
+            { ...config, projectID: generatedID },
+            "../secrets/fridge-poetry-ek-0fee2c27e4fe.json"
+        );
+        return { testEnv, functions, wrap };
     } else {
         return testEnv;
     }
