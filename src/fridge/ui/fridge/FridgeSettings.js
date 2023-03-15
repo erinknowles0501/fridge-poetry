@@ -1,10 +1,10 @@
-import { fridgeService, permissionService } from "../../../services/api";
+import { fridgeRepo, permissionRepo } from "../../../services/api/index";
 
 export default {
     inject: ["store"],
     data() {
         return {
-            localFridgeInfo: JSON.parse(JSON.stringify(this.store.fridge.info)),
+            localFridgeInfo: JSON.parse(JSON.stringify(this.store.fridge)),
             isDeleting: false,
             deleteConfirmation: "",
             disableDeletionField: false,
@@ -61,8 +61,8 @@ export default {
             const data = {
                 ...this.localFridgeInfo,
             };
-            await fridgeService.updateFridge(this.store.fridge.id, data);
-            this.store.fridge.info = data;
+            await fridgeRepo.update(this.store.fridge.id, data);
+            this.store.fridge = data;
             this.$forceUpdate();
         },
         startDeleting() {
@@ -76,16 +76,8 @@ export default {
                 this.$refs.deleteConfirmation.blur();
                 this.disableDeletionField = true;
 
-                const permissionRefs =
-                    await permissionService.getPermissionRefsByFridge(
-                        this.store.fridge.id
-                    );
-
-                permissionRefs.forEach((ref) => {
-                    permissionService.delete(ref.id);
-                });
-
-                await fridgeService.deleteFridge(this.store.fridge.id);
+                await permissionRepo.deleteByFridge(this.store.fridge.id);
+                await fridgeRepo.delete(this.store.fridge.id);
                 window.location = "/";
             }
         },

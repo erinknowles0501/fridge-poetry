@@ -1,10 +1,10 @@
 import { PERMISSION_GROUPS } from "../../../constants";
 import {
-    invitationService,
-    userService,
-    permissionService,
+    inviteRepo,
+    userRepo,
+    permissionRepo,
     authService,
-} from "../../../services/api";
+} from "../../../services/api/index";
 
 export default {
     inject: ["store"],
@@ -18,7 +18,7 @@ export default {
         <div>
             <div class="overlay-wrap" v-if="isActive">
                 <div class="modal">
-                    <h2>Join '{{store.fridge.info.name}}'?</h2>
+                    <h2>Join '{{store.fridge.name}}'?</h2>
                     <p>
                         {{invite?.fromDisplayName || 'A user' }} has invited you to join this fridge. Accept this invitation?
                     </p>
@@ -41,7 +41,7 @@ export default {
                 .find((param) => param.includes("invite"))
                 .split("=")[1];
 
-            this.invite = await invitationService.getInvitation(inviteID);
+            this.invite = await inviteRepo.getOne(inviteID);
 
             if (this.invite.status !== "pending") {
                 this.isActive = false;
@@ -50,8 +50,8 @@ export default {
                     .replace(this.invite.id, "");
             }
 
-            await userService
-                .getUserByID(this.invite.fromID)
+            await userRepo
+                .getOne(this.invite.fromID)
                 .then(
                     (inviter) =>
                         (this.invite.fromDisplayName = inviter.displayName)
@@ -69,8 +69,8 @@ export default {
                 return;
             }
 
-            await invitationService.acceptInvitation(this.invite.id);
-            await permissionService.create(
+            await inviteRepo.acceptInvitation(this.invite.id);
+            await permissionRepo.create(
                 this.store.fridge.id,
                 authService.auth.currentUser.uid,
                 [...PERMISSION_GROUPS.OPTIONAL]

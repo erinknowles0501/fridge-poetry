@@ -1,4 +1,4 @@
-import { invitationService } from "../../../services/api";
+import { inviteRepo } from "../../../services/api/index";
 
 export default {
     inject: ["store"],
@@ -7,14 +7,8 @@ export default {
             inviteEmail: "",
             isWorking: false,
             pendingInvites: [],
-            userInvites: [],
             isEditing: true,
         };
-    },
-    computed: {
-        canEditAll() {
-            return true;
-        },
     },
     template: `
     <div>
@@ -27,19 +21,19 @@ export default {
         <p class="label">Pending invites:</p>
         <div style="display: flex" v-for="invite in pendingInvites" v-if="pendingInvites">
             <p>{{invite.to}}</p>
-            <button v-if="isEditing && (canEditAll || canEditOne(invite.id))">X</button>
+            <button v-if="isEditing">X</button>
         </div>
         <div v-else>No invites to show.</div>
 
     </div>
     `,
     created() {
-        invitationService
-            .getInvitationsByFridge(this.store.fridge.id)
+        inviteRepo
+            .getAccessibleInvitesByFridge(
+                this.store.user.id,
+                this.store.fridge.id
+            )
             .then((result) => (this.pendingInvites = result));
-        invitationService
-            .getSentInvitesByUser(this.store.user.id)
-            .then((result) => (this.userInvites = result));
     },
     methods: {
         async sendInvite() {
@@ -53,18 +47,14 @@ export default {
             }
 
             this.isWorking = true;
-            await invitationService.sendInvite(
+            await inviteRepo.sendInvite(
                 this.inviteEmail,
                 this.store.fridge.id,
+                this.store.user.id,
                 this.store.user.displayName
             );
             this.isWorking = false;
             this.inviteEmail = "";
-        },
-        canEditOne(inviteID) {
-            return this.userInvites.includes(
-                (invite) => invite.id === inviteID
-            );
         },
     },
 };

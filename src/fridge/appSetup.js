@@ -1,4 +1,4 @@
-import { wordService } from "../services/api.js";
+import { fridgeRepo } from "../services/api/index";
 import { setElementPosition } from "./domHelpers.js";
 import store from "./store.js";
 
@@ -53,7 +53,7 @@ function addAppDragListeners() {
         );
 
         setElementPosition(store.currentDrag.el, adjustedY, adjustedX);
-        wordService.updateWord(
+        fridgeRepo.updateWord(
             store.currentDrag.el.getAttribute("data-id"),
             adjustedY,
             adjustedX,

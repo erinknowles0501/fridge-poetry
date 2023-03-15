@@ -1,7 +1,7 @@
 import { scaleApp } from "./scale.js";
 import { makeFridge } from "./appSetup.js";
 import store from "./store.js";
-import * as services from "../services/api.js";
+import * as services from "../services/api/index";
 import startUI from "./ui/index.js";
 
 // TODO Clicking word updates its z-index

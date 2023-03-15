@@ -8,7 +8,7 @@ class Store {
     currentDrag = { el: null, offset: { x: 0, y: 0 } };
     user = null;
     services = {};
-    id = Date.now();
+    id = Date.now(); // TODO
 
     async initialize(services) {
         this.clear();
@@ -17,18 +17,13 @@ class Store {
         this.appEl = document.querySelector("#app");
 
         this.fridge.id = window.location.pathname.slice(1);
-        this.fridge.info = await this.services.fridgeService.getFridgeByID(
-            this.fridge.id
-        );
-        this.fridge.words = await this.services.wordService.getWordsByFridge(
-            this.fridge.id
-        );
+        this.fridge = await this.services.fridgeRepo.getOne(this.fridge.id);
 
-        this._user = await this.services.userService.getUserByID(
+        this._user = await this.services.userRepo.getOne(
             this.services.authService.auth.currentUser.uid
         );
         this._user.permissions =
-            await this.services.permissionService.getPermissionsByUserAndFridge(
+            await this.services.permissionRepo.getPermissionByUserAndFridge(
                 this._user.id,
                 this.fridge.id
             );
@@ -36,7 +31,7 @@ class Store {
             this._user,
             this,
             "user",
-            services.userService.updateUser
+            services.userRepo.update
         );
     }
 
