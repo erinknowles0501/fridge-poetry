@@ -57,7 +57,7 @@ export default {
     },
     created() {
         authService.handleAuthStateChanged((state) => {
-            if (state.uid) {
+            if (state?.uid) {
                 this.$emit("changeActiveComponent", "FridgeSelection");
             }
         });

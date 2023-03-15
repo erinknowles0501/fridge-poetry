@@ -19,8 +19,7 @@ import { INVITATION_STATUSES, PERMISSIONS_NAMES } from "../../constants.js";
 export default class InviteRepo {
     collectionName = "invitations";
 
-    constructor(auth, db) {
-        this.auth = auth;
+    constructor(db) {
         this.db = db;
         this.collection = collection(this.db, this.collectionName);
     }

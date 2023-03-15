@@ -12,15 +12,12 @@ import {
     where,
     deleteDoc,
 } from "firebase/firestore";
-import app from "../../firebase/index.js";
-const fbdb = getFirestore(app);
 
 export default class BaseRepo {
     collectionName = null;
     collection = null;
 
-    constructor(auth, db = fbdb) {
-        this.auth = auth;
+    constructor(db) {
         this.db = db;
     }
 

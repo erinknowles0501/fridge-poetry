@@ -1,6 +1,8 @@
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
+import { importAssertionsPlugin } from "rollup-plugin-import-assert";
+import { importAssertions } from "acorn-import-assertions";
 
 export default {
     input: {
@@ -15,7 +17,8 @@ export default {
         },
         chunkFileNames: "chunks/[name].js",
     },
-    plugins: [nodeResolve(), commonjs(), json()],
+    acornInjectPlugins: [importAssertions],
+    plugins: [nodeResolve(), commonjs(), importAssertionsPlugin(), json()],
     external: ["vue"],
     watch: true,
 };

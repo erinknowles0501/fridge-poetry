@@ -19,8 +19,8 @@ export default class UserRepo extends BaseRepo {
     collectionName = "users";
     collection = collection(this.db, this.collectionName);
 
-    constructor(auth, db) {
-        super(auth, db);
+    constructor(db) {
+        super(db);
     }
 
     // async getCurrentUser() {

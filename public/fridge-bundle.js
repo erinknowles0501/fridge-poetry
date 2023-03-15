@@ -1,5 +1,313 @@
-import { w as wordService, f as fridgeService, p as permissionService, i as invitationService, u as userService, a as authService, P as PERMISSION_GROUPS, b as PERMISSIONS_NAMES, s as services, c as scaleApp } from './chunks/api.js';
+import { o as oh, g as getAuth, a as app, A as Aa, O as Ol, T as Ta, U as Ul, b as af, d as defaultWords, c as APP_WIDTH, K as Kl, G as Gl, s as sl, r as rl, B as Bl, I as INVITATION_STATUSES, P as PERMISSIONS_NAMES, e as signInWithEmailAndPassword, f as signOut, h as createUserWithEmailAndPassword, i as onAuthStateChanged, j as APP_HEIGHT, k as PERMISSION_GROUPS, l as scaleApp } from './chunks/constants.js';
 import { computed, reactive, createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+
+const db = oh(app);
+const fbAuth = getAuth();
+
+class AuthService {
+    auth = null;
+
+    constructor(auth) {
+        this.auth = auth;
+    }
+
+    async signIn(email, password) {
+        await signInWithEmailAndPassword(this.auth, email, password);
+        return this.auth.currentUser;
+    }
+
+    async logout() {
+        await signOut(this.auth);
+    }
+
+    async signUp(email, password) {
+        await createUserWithEmailAndPassword(this.auth, email, password);
+        return this.auth.currentUser;
+    }
+
+    handleAuthStateChanged(handler) {
+        onAuthStateChanged(this.auth, (user) => {
+            if (user) {
+                handler(user);
+            }
+        });
+    }
+}
+const authService = new AuthService(fbAuth);
+
+class WordService {
+    // TODO Error handling service to route through..
+
+    async getWordsByFridge(fridgeID) {
+        const words = [];
+
+        // TODO: This snapshot listneer should be called and handled elsewhere.
+        // const unsub = onSnapshot(collection(db, "defaultWords"), (snapshot) => {
+        //     console.log("querySnapshot", snapshot);
+        //     const docs = snapshot.docs;
+        //     console.log("docs", docs);
+
+        //     // console.log("Current data: ", doc.data());
+        //     snapshot.docChanges().forEach((change) => {
+        //         //console.log("change", change.doc.data());
+        //         const word = await change.doc.data();
+        //         word.id = change.doc.id;
+
+        //         words.push(word);
+        //         showme(words)
+
+        //         //console.log("doc", doc.data());
+        //         // console.log("docs", docs);
+        //         // //console.log("docs.data()", docs.data());
+        //         // docs.forEach(doc => {
+
+        //         // const word = await doc.data();
+        //         // word.id = doc.id;
+        //         // words.push(word);
+        //     });
+        // });
+        try {
+            const snapshot = await Bl(
+                Ta(db, `fridges/${fridgeID}/words`)
+            );
+            snapshot.forEach((doc) => {
+                words.push({ ...doc.data(), id: doc.id });
+            });
+            return words;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    getDocumentReference(id, fridgeID) {
+        return Aa(db, `fridges/${fridgeID}/words`, id);
+    }
+
+    async updateWord(wordID, top, left, fridgeID) {
+        // TODO Constraints on top and left
+        const docRef = this.getDocumentReference(wordID, fridgeID);
+        await Kl(docRef, {
+            "position.y": top,
+            "position.x": left,
+        });
+    }
+}
+
+const wordService = new WordService();
+
+class FridgeService {
+    constructor(auth) {
+        this.auth = auth;
+    }
+
+    async getFridgeByID(fridgeID) {
+        const docRef = Aa(db, "fridges", fridgeID);
+        const docSnap = await Ol(docRef);
+        return { ...docSnap.data(), id: docSnap.id };
+    }
+
+    async createFridge(name) {
+        const newFridgeRef = Aa(Ta(db, "fridges"));
+        await Ul(newFridgeRef, {
+            name: name,
+            creatorUID: this.auth.currentUser.uid,
+            maxUsers: 20,
+            maxCustomWords: 5,
+        });
+        await this.createWordsOnFridge(newFridgeRef.id);
+        return newFridgeRef.id;
+    }
+
+    async createWordsOnFridge(fridgeID) {
+        const remSize = 8;
+        const paddingX = 0.5 * remSize;
+        const paddingY = 0.2 * remSize; // TODO de-magic these
+
+        const batch = af(db);
+        defaultWords.forEach(async (word) => {
+            const x =
+                Math.random() * (APP_WIDTH - remSize * word.length - paddingX);
+            const y = Math.random() * (APP_HEIGHT - remSize - paddingY);
+
+            batch.set(Aa(Ta(db, `fridges/${fridgeID}/words`)), {
+                wordText: word,
+                position: { y, x },
+            });
+        });
+        await batch.commit();
+    }
+
+    async updateFridge(fridgeID, data) {
+        const fridgeRef = Aa(db, "fridges", fridgeID);
+        await Kl(fridgeRef, data);
+    }
+
+    async deleteFridge(fridgeID) {
+        await Gl(Aa(db, "fridges", fridgeID));
+    }
+}
+const fridgeService = new FridgeService(authService.auth);
+
+class UserService {
+    // get whether user can access fridge (current, ?)
+
+    constructor(auth) {
+        this.auth = auth;
+    }
+
+    async createUser(id, data) {
+        await Ul(Aa(db, "users", id), data);
+    }
+
+    async getUserByID(id) {
+        const docRef = Aa(db, "users", id);
+        const docSnap = await Ol(docRef);
+        return { ...docSnap.data(), id: docSnap.id };
+    }
+
+    async updateUser(id, data) {
+        const docRef = Aa(db, "users", id);
+        await Kl(docRef, data);
+    }
+
+    async getWhetherAUserHasEmail(email, returnUser = false) {
+        const q = sl(Ta(db, "users"), rl("email", "==", email));
+        const docs = await Bl(q);
+        if (docs.docs[0]) {
+            return returnUser
+                ? { ...docs.docs[0].data(), id: docs.docs[0].id }
+                : true;
+        } else {
+            return false;
+        }
+    }
+}
+const userService = new UserService(authService.auth);
+
+class InvitationService {
+    // mark invite/ revoked
+    // get invites by fridge
+    // re-send invite?
+
+    constructor(auth) {
+        this.auth = auth;
+        this.collectionName = "invitations";
+        this.collection = Ta(db, this.collectionName);
+    }
+
+    async sendInvite(email, fridgeID, senderDisplayName) {
+        const newInviteRef = Aa(this.collection);
+        const acceptLink = `http://127.0.0.1:5000/?invite=${newInviteRef.id}`;
+        await Ul(newInviteRef, {
+            to: email,
+            message: {
+                // 'message' property required for firestore-send-email integration
+                subject: `${senderDisplayName} has invited you to join a fridge on FridgePoetry!`,
+                html: `
+        <h2>You've been invited</h2>
+        <p><b>Fridge name:</b> ${fridgeID}</p>
+        <p>Click the link below to view the invitation.</p>
+        <p><a href="${acceptLink}">View</a></p>
+                        `,
+            },
+            fridgeID: fridgeID,
+            fromID: this.auth.currentUser.uid,
+            lastSent: new Date(),
+            status: INVITATION_STATUSES.PENDING,
+        });
+    }
+
+    async getInvitation(inviteID) {
+        const docSnap = await Ol(Aa(db, this.collectionName, inviteID));
+        return { id: inviteID, ...docSnap.data() };
+    }
+
+    async acceptInvitation(inviteID) {
+        await Kl(Aa(db, this.collectionName, inviteID), {
+            status: INVITATION_STATUSES.ACCEPTED,
+        });
+    }
+
+    async getInvitationsByFridge(fridgeID) {
+        const q = sl(this.collection, rl("fridgeID", "==", fridgeID));
+        const docs = await Bl(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+
+    async getSentInvitesByUser(userID) {
+        const q = sl(this.collection, rl("fromID", "==", userID));
+        const docs = await Bl(q);
+        return docs.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+}
+const invitationService = new InvitationService(authService.auth);
+
+class PermissionService {
+    constructor(auth) {
+        this.auth = auth;
+        this.collectionName = "permissions";
+        this.collection = Ta(db, this.collectionName);
+    }
+
+    async getPermissionsByUser(userID) {
+        const q = sl(this.collection, rl("userID", "==", userID));
+        const docs = await Bl(q);
+        return docs.docs.map((doc) => doc.data());
+    }
+
+    async getPermissionRefsByFridge(fridgeID) {
+        const q = sl(this.collection, rl("fridgeID", "==", fridgeID));
+        const docs = await Bl(q);
+        return docs.docs;
+    }
+
+    async getPermissionsByFridge(fridgeID) {
+        const permissionRefs = await this.getPermissionRefsByFridge(fridgeID);
+        return permissionRefs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    }
+
+    async getPermissionsByUserAndFridge(userID, fridgeID) {
+        const docRef = await Ol(
+            Aa(this.collection, `${fridgeID}_${userID}`)
+        );
+
+        if (docRef.exists()) {
+            return await docRef.data().permissions;
+        } else {
+            return false;
+        }
+    }
+
+    async writeInvitedPermission(userID, fridgeID) {
+        await this.create(fridgeID, userID, [PERMISSIONS_NAMES.INVITED]);
+    }
+
+    async create(fridgeID, userID, permissionArr) {
+        // Creates doc at id if not exists, otherwise, gets it and updates it
+        const docRef = Aa(this.collection, `${fridgeID}_${userID}`);
+        await Ul(docRef, {
+            fridgeID,
+            userID,
+            permissions: permissionArr,
+        });
+    }
+
+    async delete(id) {
+        await Gl(Aa(db, this.collectionName, id));
+    }
+}
+
+const permissionService = new PermissionService(authService.auth);
+
+var services = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    authService: authService,
+    wordService: wordService,
+    fridgeService: fridgeService,
+    userService: userService,
+    invitationService: invitationService,
+    permissionService: permissionService
+});
 
 function setElementPosition(element, positionY, positionX) {
     element.style.top = positionY + "px";
@@ -507,7 +815,7 @@ var menuItems = {
         {
             title: "Invitations",
             permissions: {
-                showIfIn: [PERMISSIONS_NAMES.SEND_INVITES, PERMISSIONS_NAMES.REVOKE_INVITES],
+                showIfIn: [PERMISSIONS_NAMES.SEND_INVITES, PERMISSIONS_NAMES.EDIT_BLACKLIST],
             },
             componentName: "Invitations",
         },
@@ -524,6 +832,7 @@ var menuItems = {
                     PERMISSIONS_NAMES.EDIT_FRIDGE_NAME,
                     PERMISSIONS_NAMES.EDIT_MAX_USERS,
                     PERMISSIONS_NAMES.EDIT_MAX_CUSTOM_WORDS_PER_USER,
+                    PERMISSIONS_NAMES.EDIT_BLACKLIST,
                 ],
             },
         },

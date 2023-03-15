@@ -1,5 +1,16 @@
+import {
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signOut,
+} from "firebase/auth";
+
 export default class AuthService {
     auth = null;
+
+    constructor(auth) {
+        this.auth = auth;
+    }
 
     async signIn(email, password) {
         await signInWithEmailAndPassword(this.auth, email, password);

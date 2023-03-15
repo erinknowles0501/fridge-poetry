@@ -25,6 +25,7 @@
         "@rollup/plugin-commonjs": "^24.0.1",
         "@rollup/plugin-json": "^5.0.2",
         "@rollup/plugin-node-resolve": "^13.3.0",
-        "jest": "^29.4.2"
+        "jest": "^29.4.2",
+        "rollup-plugin-import-assert": "^2.1.3"
     }
 }

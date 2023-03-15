@@ -17,8 +17,7 @@ import {
 export default class PermissionRepo {
     collectionName = "permissions";
 
-    constructor(auth, db) {
-        this.auth = auth;
+    constructor(db) {
         this.db = db;
         this.collection = collection(this.db, this.collectionName);
     }

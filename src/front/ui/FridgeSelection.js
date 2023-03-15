@@ -37,7 +37,7 @@ export default {
                 });
                 this.fridges = await Promise.all(
                     fridgeIDs.map(async (fridgeID) => {
-                        return await fridgeRepo.getFridgeByID(fridgeID);
+                        return await fridgeRepo.getOne(fridgeID);
                     })
                 );
             })

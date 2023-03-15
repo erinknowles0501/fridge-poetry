@@ -22,8 +22,8 @@ export default class FridgeRepo extends BaseRepo {
     collectionName = "fridges";
     collection = collection(this.db, this.collectionName);
 
-    constructor(auth, db) {
-        super(auth, db);
+    constructor(db) {
+        super(db);
     }
 
     async create(data) {
