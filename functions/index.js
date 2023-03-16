@@ -34,3 +34,20 @@ export const invitationDeleted = functions.firestore
 
         // TODO: get current list of invites on fridge now that this one is deleted and set the fridge user count to that. (idempotence)
     });
+
+// export const createFridge = functions.firestore
+//     .document("fridges/{fridgeID}")
+//     .onCreate(async (snap, context) => {
+//         const snapData = snap.data();
+//         const fridgeID = context.params.fridgeID;
+//         const ownerID = snapData.owners[0];
+//         const data = {
+//             fridgeID,
+//             userID: ownerID,
+//             permissions: [...Object.values(PERMISSIONS_NAMES)],
+//             test: "hi",
+//         };
+
+//         const concatStr = `${fridgeID}_${ownerID}`;
+//         return await db.doc("permissions/" + concatStr).set(data);
+//     });

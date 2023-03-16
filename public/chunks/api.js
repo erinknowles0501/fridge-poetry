@@ -21989,7 +21989,7 @@ var firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig, "fridge-poetry-ek");
 
 var defaultWords = [
 	"I",
@@ -22103,7 +22103,6 @@ var defaultWords = [
 const INVITATION_STATUSES = {
     PENDING: "pending",
     ACCEPTED: "accepted",
-    REVOKED: "revoked",
     DENIED: "denied",
 };
 
@@ -22114,7 +22113,7 @@ const PERMISSIONS_NAMES = {
     CHANGE_FRIDGE_VISIBILITY: "change-fridge-visibility",
     EDIT_MAX_CUSTOM_WORDS_PER_USER: "edit-max-custom-words-per-user",
     SEND_INVITES: "send-invites",
-    REVOKE_INVITES: "revoke-invites",
+    EDIT_BLACKLIST: "edit-blacklist",
     FREEZE_USER: "freeze-user",
     UNFREEZE_USER: "unfreeze-user",
     CREATE_CUSTOM_WORDS: "create-custom-words",
@@ -22133,7 +22132,7 @@ const PERMISSION_GROUPS = {
         PERMISSIONS_NAMES.EDIT_MAX_USERS,
         PERMISSIONS_NAMES.CHANGE_FRIDGE_VISIBILITY,
         PERMISSIONS_NAMES.EDIT_MAX_CUSTOM_WORDS_PER_USER,
-        PERMISSIONS_NAMES.REVOKE_INVITES,
+        PERMISSIONS_NAMES.EDIT_BLACKLIST,
         PERMISSIONS_NAMES.UNFREEZE_USER,
     ],
 };

@@ -507,7 +507,7 @@ var menuItems = {
         {
             title: "Invitations",
             permissions: {
-                showIfIn: [PERMISSIONS_NAMES.SEND_INVITES, PERMISSIONS_NAMES.REVOKE_INVITES],
+                showIfIn: [PERMISSIONS_NAMES.SEND_INVITES, PERMISSIONS_NAMES.EDIT_BLACKLIST],
             },
             componentName: "Invitations",
         },
@@ -524,6 +524,7 @@ var menuItems = {
                     PERMISSIONS_NAMES.EDIT_FRIDGE_NAME,
                     PERMISSIONS_NAMES.EDIT_MAX_USERS,
                     PERMISSIONS_NAMES.EDIT_MAX_CUSTOM_WORDS_PER_USER,
+                    PERMISSIONS_NAMES.EDIT_BLACKLIST,
                 ],
             },
         },
