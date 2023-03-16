@@ -36,7 +36,7 @@ beforeAll(async () => {
         email: "alice@test.com",
     });
     dbAlice = authAlice.firestore();
-    repoAlice = new PermissionRepo(authAlice, dbAlice);
+    repoAlice = new PermissionRepo(dbAlice);
 });
 
 beforeEach(async () => {

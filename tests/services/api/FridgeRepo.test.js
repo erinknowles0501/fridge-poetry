@@ -50,7 +50,7 @@ beforeAll(async () => {
         email: "alice@test.com",
     });
     dbAlice = authAlice.firestore();
-    fridgeRepoAlice = new FridgeRepo(authAlice, dbAlice);
+    fridgeRepoAlice = new FridgeRepo(dbAlice);
 });
 
 beforeEach(async () => {
@@ -92,25 +92,12 @@ test("Create returns new id", async () => {
 });
 
 test("CreateWithID returns same id as passed", async () => {
+    // TODO: No longer extend this method! createWithID should instead be folded into an option on create
     const id = await fridgeRepoAlice.createWithID(
         MOCK_NEW_FRIDGE.id,
         MOCK_NEW_FRIDGE
     );
     expect(id).toEqual(MOCK_NEW_FRIDGE.id);
-});
-
-test("Create also creates words", async () => {
-    const newFridgeID = await fridgeRepoAlice.create(MOCK_NEW_FRIDGE);
-
-    let newWords = [];
-    await testEnv.withSecurityRulesDisabled(async (context) => {
-        const docs = await getDocs(
-            collection(context.firestore(), "fridges/" + newFridgeID + "/words")
-        );
-        docs.docs.forEach((doc) => newWords.push(doc.data()));
-    });
-
-    expect(newWords.length).toEqual(defaultWords.length);
 });
 
 test("Update", async () => {

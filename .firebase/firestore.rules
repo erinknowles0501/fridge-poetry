@@ -34,7 +34,8 @@ service cloud.firestore {
     
    	match /fridges/{fridgeID} {
     	match /words/{wordID} {
-      	    allow read, write: if isLoggedIn() && permissionExists(fridgeID, request.auth.uid)
+            allow create, delete: if isLoggedIn() && hasAllPermissionsOf(fridgeID, request.auth.uid, ['create-custom-words'])
+      	    allow read, update: if isLoggedIn() && permissionExists(fridgeID, request.auth.uid)
         }
       
         allow create;

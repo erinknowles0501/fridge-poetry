@@ -39,7 +39,7 @@ class Store {
             this._user,
             this,
             "user",
-            services.userRepo.update
+            services.userRepo.update.bind(services.userRepo)
         );
     }
 

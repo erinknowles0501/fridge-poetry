@@ -28,6 +28,7 @@ export default class BaseRepo {
     }
 
     async createWithID(id, data) {
+        // TODO: No longer extend this method! createWithID should instead be folded into an option on create
         const newDocRef = doc(this.collection, id);
         await setDoc(newDocRef, data);
         return newDocRef.id;

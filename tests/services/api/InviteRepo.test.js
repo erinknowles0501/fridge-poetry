@@ -57,7 +57,7 @@ beforeAll(async () => {
         email: "alice@test.com",
     });
     dbAlice = authAlice.firestore();
-    repoAlice = new InviteRepo(authAlice, dbAlice);
+    repoAlice = new InviteRepo(dbAlice);
 });
 
 beforeEach(async () => {

@@ -40,13 +40,13 @@ beforeAll(async () => {
     authAlice = testEnv.authenticatedContext("alice", {
         email: "alice@test.com",
     });
-    userRepoAlice = new UserRepo(authAlice, authAlice.firestore());
+    userRepoAlice = new UserRepo(authAlice.firestore());
     authBob = testEnv.authenticatedContext("bob", {
         email: "bob@test.com",
     });
-    userRepoBob = new UserRepo(authBob, authBob.firestore());
+    userRepoBob = new UserRepo(authBob.firestore());
     authNone = testEnv.unauthenticatedContext();
-    userRepoNone = new UserRepo(authNone, authNone.firestore());
+    userRepoNone = new UserRepo(authNone.firestore());
 });
 
 // const userRepoAlice = new UserRepo(null, authAlice.firestore());

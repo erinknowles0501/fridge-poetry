@@ -26,17 +26,6 @@ export default class FridgeRepo extends BaseRepo {
         super(db);
     }
 
-    async create(data) {
-        data = {
-            maxUsers: 20,
-            maxCustomWords: 5,
-            ...data,
-        };
-        const fridgeID = await super.create(data);
-        await this.createWords(fridgeID);
-        return fridgeID;
-    }
-
     async getOne(id, asRef = false) {
         const fridge = await super.getOne(id, asRef);
         if (asRef) return fridge;

@@ -1,5 +1,5 @@
 import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-import { d as defaultWords, a as authService, i as inviteRepo, I as INVITATION_STATUSES, u as userRepo, p as permissionRepo, f as fridgeRepo, P as PERMISSION_GROUPS } from './chunks/index.js';
+import { d as defaultWords, a as authService, i as inviteRepo, I as INVITATION_STATUSES, u as userRepo, p as permissionRepo, f as fridgeRepo, b as PERMISSIONS_NAMES } from './chunks/index.js';
 
 var LoginSignup = {
     emits: ["changeActiveComponent"],
@@ -307,11 +307,9 @@ var NewFridge = {
                 await permissionRepo.create(
                     newFridgeID,
                     authService.auth.currentUser.uid,
-                    [
-                        ...PERMISSION_GROUPS.FRIDGE_OWNER,
-                        ...PERMISSION_GROUPS.OPTIONAL,
-                    ]
+                    [...Object.values(PERMISSIONS_NAMES)]
                 );
+                await fridgeRepo.createWords(newFridgeID);
                 window.location = newFridgeID;
             } catch (error) {
                 // TODO

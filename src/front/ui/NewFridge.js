@@ -3,7 +3,7 @@ import {
     fridgeRepo,
     permissionRepo,
 } from "../../services/api/index";
-import { PERMISSION_GROUPS } from "../../constants";
+import { PERMISSIONS_NAMES } from "../../constants";
 
 export default {
     data() {
@@ -37,11 +37,9 @@ export default {
                 await permissionRepo.create(
                     newFridgeID,
                     authService.auth.currentUser.uid,
-                    [
-                        ...PERMISSION_GROUPS.FRIDGE_OWNER,
-                        ...PERMISSION_GROUPS.OPTIONAL,
-                    ]
+                    [...Object.values(PERMISSIONS_NAMES)]
                 );
+                await fridgeRepo.createWords(newFridgeID);
                 window.location = newFridgeID;
             } catch (error) {
                 // TODO
