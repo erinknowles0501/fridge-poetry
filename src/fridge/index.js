@@ -1,5 +1,5 @@
 import { scaleApp } from "./scale.js";
-import { makeFridge } from "./appSetup.js";
+import { makeFridge, scaleGhost } from "./appSetup.js";
 import store from "./store.js";
 import * as services from "../services/api/index";
 import startUI from "./ui/index.js";
@@ -14,8 +14,10 @@ services.authService.handleAuthStateChanged(async (state) => {
 
         // TODO: Case where landscape
         store.scale = scaleApp(store.appEl);
+        scaleGhost();
         onresize = () => {
             ({ x: store.scale.x, y: store.scale.y } = scaleApp(store.appEl));
+            scaleGhost();
         };
 
         startUI();

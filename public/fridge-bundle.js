@@ -74,6 +74,36 @@ function makeFridge() {
     addAppDragListeners();
 }
 
+function scaleGhost() {
+    const ghostEl = document.querySelector("#dragghost");
+    const computedWordStyle = getComputedStyle(document.querySelector(".word"));
+
+    const adjustedFontSizeInt =
+        computedWordStyle.getPropertyValue("font-size").split("px")[0] *
+        store.scale.y;
+    ghostEl.style.fontSize = adjustedFontSizeInt + "px";
+
+    const adjustedPaddingTopInt =
+        computedWordStyle.getPropertyValue("padding-top").split("px")[0] *
+        store.scale.y;
+    const adjustedPaddingLeftInt =
+        computedWordStyle.getPropertyValue("padding-left").split("px")[0] *
+        store.scale.x;
+    ghostEl.style.padding = `${adjustedPaddingTopInt}px ${adjustedPaddingLeftInt}px`;
+
+    const CHAR_WIDTH_RATIO = 0.55; // This is an approximation of the value of the char width for a char height of 1. One way to actually get this value is to get the offsetWidth of an element containing just one character and with no padding, but that is overkill here.
+    const charWidth = adjustedFontSizeInt * CHAR_WIDTH_RATIO;
+    const expectedWidth = charWidth / (store.scale.y / store.scale.x);
+    ghostEl.style.letterSpacing = -(charWidth - expectedWidth) + "px";
+
+    if (
+        document.documentElement.clientHeight >
+        document.documentElement.clientWidth
+    ) {
+        ghostEl.className = "vertical-ghost";
+    }
+}
+
 function makeWordEls() {
     store.fridge.words.forEach((word) => {
         const el = document.createElement("div");
@@ -90,9 +120,18 @@ function makeWordEls() {
 }
 
 function addListeners(element) {
+    const ghostEl = document.querySelector("#dragghost");
+
     element.addEventListener("dragstart", (event) => {
         store.currentDrag.offset.x = event.offsetX;
         store.currentDrag.offset.y = event.offsetY;
+
+        ghostEl.textContent = element.textContent;
+        event.dataTransfer.setDragImage(
+            ghostEl,
+            event.offsetX * store.scale.x,
+            event.offsetY * store.scale.y
+        );
 
         store.currentDrag.el = element;
     });
@@ -605,8 +644,10 @@ authService.handleAuthStateChanged(async (state) => {
 
         // TODO: Case where landscape
         store.scale = scaleApp(store.appEl);
+        scaleGhost();
         onresize = () => {
             ({ x: store.scale.x, y: store.scale.y } = scaleApp(store.appEl));
+            scaleGhost();
         };
 
         startUI();

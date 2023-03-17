@@ -19,7 +19,8 @@ body {
     transform-origin: top left;
 }
 
-.word {
+.word,
+#dragghost {
     font-family: monospace;
     outline: 1px solid rgba(0, 0, 0, 0.3);
     padding: 0.1rem 0.25rem;
@@ -34,4 +35,17 @@ body {
 
 .word:hover {
     cursor: grab;
+}
+
+#dragghost {
+    top: -100px;
+    left: -100px;
+    z-index: -20;
+    color: rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.vertical-ghost {
+    writing-mode: vertical-rl;
+    text-orientation: sideways;
 }
