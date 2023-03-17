@@ -64,7 +64,7 @@ export default class PermissionRepo {
         );
 
         if (docRef.exists()) {
-            return await docRef.data().permissions;
+            return docRef.data().permissions;
         } else {
             return false;
         }

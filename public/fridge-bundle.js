@@ -25,16 +25,21 @@ class Store {
         this.appEl = document.querySelector("#app");
 
         this.fridge.id = window.location.pathname.slice(1);
-        this.fridge = await this.services.fridgeRepo.getOne(this.fridge.id);
 
         this._user = await this.services.userRepo.getOne(
             this.services.authService.auth.currentUser.uid
         );
-        this._user.permissions =
-            await this.services.permissionRepo.getPermissionByUserAndFridge(
+
+        const [fridge, permissions] = await Promise.all([
+            this.services.fridgeRepo.getOne(this.fridge.id),
+            this.services.permissionRepo.getPermissionByUserAndFridge(
                 this._user.id,
                 this.fridge.id
-            );
+            ),
+        ]);
+        this.fridge = fridge;
+
+        this._user.permissions = permissions;
         this.makeUpdateProxy(
             this._user,
             this,
@@ -593,13 +598,19 @@ function startUI() {
 // TODO Clicking word updates its z-index
 // TODO Mobile interactions...
 
-await store.initialize(services);
-makeFridge();
+authService.handleAuthStateChanged(async (state) => {
+    if (state?.uid) {
+        await store.initialize(services);
+        makeFridge();
 
-// TODO: Case where landscape
-store.scale = scaleApp(store.appEl);
-onresize = () => {
-    ({ x: store.scale.x, y: store.scale.y } = scaleApp(store.appEl));
-};
+        // TODO: Case where landscape
+        store.scale = scaleApp(store.appEl);
+        onresize = () => {
+            ({ x: store.scale.x, y: store.scale.y } = scaleApp(store.appEl));
+        };
 
-startUI();
+        startUI();
+    } else {
+        window.location = "/";
+    }
+});
