@@ -29,10 +29,7 @@ export function scaleGhost() {
     const expectedWidth = charWidth / (store.scale.y / store.scale.x);
     ghostEl.style.letterSpacing = -(charWidth - expectedWidth) + "px";
 
-    if (
-        document.documentElement.clientHeight >
-        document.documentElement.clientWidth
-    ) {
+    if (store.scale.isPortrait) {
         ghostEl.className = "vertical-ghost";
     }
 }
@@ -83,12 +80,17 @@ function addAppDragListeners() {
 
     store.appEl.addEventListener("drop", (event) => {
         event.preventDefault();
+        const uiEl = document.querySelector("#app-ui");
 
         const adjustedX = Math.round(
-            event.pageX / store.scale.x - store.currentDrag.offset.x
+            (event.pageX - (store.scale.isPortrait ? 0 : uiEl.offsetWidth)) /
+                store.scale.x -
+                store.currentDrag.offset.x
         );
         const adjustedY = Math.round(
-            event.pageY / store.scale.y - store.currentDrag.offset.y
+            (event.pageY - (store.scale.isPortrait ? uiEl.offsetHeight : 0)) /
+                store.scale.y -
+                store.currentDrag.offset.y
         );
 
         setElementPosition(store.currentDrag.el, adjustedY, adjustedX);

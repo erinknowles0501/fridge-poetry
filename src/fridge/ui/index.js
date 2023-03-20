@@ -17,6 +17,9 @@ export default function startUI() {
             };
         },
         computed: {
+            isPortrait() {
+                return reactiveStore.scale.isPortrait;
+            },
             filteredMenuItems() {
                 function filterMenuItem(item) {
                     if (!item.permissions) {
@@ -37,7 +40,7 @@ export default function startUI() {
             },
         },
         template: `
-        <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false">
+        <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false" :class="{'is-portrait': isPortrait}">
             <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="filteredMenuItems" :activeLink="activeLink" />
         </div>
         <AcceptInvite />

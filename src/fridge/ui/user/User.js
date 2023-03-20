@@ -6,10 +6,9 @@ export default {
     inject: ["navigate", "store"],
     components: { UserColorDisplay },
     template: `
+    <h3 class="user-name"><UserColorDisplay/>{{store.scale.isPortrait ? store.user?.displayName : ''}}</h3>
     <div class="user">
-        <h3 class="user-name" v-if="!isOpen"><UserColorDisplay/>{{ store.user.displayName }}</h3>
-        <div class="menu" style="margin-top: 3rem;" v-else>
-            <div class="menu-title">Logged in as <div style="display: inline-block"><UserColorDisplay/><span>{{ store.user?.displayName }}</span></div></div>
+        <div class="menu" v-if="isOpen">
             <a v-for="link in menuItems" @click.prevent="navigate(link)" href="#">{{link.title}}</a>
         </div>
     </div>

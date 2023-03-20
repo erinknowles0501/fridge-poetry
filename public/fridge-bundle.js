@@ -96,10 +96,7 @@ function scaleGhost() {
     const expectedWidth = charWidth / (store.scale.y / store.scale.x);
     ghostEl.style.letterSpacing = -(charWidth - expectedWidth) + "px";
 
-    if (
-        document.documentElement.clientHeight >
-        document.documentElement.clientWidth
-    ) {
+    if (store.scale.isPortrait) {
         ghostEl.className = "vertical-ghost";
     }
 }
@@ -150,12 +147,17 @@ function addAppDragListeners() {
 
     store.appEl.addEventListener("drop", (event) => {
         event.preventDefault();
+        const uiEl = document.querySelector("#app-ui");
 
         const adjustedX = Math.round(
-            event.pageX / store.scale.x - store.currentDrag.offset.x
+            (event.pageX - (store.scale.isPortrait ? 0 : uiEl.offsetWidth)) /
+                store.scale.x -
+                store.currentDrag.offset.x
         );
         const adjustedY = Math.round(
-            event.pageY / store.scale.y - store.currentDrag.offset.y
+            (event.pageY - (store.scale.isPortrait ? uiEl.offsetHeight : 0)) /
+                store.scale.y -
+                store.currentDrag.offset.y
         );
 
         setElementPosition(store.currentDrag.el, adjustedY, adjustedX);
@@ -186,10 +188,9 @@ var User = {
     inject: ["navigate", "store"],
     components: { UserColorDisplay },
     template: `
+    <h3 class="user-name"><UserColorDisplay/>{{store.scale.isPortrait ? store.user?.displayName : ''}}</h3>
     <div class="user">
-        <h3 class="user-name" v-if="!isOpen"><UserColorDisplay/>{{ store.user.displayName }}</h3>
-        <div class="menu" style="margin-top: 3rem;" v-else>
-            <div class="menu-title">Logged in as <div style="display: inline-block"><UserColorDisplay/><span>{{ store.user?.displayName }}</span></div></div>
+        <div class="menu" v-if="isOpen">
             <a v-for="link in menuItems" @click.prevent="navigate(link)" href="#">{{link.title}}</a>
         </div>
     </div>
@@ -201,8 +202,8 @@ var Fridge = {
     props: ["isOpen", "menuItems"],
     inject: ["navigate", "store"],
     template: `
+    <h2 :class="['fridge-name', {'ellipsis-overflow': !isOpen}]">{{ store.fridge.name }}</h2>
     <div class="fridge">
-        <h2 :class="['fridge-name', {'ellipsis-overflow': !isOpen}]">{{ store.fridge.name }}</h2>
         <div v-if="isOpen" class="menu">
             <a v-for="link in menuItems" @click.prevent="navigate(link)" href="#">{{link.title}}</a>
         </div>
@@ -587,6 +588,9 @@ function startUI() {
             };
         },
         computed: {
+            isPortrait() {
+                return reactiveStore.scale.isPortrait;
+            },
             filteredMenuItems() {
                 function filterMenuItem(item) {
                     if (!item.permissions) {
@@ -607,7 +611,7 @@ function startUI() {
             },
         },
         template: `
-        <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false">
+        <div id="app-ui" @mouseover="isOpen = true" @mouseleave="isOpen = false" :class="{'is-portrait': isPortrait}">
             <component :is="activeLink ? 'MenuSlide' : 'MenuRoot'" :isOpen="isOpen" :menuItems="filteredMenuItems" :activeLink="activeLink" />
         </div>
         <AcceptInvite />
