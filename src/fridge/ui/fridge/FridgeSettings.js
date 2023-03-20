@@ -2,6 +2,7 @@ import { fridgeRepo, permissionRepo } from "../../../services/api/index";
 
 export default {
     inject: ["store"],
+    props: { activeLink: { required: true, type: Object } },
     data() {
         return {
             localFridgeInfo: JSON.parse(JSON.stringify(this.store.fridge)),

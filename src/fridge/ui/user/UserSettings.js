@@ -1,5 +1,6 @@
 export default {
     inject: ["store"],
+    props: { activeLink: { required: true, type: Object } },
     data() {
         return {
             localDisplayName: "",

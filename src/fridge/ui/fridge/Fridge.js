@@ -1,6 +1,9 @@
 export default {
     name: "fridge",
-    props: ["isOpen", "menuItems"],
+    props: {
+        isOpen: { required: true, type: Boolean },
+        menuItems: { required: true, type: Object },
+    },
     inject: ["navigate", "store"],
     template: `
     <h2 :class="['fridge-name', {'ellipsis-overflow': !isOpen}]">{{ store.fridge.name }}</h2>

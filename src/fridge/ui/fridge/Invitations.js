@@ -2,6 +2,7 @@ import { inviteRepo } from "../../../services/api/index";
 
 export default {
     inject: ["store"],
+    props: { activeLink: { required: true, type: Object } },
     data() {
         return {
             inviteEmail: "",

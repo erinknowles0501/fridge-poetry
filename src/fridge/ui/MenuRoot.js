@@ -2,7 +2,10 @@ import User from "./user/User.js";
 import Fridge from "./fridge/Fridge.js";
 
 export default {
-    props: ["isOpen", "menuItems"],
+    props: {
+        isOpen: { required: true, type: Boolean },
+        menuItems: { required: true, type: Object },
+    },
     components: { Fridge, User },
     template: `
     <div>

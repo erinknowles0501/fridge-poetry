@@ -2,7 +2,10 @@ import UserColorDisplay from "./UserColorDisplay";
 
 export default {
     name: "user",
-    props: ["isOpen", "menuItems"],
+    props: {
+        isOpen: { required: true, type: Boolean },
+        menuItems: { required: true, type: Object },
+    },
     inject: ["navigate", "store"],
     components: { UserColorDisplay },
     template: `

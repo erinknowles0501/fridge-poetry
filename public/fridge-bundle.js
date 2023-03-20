@@ -184,7 +184,10 @@ var UserColorDisplay = {
 
 var User = {
     name: "user",
-    props: ["isOpen", "menuItems"],
+    props: {
+        isOpen: { required: true, type: Boolean },
+        menuItems: { required: true, type: Object },
+    },
     inject: ["navigate", "store"],
     components: { UserColorDisplay },
     template: `
@@ -199,7 +202,10 @@ var User = {
 
 var Fridge = {
     name: "fridge",
-    props: ["isOpen", "menuItems"],
+    props: {
+        isOpen: { required: true, type: Boolean },
+        menuItems: { required: true, type: Object },
+    },
     inject: ["navigate", "store"],
     template: `
     <h2 :class="['fridge-name', {'ellipsis-overflow': !isOpen}]">{{ store.fridge.name }}</h2>
@@ -212,7 +218,10 @@ var Fridge = {
 };
 
 var MenuRoot = {
-    props: ["isOpen", "menuItems"],
+    props: {
+        isOpen: { required: true, type: Boolean },
+        menuItems: { required: true, type: Object },
+    },
     components: { Fridge, User },
     template: `
     <div>
@@ -224,6 +233,7 @@ var MenuRoot = {
 
 var UserSettings = {
     inject: ["store"],
+    props: { activeLink: { required: true, type: Object } },
     data() {
         return {
             localDisplayName: "",
@@ -288,6 +298,7 @@ var UserSettings = {
 
 var FridgeSettings = {
     inject: ["store"],
+    props: { activeLink: { required: true, type: Object } },
     data() {
         return {
             localFridgeInfo: JSON.parse(JSON.stringify(this.store.fridge)),
@@ -372,6 +383,7 @@ var FridgeSettings = {
 
 var Invitations = {
     inject: ["store"],
+    props: { activeLink: { required: true, type: Object } },
     data() {
         return {
             inviteEmail: "",
@@ -430,7 +442,10 @@ var Invitations = {
 };
 
 var MenuSlide = {
-    props: ["isOpen", "activeLink"],
+    props: {
+        isOpen: { required: true, type: Boolean },
+        activeLink: { required: true, type: Object },
+    },
     inject: ["navigate"],
     components: { UserSettings, FridgeSettings, Invitations },
     template: `

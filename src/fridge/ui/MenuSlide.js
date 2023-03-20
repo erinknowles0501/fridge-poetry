@@ -3,7 +3,10 @@ import FridgeSettings from "./fridge/FridgeSettings.js";
 import Invitations from "./fridge/Invitations.js";
 
 export default {
-    props: ["isOpen", "activeLink"],
+    props: {
+        isOpen: { required: true, type: Boolean },
+        activeLink: { required: true, type: Object },
+    },
     inject: ["navigate"],
     components: { UserSettings, FridgeSettings, Invitations },
     template: `
