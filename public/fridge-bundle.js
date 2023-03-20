@@ -1,4 +1,4 @@
-import { f as fridgeRepo, p as permissionRepo, i as inviteRepo, u as userRepo, a as authService, P as PERMISSION_GROUPS, b as PERMISSIONS_NAMES, s as services, c as scaleApp } from './chunks/index.js';
+import { f as fridgeRepo, A as APP_HEIGHT, p as permissionRepo, i as inviteRepo, u as userRepo, a as authService, P as PERMISSION_GROUPS, b as PERMISSIONS_NAMES, s as services, c as scaleApp } from './chunks/index.js';
 import { computed, reactive, createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 
 function setElementPosition(element, positionY, positionX) {
@@ -23,6 +23,7 @@ class Store {
 
         this.services = services;
         this.appEl = document.querySelector("#app");
+        this.ghostEl = document.querySelector("#dragghost");
 
         this.fridge.id = window.location.pathname.slice(1);
 
@@ -75,13 +76,12 @@ function makeFridge() {
 }
 
 function scaleGhost() {
-    const ghostEl = document.querySelector("#dragghost");
     const computedWordStyle = getComputedStyle(document.querySelector(".word"));
 
     const adjustedFontSizeInt =
         computedWordStyle.getPropertyValue("font-size").split("px")[0] *
         store.scale.y;
-    ghostEl.style.fontSize = adjustedFontSizeInt + "px";
+    store.ghostEl.style.fontSize = adjustedFontSizeInt + "px";
 
     const adjustedPaddingTopInt =
         computedWordStyle.getPropertyValue("padding-top").split("px")[0] *
@@ -89,15 +89,15 @@ function scaleGhost() {
     const adjustedPaddingLeftInt =
         computedWordStyle.getPropertyValue("padding-left").split("px")[0] *
         store.scale.x;
-    ghostEl.style.padding = `${adjustedPaddingTopInt}px ${adjustedPaddingLeftInt}px`;
+    store.ghostEl.style.padding = `${adjustedPaddingTopInt}px ${adjustedPaddingLeftInt}px`;
 
     const CHAR_WIDTH_RATIO = 0.55; // This is an approximation of the value of the char width for a char height of 1. One way to actually get this value is to get the offsetWidth of an element containing just one character and with no padding, but that is overkill here.
     const charWidth = adjustedFontSizeInt * CHAR_WIDTH_RATIO;
     const expectedWidth = charWidth / (store.scale.y / store.scale.x);
-    ghostEl.style.letterSpacing = -(charWidth - expectedWidth) + "px";
+    store.ghostEl.style.letterSpacing = -(charWidth - expectedWidth) + "px";
 
     if (store.scale.isPortrait) {
-        ghostEl.className = "vertical-ghost";
+        store.ghostEl.className = "vertical-ghost";
     }
 }
 
@@ -117,21 +117,21 @@ function makeWordEls() {
 }
 
 function addListeners(element) {
-    const ghostEl = document.querySelector("#dragghost");
-
-    element.addEventListener("dragstart", (event) => {
+    function onDragStart(event) {
         store.currentDrag.offset.x = event.offsetX;
         store.currentDrag.offset.y = event.offsetY;
 
-        ghostEl.textContent = element.textContent;
-        event.dataTransfer.setDragImage(
-            ghostEl,
+        store.ghostEl.textContent = element.textContent;
+        event.dataTransfer?.setDragImage(
+            store.ghostEl,
             event.offsetX * store.scale.x,
             event.offsetY * store.scale.y
         );
-
         store.currentDrag.el = element;
-    });
+    }
+
+    element.addEventListener("dragstart", onDragStart);
+    element.addEventListener("touchstart", onDragStart);
 }
 
 /** DRAG AND DROP **/
@@ -144,6 +144,13 @@ function addAppDragListeners() {
         },
         false
     );
+    store.appEl.addEventListener("touchmove", (event) => {
+        if (store.currentDrag.el) {
+            store.ghostEl.style.zIndex = 20;
+            store.ghostEl.style.top = event.changedTouches[0].pageY + "px";
+            store.ghostEl.style.left = event.changedTouches[0].pageX + "px";
+        }
+    });
 
     store.appEl.addEventListener("drop", (event) => {
         event.preventDefault();
@@ -167,6 +174,38 @@ function addAppDragListeners() {
             adjustedX,
             store.fridge.id
         );
+    });
+
+    store.appEl.addEventListener("touchend", (event) => {
+        event.preventDefault();
+        if (store.currentDrag.el) {
+            const uiEl = document.querySelector("#app-ui");
+
+            const adjustedX = Math.round(
+                APP_HEIGHT -
+                    (event.changedTouches[0].pageX -
+                        (store.scale.isPortrait ? 0 : uiEl.offsetWidth)) /
+                        store.scale.x
+            );
+            const adjustedY = Math.round(
+                (event.changedTouches[0].pageY -
+                    (store.scale.isPortrait ? uiEl.offsetHeight : 0)) /
+                    store.scale.y
+            );
+
+            setElementPosition(store.currentDrag.el, adjustedX, adjustedY);
+            fridgeRepo.updateWord(
+                store.currentDrag.el.getAttribute("data-id"),
+                adjustedX,
+                adjustedY,
+                store.fridge.id
+            );
+
+            store.ghostEl.style.top = "-100px";
+            store.ghostEl.style.left = "-100px";
+            store.ghostEl.style.zIndex = "-20";
+            store.currentDrag.el = null;
+        }
     });
 }
 

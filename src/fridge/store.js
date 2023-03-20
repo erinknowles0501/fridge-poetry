@@ -15,6 +15,7 @@ class Store {
 
         this.services = services;
         this.appEl = document.querySelector("#app");
+        this.ghostEl = document.querySelector("#dragghost");
 
         this.fridge.id = window.location.pathname.slice(1);
 

@@ -22589,4 +22589,4 @@ var services = /*#__PURE__*/Object.freeze({
     permissionRepo: permissionRepo
 });
 
-export { INVITATION_STATUSES as I, PERMISSION_GROUPS as P, authService as a, PERMISSIONS_NAMES as b, scaleApp as c, defaultWords as d, fridgeRepo as f, inviteRepo as i, permissionRepo as p, services as s, userRepo as u };
+export { APP_HEIGHT as A, INVITATION_STATUSES as I, PERMISSION_GROUPS as P, authService as a, PERMISSIONS_NAMES as b, scaleApp as c, defaultWords as d, fridgeRepo as f, inviteRepo as i, permissionRepo as p, services as s, userRepo as u };
