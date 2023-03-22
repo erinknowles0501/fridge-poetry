@@ -85,59 +85,58 @@ function addAppDragListeners() {
         }
     });
 
-    store.appEl.addEventListener("drop", (event) => {
-        event.preventDefault();
-        const uiEl = document.querySelector("#app-ui");
+    store.appEl.addEventListener("drop", onDrop);
+    store.appEl.addEventListener("touchend", (event) => onDrop(event, true));
 
-        const adjustedX = Math.round(
-            (event.pageX - (store.scale.isPortrait ? 0 : uiEl.offsetWidth)) /
-                store.scale.x -
-                store.currentDrag.offset.x
-        );
-        const adjustedY = Math.round(
-            (event.pageY - (store.scale.isPortrait ? uiEl.offsetHeight : 0)) /
-                store.scale.y -
-                store.currentDrag.offset.y
-        );
-
-        setElementPosition(store.currentDrag.el, adjustedY, adjustedX);
-        fridgeRepo.updateWord(
-            store.currentDrag.el.getAttribute("data-id"),
-            adjustedY,
-            adjustedX,
-            store.fridge.id
-        );
-    });
-
-    store.appEl.addEventListener("touchend", (event) => {
-        event.preventDefault();
+    function onDrop(event, isTouch = false) {
         if (store.currentDrag.el) {
             const uiEl = document.querySelector("#app-ui");
+            /*
+            This function has to take the on-page location of the drop (x and y values up to the pixel width and height of the client's window) and transform it into the "app" location (x and y values up to APP_WIDTH and APP_HEIGHT - the internal coordinate system), taking into account the possible (UI is at side in landscape, top in portrait) offset from the UI element, and the possible (mobile doesn't record this) offset from where the word was clicked vs that word's origin.
+            Word-offset is added outside the translation to app location, since it's recorded and applied in on-page location, and has to be cancelled out the same way.
 
-            const adjustedX = Math.round(
-                APP_HEIGHT -
-                    (event.changedTouches[0].pageX -
-                        (store.scale.isPortrait ? 0 : uiEl.offsetWidth)) /
-                        store.scale.x
-            );
-            const adjustedY = Math.round(
-                (event.changedTouches[0].pageY -
-                    (store.scale.isPortrait ? uiEl.offsetHeight : 0)) /
-                    store.scale.y
-            );
+            There are also two factors here: 
+            1. Whether the page is portrait or landscape
+            2. Whether the browser is desktop or mobile.
 
-            setElementPosition(store.currentDrag.el, adjustedX, adjustedY);
-            fridgeRepo.updateWord(
-                store.currentDrag.el.getAttribute("data-id"),
-                adjustedX,
-                adjustedY,
-                store.fridge.id
-            );
+            (1) Affects positioning (due to UI position), and gives weird inversions of X and Y because of the rotation of the app element
+            (2) Affects how we get the location of the event on the page.
+            */
 
-            store.ghostEl.style.top = "-100px";
-            store.ghostEl.style.left = "-100px";
-            store.ghostEl.style.zIndex = "-20";
-            store.currentDrag.el = null;
+            const pageX = event.pageX || event.changedTouches[0].pageX;
+            const pageY = event.pageY || event.changedTouches[0].pageY;
+
+            let adjustedX, adjustedY;
+
+            if (store.scale.isPortrait) {
+                /* Here, because the app is rotated, we have to translate the on-page Y value into an in-app X value, and vice versa. */
+                adjustedX = (pageY - uiEl.offsetHeight) / store.scale.x;
+                adjustedY = APP_HEIGHT - pageX / store.scale.y;
+            } else {
+                adjustedX =
+                    (pageX - uiEl.offsetWidth) / store.scale.x -
+                    store.currentDrag.offset.x;
+                adjustedY = pageY / store.scale.y - store.currentDrag.offset.y;
+            }
+
+            adjustedX = Math.round(adjustedX);
+            adjustedY = Math.round(adjustedY);
+
+            setElementPosition(store.currentDrag.el, adjustedY, adjustedX);
+            fridgeRepo
+                .updateWord(
+                    store.currentDrag.el.getAttribute("data-id"),
+                    adjustedY,
+                    adjustedX,
+                    store.fridge.id
+                )
+                .then(() => (store.currentDrag.el = null));
+
+            if (isTouch) {
+                store.ghostEl.style.top = "-100px"; // These magic numbers aren't terribly magic - they're just to hide the element.
+                store.ghostEl.style.left = "-100px";
+                store.ghostEl.style.zIndex = "-20";
+            }
         }
-    });
+    }
 }
